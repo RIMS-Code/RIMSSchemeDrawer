@@ -121,11 +121,17 @@ class RSD:
         self.button_plot = tk.Button(master, text='Plot', font=self.font_std, command=self.plotter)
         self.button_save = tk.Button(master, text='Save', font=self.font_std, command=self.save)
         self.button_help = tk.Button(master, text='Help', font=self.font_std, command=self.help)
-        self.button_quit = tk.Button(master, text='Quit', font=self.font_std, command=quit)
+        self.button_quit = tk.Button(master, text='Quit', font=self.font_std, command=self.quit)
         self.button_plot.place(x=self.x(4), y=self.y(3), width=BW, height=BH)
         self.button_save.place(x=self.x(4), y=self.y(4), width=BW, height=BH)
         self.button_help.place(x=self.x(4), y=self.y(7), width=BW, height=BH)
         self.button_quit.place(x=self.x(4), y=self.y(8), width=BW, height=BH)
+
+        # Options
+        self.opt_linebreak_st = tk.IntVar()
+        self.opt_linebreak = tk.Checkbutton(master, text='Linebreaks?', justify=tk.LEFT,
+                                            variable=self.opt_linebreak_st, font=self.font_std)
+        self.opt_linebreak.place(x=self.x(4), y=self.y(5), width=BW, height=BH)
 
         # fixme: temporary insert, remove later
         # self.step1_lambda.insert(tk.END, '273.448')
@@ -198,12 +204,12 @@ class RSD:
         totwavenumber_photons = np.sum(wavenumber_steps)
 
         # ymax:
-        if ipvalue > totwavenumber_photons:
+        if ipvalue > totwavenumber_photons + float(self.ground_state_value.get()):
             ymax = ipvalue + 2000.
-        elif totwavenumber_photons - ipvalue < 2000.:
+        elif totwavenumber_photons + float(self.ground_state_value.get()) - ipvalue < 2000.:
             ymax = ipvalue + 2000.
         else:
-            ymax = totwavenumber_photons
+            ymax = totwavenumber_photons + float(self.ground_state_value.get())
 
         # create term symbol string for direct usage in plotting
         term_symb = []
@@ -218,6 +224,11 @@ class RSD:
             # create the new window
             pltwin = tk.Toplevel()
 
+        # break line or put in comma, depending on option
+        lbreak = ', '
+        if self.opt_linebreak_st.get():
+            lbreak = '\n'
+
         # create the figure
         f = Figure(figsize=(5, 8), dpi=100)
         a = f.add_subplot(111)
@@ -231,7 +242,7 @@ class RSD:
         if term_symb_ip is None:
             iplabelstr = 'IP, ' + str(round(ipvalue, 3)) + '$\,$cm$^{-1}$'
         else:
-            iplabelstr = 'IP, ' + str(round(ipvalue, 3)) + '$\,$cm$^{-1}$, ' + term_symb_ip
+            iplabelstr = 'IP, ' + str(round(ipvalue, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb_ip
         a.text(textpad, ipvalue + 0.01*totwavenumber_photons, iplabelstr, color='k', ha='left')
 
         # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
@@ -244,23 +255,27 @@ class RSD:
             if it < ipvalue:
                 a.hlines(it, xmin=0, xmax=10)
 
+        # draw the state we come out of, if not ground state
+        if float(self.ground_state_value.get()) > 0.:
+            a.hlines(float(self.ground_state_value.get()), xmin=0, xmax=10)
+
         # draw the arrows
-        deltax = 10. / (len(lambda_steps) + 1.) - 0.5
+        deltax = 8.65 / (len(lambda_steps) + 1.) - 0.5
         xval = 0.
-        yval_bott = 0.
+        yval_bott = float(self.ground_state_value.get())
         # put in bottom level
         if term_symb_gs is None:
             levelstr = str(round(wavenumber_gs, 3)) + '$\,$cm$^{-1}$'
         else:
-            levelstr = str(round(wavenumber_gs, 3)) + '$\,$cm$^{-1}$, ' + term_symb_gs
+            levelstr = str(round(wavenumber_gs, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb_gs
 
-        a.text(10. - textpad, 0, levelstr, color='k', ha='right', va='bottom')
+        a.text(10. - textpad, float(self.ground_state_value.get()), levelstr, color='k', ha='right', va='bottom')
         for it in range(len(lambda_steps)):
-            if lambda_steps[it] > 700:
+            if lambda_steps[it] >= 700:
                 col = self.colir
             elif 500. < lambda_steps[it] < 700.:
                 col = self.colpump
-            elif 350. < lambda_steps[it] < 500.:
+            elif 350. < lambda_steps[it] <= 500.:
                 col = self.coluv
             else:
                 col = self.colfuv
@@ -291,7 +306,7 @@ class RSD:
             if term_symb[it] is None:
                 levelstr = str(round(tstp, 3)) + '$\,$cm$^{-1}$'
             else:
-                levelstr = str(round(tstp, 3)) + '$\,$cm$^{-1}$, ' + term_symb[it]
+                levelstr = str(round(tstp, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb[it]
             a.text(xloc_levelstr, tstp - 0.01*totwavenumber_photons, levelstr, color='k', ha=halignlev, va='top')
 
             # update yval_bott
@@ -335,7 +350,22 @@ class RSD:
                                     'variety of formats. Available formats are:\n'
                                     '  * .pdf (vector graphic, default)\n'
                                     '  * .eps (vector graphic\n'
-                                    '  * .png')
+                                    '  * .png\n\n'
+                                    '  * Term signs have to be entered as,\n'
+                                    '    e.g., 2D5 or 2/3L7/9\n'
+                                    '  * Wavelengths have to be entered in\n'
+                                    '    nm, levels in cm^-1\n'
+                                    '  * You can draw up to 5 colors per scheme,\n'
+                                    '    that should be enough for a while :)\n'
+                                    '  * Linebreaks: will put a linebreak between\n'
+                                    '    the level and the term symbol.\n\n'
+                                    'Questions?  trappitsch1@llnl.gov\n'
+                                    'Complaints? isselhardt1@llnl.gov\n\n'
+                                    'Version: 20180111')
+
+    def quit(self):
+        self.master.destroy()
+        self.master.quit()
 
 
 def term_to_string(tstr):
@@ -346,6 +376,10 @@ def term_to_string(tstr):
     """
     if tstr == '':
         return None
+
+    # if there is an equal sign in there, leave it as is
+    if tstr.find('=') != -1:
+        return tstr
 
     # find the first slash and start looking for the letter after that
     start = tstr.find('/') + 1
