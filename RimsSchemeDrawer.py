@@ -14,6 +14,7 @@ except ImportError:
     from tkinter import simpledialog
     import tkinter.ttk as ttk
 import numpy as np
+import platform
 
 import matplotlib
 matplotlib.use('TkAgg')
@@ -38,7 +39,7 @@ class RSD:
         master.title("RIMS Scheme Drawer")
 
         # Geometry and stuff
-        rows, cols = 9, 7
+        rows, cols = 11, 7
         BW, BH, pad = 120, 30, 15
         winsize = ((1.5 + cols / 2) * pad + cols * BW,
                    (1.5 + rows / 2) * pad + rows * BH,
@@ -50,10 +51,18 @@ class RSD:
         # set master size
         master.geometry("%dx%d+%d+%d" % winsize)
 
+        # font formatting OS dependent
+        if platform.system() == 'Darwin':
+            fontsize = 11
+            self.fontsize = fontsize
+        else:
+            fontsize = 9
+            self.fontsize = fontsize
+
         # font formatting
-        self.font_std = tkFont.Font(size=11)
-        self.font_bold = tkFont.Font(size=11, weight=tkFont.BOLD)
-        self.font_ital = tkFont.Font(size=11, slant=tkFont.ITALIC)
+        self.font_std = tkFont.Font(size=fontsize)
+        self.font_bold = tkFont.Font(size=fontsize, weight=tkFont.BOLD)
+        self.font_ital = tkFont.Font(size=fontsize, slant=tkFont.ITALIC)
 
         # radiobutton for nm or cm-1
         self.unitvar = tk.IntVar()
@@ -146,6 +155,8 @@ class RSD:
         self.sett_headspace = tk.Label(master, text='Headspace (cm^-1):', anchor=tk.W, font=self.font_std)
         self.sett_arr_lbl = tk.Label(master, text='Arrow width:', anchor=tk.W, font=self.font_std)
         self.sett_arr_head_lbl = tk.Label(master, text='Arrow head width:', anchor=tk.W, font=self.font_std)
+        self.sett_prec_lambda_label = tk.Label(master, text='Precision wavlength:', anchor=tk.W, font=self.font_std)
+        self.sett_prec_level_label = tk.Label(master, text='Precision level:', anchor=tk.W, font=self.font_std)
         self.fsz_title_label.place(x=self.x(5), y=self.y(3), width=BW, height=BH)
         self.fsz_ax_num_label.place(x=self.x(5), y=self.y(4), width=BW, height=BH)
         self.fsz_ax_lbl_label.place(x=self.x(5), y=self.y(5), width=BW, height=BH)
@@ -153,6 +164,8 @@ class RSD:
         self.sett_headspace.place(x=self.x(5), y=self.y(7), width=BW, height=BH)
         self.sett_arr_lbl.place(x=self.x(5), y=self.y(8), width=BW, height=BH)
         self.sett_arr_head_lbl.place(x=self.x(5), y=self.y(9), width=BW, height=BH)
+        self.sett_prec_lambda_label.place(x=self.x(5), y=self.y(10), width=BW, height=BH)
+        self.sett_prec_level_label.place(x=self.x(5), y=self.y(11), width=BW, height=BH)
         self.fsz_title_entry = tk.Entry(master)
         self.fsz_ax_num_entry = tk.Entry(master)
         self.fsz_ax_lbl_entry = tk.Entry(master)
@@ -160,6 +173,8 @@ class RSD:
         self.sett_headspace_entry = tk.Entry(master)
         self.sett_arr_entry = tk.Entry(master)
         self.sett_arr_head_entry = tk.Entry(master)
+        self.sett_prec_lambda_entry = tk.Entry(master)
+        self.sett_prec_level_entry = tk.Entry(master)
         self.fsz_title_entry.place(x=self.x(6), y=self.y(3), width=BW, height=BH)
         self.fsz_ax_num_entry.place(x=self.x(6), y=self.y(4), width=BW, height=BH)
         self.fsz_ax_lbl_entry.place(x=self.x(6), y=self.y(5), width=BW, height=BH)
@@ -167,6 +182,8 @@ class RSD:
         self.sett_headspace_entry.place(x=self.x(6), y=self.y(7), width=BW, height=BH)
         self.sett_arr_entry.place(x=self.x(6), y=self.y(8), width=BW, height=BH)
         self.sett_arr_head_entry.place(x=self.x(6), y=self.y(9), width=BW, height=BH)
+        self.sett_prec_lambda_entry.place(x=self.x(6), y=self.y(10), width=BW, height=BH)
+        self.sett_prec_level_entry.place(x=self.x(6), y=self.y(11), width=BW, height=BH)
         # Title
         self.title_label = tk.Label(master, text='Plot Title', anchor=tk.W, font=self.font_bold)
         self.title_label.place(x=self.x(7), y=self.y(1), width=BW, height=BH)
@@ -205,14 +222,16 @@ class RSD:
         self.sett_headspace_entry.insert(tk.END, '2000')
         self.sett_arr_entry.insert(tk.END, '0.2')
         self.sett_arr_head_entry.insert(tk.END, '0.6')
+        self.sett_prec_lambda_entry.insert(tk.END, '3')
+        self.sett_prec_level_entry.insert(tk.END, '0')
 
         # fixme: temporary insert, remove later
-        self.ground_state_value.insert(tk.END, '0.')
-        self.step1_lambda.insert(tk.END, '200.')
-        self.mf1_box.select()
-        self.step2_lambda.insert(tk.END, '19387')
-        self.step3_lambda.insert(tk.END, '37020')
-        self.ip_value.insert(tk.END, '36000.')
+        # self.ground_state_value.insert(tk.END, '0.')
+        # self.step1_lambda.insert(tk.END, '200.')
+        # self.mf1_box.select()
+        # self.step2_lambda.insert(tk.END, '19387')
+        # self.step3_lambda.insert(tk.END, '37020')
+        # self.ip_value.insert(tk.END, '36000.')
 
     def setsteplabels(self):
         # set unit
@@ -279,6 +298,8 @@ class RSD:
         sett_headspace = float(self.sett_headspace_entry.get())
         sett_arr = float(self.sett_arr_entry.get())
         sett_arr_head = float(self.sett_arr_head_entry.get())
+        prec_lambda = float(self.sett_prec_lambda_entry.get())
+        prec_level = float(self.sett_prec_level_entry.get())
 
         # let's first get the wavelengths that we want
         lambda1 = self.step1_lambda.get()
@@ -405,7 +426,7 @@ class RSD:
         matplotlib.rc('xtick', labelsize=fsz_axes)
         matplotlib.rc('ytick', labelsize=fsz_axes)
 
-        f = Figure(figsize=(int(self.wh_width.get()), int(self.wh_height.get())), dpi=100)
+        f = Figure(figsize=(float(self.wh_width.get()), float(self.wh_height.get())), dpi=100)
         a = f.add_subplot(111)
         # second axis for eV
         a2 = a.twinx()
@@ -415,9 +436,9 @@ class RSD:
         a.fill_between(xshade, ipvalue, ymax, facecolor='#adbbff', alpha=0.5)
         # label the IP
         if term_symb_ip is None:
-            iplabelstr = 'IP, ' + str(round(ipvalue, 3)) + '$\,$cm$^{-1}$'
+            iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$'
         else:
-            iplabelstr = 'IP, ' + str(round(ipvalue, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb_ip
+            iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$' + lbreak + term_symb_ip
         a.text(textpad, ipvalue + 0.01*totwavenumber_photons, iplabelstr, color='k', ha='left', size=fsz_labels)
 
         # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
@@ -444,9 +465,9 @@ class RSD:
         yval_bott = float(self.ground_state_value.get())
         # put in bottom level
         if term_symb_gs is None:
-            levelstr = str(round(wavenumber_gs, 3)) + '$\,$cm$^{-1}$'
+            levelstr = '%.*f' %(int(prec_level), wavenumber_gs) + '$\,$cm$^{-1}$'
         else:
-            levelstr = str(round(wavenumber_gs, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb_gs
+            levelstr = '%.*f' %(int(prec_level), wavenumber_gs) + '$\,$cm$^{-1}$' + lbreak + term_symb_gs
         a.text(10. - textpad, float(self.ground_state_value.get()), levelstr, color='k', ha='right', va='bottom',
                size=fsz_labels)
 
@@ -483,7 +504,7 @@ class RSD:
                 xloc_levelstr = textpad
 
             # wavelength text
-            lambdastr = str(round(lambda_steps[it], 3)) + '$\,$nm'
+            lambdastr = '%.*f' %(int(prec_lambda), lambda_steps[it]) + '$\,$nm'
             if it == 0 and len(wavenumber_es) > 0:
                 a.text(firstarrowxmfl + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center',
                        rotation=90, size=fsz_labels)
@@ -493,9 +514,9 @@ class RSD:
 
             # level text
             if term_symb[it] is None:
-                levelstr = str(round(tstp, 3)) + '$\,$cm$^{-1}$'
+                levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$'
             else:
-                levelstr = str(round(tstp, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb[it]
+                levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$' + lbreak + term_symb[it]
             a.text(xloc_levelstr, tstp - 0.01*totwavenumber_photons, levelstr, color='k', ha=halignlev, va='top',
                    size=fsz_labels)
 
@@ -525,16 +546,17 @@ class RSD:
                     head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
 
             # wavelength text
-            lambdastr = str(round(lambda_step_es[it], 3)) + '$\,$nm'
+            lambdastr = '%.*f' %(int(prec_lambda), lambda_step_es[it]) + '$\,$nm'
             a.text(xval + textpad, yval + wstp/2., lambdastr, color=col, ha='left', va='center', rotation=90,
                    size=fsz_labels)
 
             # level text
             if term_symb_es_formatted[it] is None:
-                levelstr = str(round(float(wavenumber_es[it]), 3)) + '$\,$cm$^{-1}$'
+                levelstr = '%.*f' %(int(prec_level), float(wavenumber_es[it])) + '$\,$cm$^{-1}$'
             else:
                 # NO LINEBREAK HERE ON THESE LINES!
-                levelstr = str(round(float(wavenumber_es[it]), 3)) + '$\,$cm$^{-1}$, ' + term_symb_es_formatted[it]
+                levelstr = '%.*f' %(int(prec_level),float(wavenumber_es[it])) + '$\,$cm$^{-1}$, ' + \
+                           term_symb_es_formatted[it]
             a.text(xval + 0.5, yval, levelstr, color='k', ha='left', va='bottom', size=fsz_labels)
 
         # Title:
