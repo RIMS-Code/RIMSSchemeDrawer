@@ -38,7 +38,7 @@ class RSD:
         master.title("RIMS Scheme Drawer")
 
         # Geometry and stuff
-        rows, cols = 8, 5
+        rows, cols = 9, 7
         BW, BH, pad = 120, 30, 15
         winsize = ((1.5 + cols / 2) * pad + cols * BW,
                    (1.5 + rows / 2) * pad + rows * BH,
@@ -127,21 +127,51 @@ class RSD:
                                       variable=self.mf4_var, font=self.font_std, command=self.setsteplabels)
         self.mf4_box.place(x=self.x(4), y=self.y(6), width=BW, height=BH)
 
+        # ### SETTINGS ###
         # width, height to set
-        self.wh_label = tk.Label(master, text='Width/Height', anchor=tk.W, font=self.font_bold)
-        self.wh_label.place(x=self.x(4), y=self.y(7), width=BW, height=BH)
+        self.sett_label = tk.Label(master, text='Settings', anchor=tk.W, font=self.font_bold)
+        self.sett_label.place(x=self.x(5), y=self.y(1), width=2*BW, height=BH)
+        self.wh_label = tk.Label(master, text='Figure Width x Height:', anchor=tk.W, font=self.font_std)
+        self.wh_label.place(x=self.x(5), y=self.y(2), width=BW, height=BH)
         self.wh_width = tk.Entry(master)
         self.wh_height = tk.Entry(master)
-        self.wh_times = tk.Label(master, text='x', anchor=tk.W, font=self.font_bold)
-        self.wh_width.place(x=self.x(4), y=self.y(8), width=0.4*BW, height=BH)
-        self.wh_times.place(x=self.x(4.4), y=self.y(8), width=0.2*BW, height=BH)
-        self.wh_height.place(x=self.x(4.6), y=self.y(8), width=0.4 * BW, height=BH)
-
+        self.wh_times = tk.Label(master, text='x', anchor=tk.W, font=self.font_std)
+        self.wh_width.place(x=self.x(6), y=self.y(2), width=0.45 * BW, height=BH)
+        self.wh_times.place(x=self.x(6.45), y=self.y(2), width=0.1 * BW, height=BH)
+        self.wh_height.place(x=self.x(6.55), y=self.y(2), width=0.45 * BW, height=BH)
+        self.fsz_title_label = tk.Label(master, text='Font size title:', anchor=tk.W, font=self.font_std)
+        self.fsz_ax_num_label = tk.Label(master, text='Font size axes:', anchor=tk.W, font=self.font_std)
+        self.fsz_ax_lbl_label = tk.Label(master, text='Font size axes label:', anchor=tk.W, font=self.font_std)
+        self.fsz_lbls_label = tk.Label(master, text='Font size labels:', anchor=tk.W, font=self.font_std)
+        self.sett_headspace = tk.Label(master, text='Headspace (cm^-1):', anchor=tk.W, font=self.font_std)
+        self.sett_arr_lbl = tk.Label(master, text='Arrow width:', anchor=tk.W, font=self.font_std)
+        self.sett_arr_head_lbl = tk.Label(master, text='Arrow head width:', anchor=tk.W, font=self.font_std)
+        self.fsz_title_label.place(x=self.x(5), y=self.y(3), width=BW, height=BH)
+        self.fsz_ax_num_label.place(x=self.x(5), y=self.y(4), width=BW, height=BH)
+        self.fsz_ax_lbl_label.place(x=self.x(5), y=self.y(5), width=BW, height=BH)
+        self.fsz_lbls_label.place(x=self.x(5), y=self.y(6), width=BW, height=BH)
+        self.sett_headspace.place(x=self.x(5), y=self.y(7), width=BW, height=BH)
+        self.sett_arr_lbl.place(x=self.x(5), y=self.y(8), width=BW, height=BH)
+        self.sett_arr_head_lbl.place(x=self.x(5), y=self.y(9), width=BW, height=BH)
+        self.fsz_title_entry = tk.Entry(master)
+        self.fsz_ax_num_entry = tk.Entry(master)
+        self.fsz_ax_lbl_entry = tk.Entry(master)
+        self.fsz_lbls_entry = tk.Entry(master)
+        self.sett_headspace_entry = tk.Entry(master)
+        self.sett_arr_entry = tk.Entry(master)
+        self.sett_arr_head_entry = tk.Entry(master)
+        self.fsz_title_entry.place(x=self.x(6), y=self.y(3), width=BW, height=BH)
+        self.fsz_ax_num_entry.place(x=self.x(6), y=self.y(4), width=BW, height=BH)
+        self.fsz_ax_lbl_entry.place(x=self.x(6), y=self.y(5), width=BW, height=BH)
+        self.fsz_lbls_entry.place(x=self.x(6), y=self.y(6), width=BW, height=BH)
+        self.sett_headspace_entry.place(x=self.x(6), y=self.y(7), width=BW, height=BH)
+        self.sett_arr_entry.place(x=self.x(6), y=self.y(8), width=BW, height=BH)
+        self.sett_arr_head_entry.place(x=self.x(6), y=self.y(9), width=BW, height=BH)
         # Title
         self.title_label = tk.Label(master, text='Plot Title', anchor=tk.W, font=self.font_bold)
-        self.title_label.place(x=self.x(5), y=self.y(1), width=BW, height=BH)
+        self.title_label.place(x=self.x(7), y=self.y(1), width=BW, height=BH)
         self.title_entry = tk.Entry(master)
-        self.title_entry.place(x=self.x(5), y=self.y(2), width=BW, height=BH)
+        self.title_entry.place(x=self.x(7), y=self.y(2), width=BW, height=BH)
 
         # Buttons
         self.button_plot = tk.Button(master, text='Plot', font=self.font_std, command=self.plotter)
@@ -150,32 +180,39 @@ class RSD:
         # self.button_test = tk.Button(master, text='Test', font=self.font_std, command=self.test)
         self.button_help = tk.Button(master, text='Help', font=self.font_std, command=self.help)
         self.button_quit = tk.Button(master, text='Quit', font=self.font_std, command=self.quit)
-        self.button_plot.place(x=self.x(5), y=self.y(3), width=BW, height=BH)
-        self.button_save.place(x=self.x(5), y=self.y(4), width=BW, height=BH)
+        self.button_plot.place(x=self.x(7), y=self.y(3), width=BW, height=BH)
+        self.button_save.place(x=self.x(7), y=self.y(4), width=BW, height=BH)
         # self.button_test.place(x=self.x(5), y=self.y(6), width=BW, height=BH)
-        self.button_help.place(x=self.x(5), y=self.y(7), width=BW, height=BH)
-        self.button_quit.place(x=self.x(5), y=self.y(8), width=BW, height=BH)
+        self.button_help.place(x=self.x(7), y=self.y(8), width=BW, height=BH)
+        self.button_quit.place(x=self.x(7), y=self.y(9), width=BW, height=BH)
 
         # Options
         self.opt_linebreak_st = tk.IntVar()
         self.opt_linebreak = tk.Checkbutton(master, text='Linebreaks?', justify=tk.LEFT,
                                             variable=self.opt_linebreak_st, font=self.font_std)
-        self.opt_linebreak.place(x=self.x(5), y=self.y(5), width=BW, height=BH)
+        self.opt_linebreak.place(x=self.x(7), y=self.y(5), width=BW, height=BH)
 
         # set step labels
         self.setsteplabels()
 
-        # set standard window size
+        # set settings
         self.wh_width.insert(tk.END, '5')
         self.wh_height.insert(tk.END, '8')
+        self.fsz_title_entry.insert(tk.END, '14')
+        self.fsz_ax_num_entry.insert(tk.END, '10')
+        self.fsz_ax_lbl_entry.insert(tk.END, '14')
+        self.fsz_lbls_entry.insert(tk.END, '12')
+        self.sett_headspace_entry.insert(tk.END, '2000')
+        self.sett_arr_entry.insert(tk.END, '0.2')
+        self.sett_arr_head_entry.insert(tk.END, '0.6')
 
         # fixme: temporary insert, remove later
-        # self.ground_state_value.insert(tk.END, '0.')
-        # self.step1_lambda.insert(tk.END, '200.')
-        # self.mf1_box.select()
-        # self.step2_lambda.insert(tk.END, '19387')
-        # self.step3_lambda.insert(tk.END, '37020')
-        # self.ip_value.insert(tk.END, '36000.')
+        self.ground_state_value.insert(tk.END, '0.')
+        self.step1_lambda.insert(tk.END, '200.')
+        self.mf1_box.select()
+        self.step2_lambda.insert(tk.END, '19387')
+        self.step3_lambda.insert(tk.END, '37020')
+        self.ip_value.insert(tk.END, '36000.')
 
     def setsteplabels(self):
         # set unit
@@ -232,6 +269,17 @@ class RSD:
         mfld_yinc = 0.04   # in # of ipvalue
         #
         firstarrowxmfl = 1.
+
+        # gett settings from program
+        # font sizes
+        fsz_title = int(self.fsz_title_entry.get())
+        fsz_axes = int(self.fsz_ax_num_entry.get())
+        fsz_axes_labels = int(self.fsz_ax_lbl_entry.get())
+        fsz_labels = int(self.fsz_lbls_entry.get())
+        sett_headspace = float(self.sett_headspace_entry.get())
+        sett_arr = float(self.sett_arr_entry.get())
+        sett_arr_head = float(self.sett_arr_head_entry.get())
+
         # let's first get the wavelengths that we want
         lambda1 = self.step1_lambda.get()
         lambda2 = self.step2_lambda.get()
@@ -325,9 +373,9 @@ class RSD:
 
         # ymax:
         if ipvalue > totwavenumber_photons + float(self.ground_state_value.get()):
-            ymax = ipvalue + 2000.
-        elif totwavenumber_photons + float(self.ground_state_value.get()) - ipvalue < 2000.:
-            ymax = ipvalue + 2000.
+            ymax = ipvalue + sett_headspace
+        elif totwavenumber_photons + float(self.ground_state_value.get()) - ipvalue < sett_headspace:
+            ymax = ipvalue + sett_headspace
         else:
             ymax = totwavenumber_photons + float(self.ground_state_value.get())
 
@@ -352,7 +400,11 @@ class RSD:
         if self.opt_linebreak_st.get():
             lbreak = '\n'
 
-        # create the figure
+        # ### CREATE FIGURE ###
+        # tick size
+        matplotlib.rc('xtick', labelsize=fsz_axes)
+        matplotlib.rc('ytick', labelsize=fsz_axes)
+
         f = Figure(figsize=(int(self.wh_width.get()), int(self.wh_height.get())), dpi=100)
         a = f.add_subplot(111)
         # second axis for eV
@@ -366,7 +418,7 @@ class RSD:
             iplabelstr = 'IP, ' + str(round(ipvalue, 3)) + '$\,$cm$^{-1}$'
         else:
             iplabelstr = 'IP, ' + str(round(ipvalue, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb_ip
-        a.text(textpad, ipvalue + 0.01*totwavenumber_photons, iplabelstr, color='k', ha='left')
+        a.text(textpad, ipvalue + 0.01*totwavenumber_photons, iplabelstr, color='k', ha='left', size=fsz_labels)
 
         # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
@@ -395,7 +447,8 @@ class RSD:
             levelstr = str(round(wavenumber_gs, 3)) + '$\,$cm$^{-1}$'
         else:
             levelstr = str(round(wavenumber_gs, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb_gs
-        a.text(10. - textpad, float(self.ground_state_value.get()), levelstr, color='k', ha='right', va='bottom')
+        a.text(10. - textpad, float(self.ground_state_value.get()), levelstr, color='k', ha='right', va='bottom',
+               size=fsz_labels)
 
         for it in range(len(lambda_steps)):
             if lambda_steps[it] >= 700:
@@ -411,11 +464,11 @@ class RSD:
             wstp = wavenumber_steps[it]
             tstp = transition_steps[it]
             if it == 0 and len(wavenumber_es) > 0:
-                a.arrow(firstarrowxmfl, yval_bott, 0, wstp, width=0.2, fc=col, ec=col, length_includes_head=True,
-                        head_width=0.6, head_length=totwavenumber_photons/30.)
+                a.arrow(firstarrowxmfl, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
+                        head_width=sett_arr_head, head_length=totwavenumber_photons/30.)
             else:
-                a.arrow(xval, yval_bott, 0, wstp, width=0.2, fc=col, ec=col, length_includes_head=True,
-                        head_width=0.6, head_length=totwavenumber_photons / 30.)
+                a.arrow(xval, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
+                        head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
 
             # alignment of labels
             if xval <= 5.:
@@ -433,16 +486,18 @@ class RSD:
             lambdastr = str(round(lambda_steps[it], 3)) + '$\,$nm'
             if it == 0 and len(wavenumber_es) > 0:
                 a.text(firstarrowxmfl + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center',
-                       rotation=90)
+                       rotation=90, size=fsz_labels)
             else:
-                a.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center', rotation=90)
+                a.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center', rotation=90,
+                       size=fsz_labels)
 
             # level text
             if term_symb[it] is None:
                 levelstr = str(round(tstp, 3)) + '$\,$cm$^{-1}$'
             else:
                 levelstr = str(round(tstp, 3)) + '$\,$cm$^{-1}$' + lbreak + term_symb[it]
-            a.text(xloc_levelstr, tstp - 0.01*totwavenumber_photons, levelstr, color='k', ha=halignlev, va='top')
+            a.text(xloc_levelstr, tstp - 0.01*totwavenumber_photons, levelstr, color='k', ha=halignlev, va='top',
+                   size=fsz_labels)
 
             # update yval_bott
             yval_bott = transition_steps[it]
@@ -466,14 +521,13 @@ class RSD:
             xval = firstarrowxmfl + 1.5 + it * 1.5
             yval = mfld_yinc*ipvalue*(1+it)
             wstp = float(wavenumber_steps[0]) - yval
-            print wstp
-            print wavenumber_es[it]
-            a.arrow(xval, yval, 0, wstp, width=0.2, fc=col, ec=col, length_includes_head=True,
-                    head_width=0.6, head_length=totwavenumber_photons / 30.)
+            a.arrow(xval, yval, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
+                    head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
 
             # wavelength text
             lambdastr = str(round(lambda_step_es[it], 3)) + '$\,$nm'
-            a.text(xval + textpad, yval + wstp/2., lambdastr, color=col, ha='left', va='center', rotation=90)
+            a.text(xval + textpad, yval + wstp/2., lambdastr, color=col, ha='left', va='center', rotation=90,
+                   size=fsz_labels)
 
             # level text
             if term_symb_es_formatted[it] is None:
@@ -481,20 +535,20 @@ class RSD:
             else:
                 # NO LINEBREAK HERE ON THESE LINES!
                 levelstr = str(round(float(wavenumber_es[it]), 3)) + '$\,$cm$^{-1}$, ' + term_symb_es_formatted[it]
-            a.text(xval + 0.5, yval, levelstr, color='k', ha='left', va='bottom')
+            a.text(xval + 0.5, yval, levelstr, color='k', ha='left', va='bottom', size=fsz_labels)
 
         # Title:
         if self.title_entry is not '':
-            a.set_title(self.title_entry.get())
+            a.set_title(self.title_entry.get(), size=fsz_title)
 
         # ylabel
-        a.set_ylabel('Wavenumber (cm$^{-1}$)')
+        a.set_ylabel('Wavenumber (cm$^{-1}$)', size=fsz_axes_labels)
         # axis limits
         a.set_xlim([0., 10.])
         a.set_ylim([0., ymax])
 
         # eV axis on the right
-        a2.set_ylabel('Energy (eV)')
+        a2.set_ylabel('Energy (eV)', size=fsz_axes_labels)
         a2.set_ylim([0., ymax / 8065.54429])
 
         # remove x ticks
