@@ -170,12 +170,12 @@ class RSD:
         self.wh_height.insert(tk.END, '8')
 
         # fixme: temporary insert, remove later
-        self.ground_state_value.insert(tk.END, '0.')
-        self.step1_lambda.insert(tk.END, '200.')
-        self.mf1_box.select()
-        self.step2_lambda.insert(tk.END, '19387')
-        self.step3_lambda.insert(tk.END, '37020')
-        self.ip_value.insert(tk.END, '36000.')
+        # self.ground_state_value.insert(tk.END, '0.')
+        # self.step1_lambda.insert(tk.END, '200.')
+        # self.mf1_box.select()
+        # self.step2_lambda.insert(tk.END, '19387')
+        # self.step3_lambda.insert(tk.END, '37020')
+        # self.ip_value.insert(tk.END, '36000.')
 
     def setsteplabels(self):
         # set unit
