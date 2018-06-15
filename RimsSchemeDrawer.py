@@ -126,10 +126,16 @@ class RSD:
         self.mf4_box = tk.Checkbutton(master, text='Low-lying state?', justify=tk.LEFT,
                                       variable=self.mf4_var, font=self.font_std, command=self.setsteplabels)
         self.mf4_box.place(x=self.x(4), y=self.y(6), width=BW, height=BH)
-        self.mf5_var = tk.IntVar()
-        self.mf5_box = tk.Checkbutton(master, text='Low-lying state?', justify=tk.LEFT,
-                                      variable=self.mf5_var, font=self.font_std, command=self.setsteplabels)
-        self.mf5_box.place(x=self.x(4), y=self.y(7), width=BW, height=BH)
+
+        # width, height to set
+        self.wh_label = tk.Label(master, text='Width/Height', anchor=tk.W, font=self.font_bold)
+        self.wh_label.place(x=self.x(4), y=self.y(7), width=BW, height=BH)
+        self.wh_width = tk.Entry(master)
+        self.wh_height = tk.Entry(master)
+        self.wh_times = tk.Label(master, text='x', anchor=tk.W, font=self.font_bold)
+        self.wh_width.place(x=self.x(4), y=self.y(8), width=0.4*BW, height=BH)
+        self.wh_times.place(x=self.x(4.4), y=self.y(8), width=0.2*BW, height=BH)
+        self.wh_height.place(x=self.x(4.6), y=self.y(8), width=0.4 * BW, height=BH)
 
         # Title
         self.title_label = tk.Label(master, text='Plot Title', anchor=tk.W, font=self.font_bold)
@@ -159,13 +165,17 @@ class RSD:
         # set step labels
         self.setsteplabels()
 
+        # set standard window size
+        self.wh_width.insert(tk.END, '5')
+        self.wh_height.insert(tk.END, '8')
+
         # fixme: temporary insert, remove later
-        # self.ground_state_value.insert(tk.END, '0.')
-        # self.step1_lambda.insert(tk.END, '200.')
-        # self.mf1_box.select()
-        # self.step2_lambda.insert(tk.END, '19387')
-        # self.step3_lambda.insert(tk.END, '37020')
-        # self.ip_value.insert(tk.END, '36000.')
+        self.ground_state_value.insert(tk.END, '0.')
+        self.step1_lambda.insert(tk.END, '200.')
+        self.mf1_box.select()
+        self.step2_lambda.insert(tk.END, '19387')
+        self.step3_lambda.insert(tk.END, '37020')
+        self.ip_value.insert(tk.END, '36000.')
 
     def setsteplabels(self):
         # set unit
@@ -192,10 +202,8 @@ class RSD:
             self.step4_label = tk.Label(self.master, text='Low-lying st (cm^-1):', anchor=tk.W, font=self.font_std)
         else:
             self.step4_label = tk.Label(self.master, text='4th step (' + unit + '):', anchor=tk.W, font=self.font_std)
-        if self.mf5_var.get():
-            self.step5_label = tk.Label(self.master, text='Low-lying st (cm^-1):', anchor=tk.W, font=self.font_std)
-        else:
-            self.step5_label = tk.Label(self.master, text='5th step (' + unit + '):', anchor=tk.W, font=self.font_std)
+        # label 5
+        self.step5_label = tk.Label(self.master, text='5th step (' + unit + '):', anchor=tk.W, font=self.font_std)
         self.step1_label.place(x=self.x(1), y=self.y(3), width=self.BW, height=self.BH)
         self.step2_label.place(x=self.x(1), y=self.y(4), width=self.BW, height=self.BH)
         self.step3_label.place(x=self.x(1), y=self.y(5), width=self.BW, height=self.BH)
@@ -241,8 +249,7 @@ class RSD:
             lambda_steps.append(lambda3)
         if not self.mf4_var.get():
             lambda_steps.append(lambda4)
-        if not self.mf5_var.get():
-            lambda_steps.append(lambda5)
+        lambda_steps.append(lambda5)
 
         try:
             ipvalue = float(self.ip_value.get())
@@ -260,8 +267,7 @@ class RSD:
             term_symb_entered.append(self.term3.get())
         if not self.mf4_var.get():
             term_symb_entered.append(self.term4.get())
-        if not self.mf5_var.get():
-            term_symb_entered.append(self.term5.get())
+        term_symb_entered.append(self.term5.get())
 
         # get ground state wavenumber
         if self.ground_state_value.get() is '':
@@ -305,9 +311,6 @@ class RSD:
         if self.mf4_var.get():
             wavenumber_es.append(self.step4_lambda.get())
             term_symb_es.append(self.term4.get())
-        if self.mf5_var.get():
-            wavenumber_es.append(self.step5_lambda.get())
-            term_symb_es.append(self.term5.get())
 
         # create wavenumber array
         wavenumber_steps = 1. / lambda_steps * 1e7
@@ -350,7 +353,7 @@ class RSD:
             lbreak = '\n'
 
         # create the figure
-        f = Figure(figsize=(5, 8), dpi=100)
+        f = Figure(figsize=(int(self.wh_width.get()), int(self.wh_height.get())), dpi=100)
         a = f.add_subplot(111)
         # second axis for eV
         a2 = a.twinx()
