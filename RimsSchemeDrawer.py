@@ -216,7 +216,7 @@ class RSD:
         self.wh_width.insert(tk.END, '5')
         self.wh_height.insert(tk.END, '8')
         self.fsz_title_entry.insert(tk.END, '14')
-        self.fsz_ax_num_entry.insert(tk.END, '10')
+        self.fsz_ax_num_entry.insert(tk.END, '12')
         self.fsz_ax_lbl_entry.insert(tk.END, '14')
         self.fsz_lbls_entry.insert(tk.END, '12')
         self.sett_headspace_entry.insert(tk.END, '2000')
@@ -431,6 +431,13 @@ class RSD:
         # second axis for eV
         a2 = a.twinx()
 
+        # tick label in scientific notation
+        # a.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
+        fform = matplotlib.ticker.ScalarFormatter(useOffset=False, useMathText=True)
+        gform = lambda x, pos: "${}$".format(fform._formatSciNotation('%1.10e' % x))
+        a.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
+        a2.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
+
         # shade the level above the IP
         xshade = [0., 10.]
         a.fill_between(xshade, ipvalue, ymax, facecolor='#adbbff', alpha=0.5)
@@ -448,7 +455,7 @@ class RSD:
         # Lines for manifold groundstater
         for it in range(len(wavenumber_es)):
             a.hlines(mfld_yinc*ipvalue*(1+it), xmin=1.5*it+2.3, xmax=1.5*it+3.7,
-                     linestyle='dashed')
+                     linestyle='solid')
 
         # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
@@ -490,6 +497,10 @@ class RSD:
             else:
                 a.arrow(xval, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
                         head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
+
+            # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
+            if it == len(lambda_steps) - 1:
+                a.hlines(tstp, xmin=xval-0.5, xmax=xval+0.5, linestyle='solid')
 
             # alignment of labels
             if xval <= 5.:
