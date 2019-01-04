@@ -39,7 +39,7 @@ class RSD:
         master.title("RIMS Scheme Drawer")
 
         # Geometry and stuff
-        rows, cols = 11, 7
+        rows, cols = 12, 7
         BW, BH, pad = 120, 30, 15
         winsize = ((1.5 + cols / 2) * pad + cols * BW,
                    (1.5 + rows / 2) * pad + rows * BH,
@@ -157,6 +157,7 @@ class RSD:
         self.sett_arr_head_lbl = tk.Label(master, text='Arrow head width:', anchor=tk.W, font=self.font_std)
         self.sett_prec_lambda_label = tk.Label(master, text='Precision wavlength:', anchor=tk.W, font=self.font_std)
         self.sett_prec_level_label = tk.Label(master, text='Precision level:', anchor=tk.W, font=self.font_std)
+        self.sett_ip_label_pos_label = tk.Label(master, text='IP label position:', anchor=tk.W, font=self.font_std)
         self.fsz_title_label.place(x=self.x(5), y=self.y(3), width=BW, height=BH)
         self.fsz_ax_num_label.place(x=self.x(5), y=self.y(4), width=BW, height=BH)
         self.fsz_ax_lbl_label.place(x=self.x(5), y=self.y(5), width=BW, height=BH)
@@ -166,6 +167,7 @@ class RSD:
         self.sett_arr_head_lbl.place(x=self.x(5), y=self.y(9), width=BW, height=BH)
         self.sett_prec_lambda_label.place(x=self.x(5), y=self.y(10), width=BW, height=BH)
         self.sett_prec_level_label.place(x=self.x(5), y=self.y(11), width=BW, height=BH)
+        self.sett_ip_label_pos_label.place(x=self.x(5), y=self.y(12), width=BW, height=BH)
         self.fsz_title_entry = tk.Entry(master)
         self.fsz_ax_num_entry = tk.Entry(master)
         self.fsz_ax_lbl_entry = tk.Entry(master)
@@ -175,6 +177,12 @@ class RSD:
         self.sett_arr_head_entry = tk.Entry(master)
         self.sett_prec_lambda_entry = tk.Entry(master)
         self.sett_prec_level_entry = tk.Entry(master)
+        self.sett_ip_label_pos_variable = tk.IntVar()
+        self.sett_ip_label_pos_rad1 = tk.Radiobutton(master, text='Top', variable=self.sett_ip_label_pos_variable,
+                                                     value=0, font=self.font_std)
+        self.sett_ip_label_pos_rad2 = tk.Radiobutton(master, text='Bott.', variable=self.sett_ip_label_pos_variable,
+                                                     value=1, font=self.font_std)
+        self.sett_ip_label_pos_rad1.select()
         self.fsz_title_entry.place(x=self.x(6), y=self.y(3), width=BW, height=BH)
         self.fsz_ax_num_entry.place(x=self.x(6), y=self.y(4), width=BW, height=BH)
         self.fsz_ax_lbl_entry.place(x=self.x(6), y=self.y(5), width=BW, height=BH)
@@ -184,6 +192,8 @@ class RSD:
         self.sett_arr_head_entry.place(x=self.x(6), y=self.y(9), width=BW, height=BH)
         self.sett_prec_lambda_entry.place(x=self.x(6), y=self.y(10), width=BW, height=BH)
         self.sett_prec_level_entry.place(x=self.x(6), y=self.y(11), width=BW, height=BH)
+        self.sett_ip_label_pos_rad1.place(x=self.x(6), y=self.y(12), width=0.5 * BW, height=BH)
+        self.sett_ip_label_pos_rad2.place(x=self.x(6) + BW/2, y=self.y(12), width=0.5 * BW, height=BH)
         # Title
         self.title_label = tk.Label(master, text='Plot Title', anchor=tk.W, font=self.font_bold)
         self.title_label.place(x=self.x(7), y=self.y(1), width=BW, height=BH)
@@ -194,14 +204,14 @@ class RSD:
         self.button_plot = tk.Button(master, text='Plot', font=self.font_std, command=self.plotter)
         self.button_save = tk.Button(master, text='Save', font=self.font_std, command=self.save)
         # test button
-        # self.button_test = tk.Button(master, text='Test', font=self.font_std, command=self.test)
+        self.button_test = tk.Button(master, text='Test', font=self.font_std, command=self.test)
         self.button_help = tk.Button(master, text='Help', font=self.font_std, command=self.help)
         self.button_quit = tk.Button(master, text='Quit', font=self.font_std, command=self.quit)
         self.button_plot.place(x=self.x(7), y=self.y(3), width=BW, height=BH)
         self.button_save.place(x=self.x(7), y=self.y(4), width=BW, height=BH)
-        # self.button_test.place(x=self.x(5), y=self.y(6), width=BW, height=BH)
-        self.button_help.place(x=self.x(7), y=self.y(8), width=BW, height=BH)
-        self.button_quit.place(x=self.x(7), y=self.y(9), width=BW, height=BH)
+        self.button_test.place(x=self.x(7), y=self.y(10), width=BW, height=BH)
+        self.button_help.place(x=self.x(7), y=self.y(11), width=BW, height=BH)
+        self.button_quit.place(x=self.x(7), y=self.y(12), width=BW, height=BH)
 
         # Options
         self.opt_linebreak_st = tk.IntVar()
@@ -442,11 +452,18 @@ class RSD:
         xshade = [0., 10.]
         a.fill_between(xshade, ipvalue, ymax, facecolor='#adbbff', alpha=0.5)
         # label the IP
+        if self.sett_ip_label_pos_variable.get() == 0:
+            iplabelypos = ipvalue + 0.01*totwavenumber_photons
+            iplabelyalign = 'bottom'
+        else:
+            iplabelypos = ipvalue - 0.01 * totwavenumber_photons
+            iplabelyalign = 'top'
         if term_symb_ip is None:
             iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$'
         else:
             iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$' + lbreak + term_symb_ip
-        a.text(textpad, ipvalue + 0.01*totwavenumber_photons, iplabelstr, color='k', ha='left', size=fsz_labels)
+        # ip above or below
+        a.text(textpad, iplabelypos, iplabelstr, color='k', ha='left', va=iplabelyalign, size=fsz_labels)
 
         # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
@@ -523,12 +540,19 @@ class RSD:
                 a.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center', rotation=90,
                        size=fsz_labels)
 
+            print lambda_steps[it]
             # level text
             if term_symb[it] is None:
                 levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$'
             else:
                 levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$' + lbreak + term_symb[it]
-            a.text(xloc_levelstr, tstp - 0.01*totwavenumber_photons, levelstr, color='k', ha=halignlev, va='top',
+            if it == len(lambda_steps) - 1:
+                leveltextypos = tstp
+                leveltextvaalign = 'center'
+            else:
+                leveltextypos = tstp - 0.01 * totwavenumber_photons
+                leveltextvaalign = 'top'
+            a.text(xloc_levelstr, leveltextypos, levelstr, color='k', ha=halignlev, va=leveltextvaalign,
                    size=fsz_labels)
 
             # update yval_bott
@@ -603,7 +627,7 @@ class RSD:
             f.savefig(fname)
 
     def test(self):
-        print self.unitvar.get()
+        print self.sett_ip_label_pos_variable.get()
 
     def help(self):
         messagebox.showinfo('Help', 'This program can be used to automatically generate RIMS scheme figures that look '
@@ -622,7 +646,7 @@ class RSD:
                                     '    the level and the term symbol.\n\n'
                                     'Questions?  trappitsch1@llnl.gov\n'
                                     'Complaints? isselhardt1@llnl.gov\n\n'
-                                    'Version: 20180614')
+                                    'Version: 20190103')
 
     def quit(self):
         self.master.destroy()
