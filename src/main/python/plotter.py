@@ -141,7 +141,10 @@ class Plotter(QMainWindow):
         # calculate total excitation in wavenumbers - for scaling later
         totwavenumber_photons = np.sum(wavenumber_steps)
 
-        # ymax:   # fixme to check: is this really wavenumber_gs here? need to see if it looks right in the plot
+        # get the ipvalue
+        ipvalue = float(self.parent.edt_iplevel.text())
+
+        # ymax:
         if ipvalue > totwavenumber_photons + wavenumber_gs:
             ymax = ipvalue + sett_headspace
         elif totwavenumber_photons + wavenumber_gs - ipvalue < sett_headspace:
