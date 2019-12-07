@@ -23,9 +23,9 @@ class SchemeDrawer(QMainWindow):
     Date:       December 7, 2019
     """
 
-    def __init__(self):
+    def __init__(self, debug=False):
         # run in debug mode?
-        self.rundebug = True
+        self.rundebug = debug
 
         # program info
         self.version = '2.0.0'

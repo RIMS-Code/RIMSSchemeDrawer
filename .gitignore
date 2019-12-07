@@ -2,6 +2,8 @@
 *.iml
 tkinter_version/RIMSSchemeDrawer_RT.command
 *.pyc
+div
+div/*
 venv
 venv/*
 target
