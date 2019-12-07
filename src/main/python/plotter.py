@@ -9,16 +9,62 @@ from PyQt5.QtGui import QFont, QDoubleValidator, QIntValidator, QIcon
 import functools
 import numpy as np
 import sys
+from os.path import expanduser
+
+import matplotlib
+matplotlib.use('Qt5Agg')
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.figure import Figure
 
 # plotter - the heart of the whole thing
-class Plotter(QWidget):
-    def __init__(self, parent, fname=None):
+class Plotter(QMainWindow):
+    def __init__(self, parent, saveplt=False):
+        # initalize super
+        super(Plotter, self).__init__(parent)
         self.parent = parent
+        self.saveplt = saveplt
+
+        # initialize the widget
+        self.title = 'RIMS scheme'
+
+        # matplotlib parameters
+        # tick size
+        fsz_axes = int(self.parent.edt_sett_fsaxes.text())
+        matplotlib.rc('xtick', labelsize=fsz_axes, direction='in')
+        matplotlib.rc('ytick', labelsize=fsz_axes, direction='in')
+
+        # figure stuff
+        self.figure = Figure()
+        self.canvas = FigureCanvas(self.figure)
+        self.axes = self.figure.subplots()
+
+        # add the figure toolbar to the main window
+        self.toolbar = NavigationToolbar(self.canvas, self)
+        self.addToolBar(self.toolbar)
+
+        # main widget
+        self.main_widget = QWidget(self)
+        self.setCentralWidget(self.main_widget)
+
+        # layout
+        layout = QVBoxLayout()
+        layout.addWidget(self.canvas)
+        self.main_widget.setLayout(layout)
+
+        # Colors for arrows
+        self.colir = '#a00000'
+        self.coluv = '#0012a0'
+        self.colfuv = '#5f00a0'
+        self.colpump = '#0aa000'
 
         # now plot the scheme
         self.plotit()
 
-    def plotit(self, fname=None):
+        # redraw the canvas
+        self.canvas.draw()
+
+    def plotit(self):
         # textpad
         textpad = 0.4
         # percentage to increase for manifold
@@ -29,7 +75,6 @@ class Plotter(QWidget):
         # gett settings from program
         # font sizes
         fsz_title = int(self.parent.edt_sett_fstitle.text())
-        fsz_axes = int(self.parent.edt_sett_fsaxes.text())
         fsz_axes_labels = int(self.parent.edt_sett_fsaxlbl.text())
         fsz_labels = int(self.parent.edt_sett_fslbl.text())
         sett_headspace = float(self.parent.edt_sett_headspace.text())
@@ -132,212 +177,227 @@ class Plotter(QWidget):
         term_symb_ip = term_to_string(self.parent.edt_ipterm.text())
         term_symb_gs = term_to_string(self.parent.edt_gsterm.text())
 
+        # break line or put in comma, depending on option
+        lbreak = ', '
+        if self.parent.chk_sett_linebreaks.isChecked():
+            lbreak = '\n'
 
-        # # file name given or show what you can do?
-        # if fname is None:
-        #     # create the new window
-        #     pltwin = tk.Toplevel()
-        #
-        # # break line or put in comma, depending on option
-        # lbreak = ', '
-        # if self.chk_sett_linebreaks.isChecked():
-        #     lbreak = '\n'
-        #
-        # # ### CREATE FIGURE ###
-        # # tick size
-        # matplotlib.rc('xtick', labelsize=fsz_axes)
-        # matplotlib.rc('ytick', labelsize=fsz_axes)
-        #
-        # f = Figure(figsize=(float(self.wh_width.get()), float(self.wh_height.get())), dpi=100)
-        # a = f.add_subplot(111)
-        # # second axis for eV
-        # a2 = a.twinx()
-        #
-        # # tick label in scientific notation
-        # # a.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
-        # fform = matplotlib.ticker.ScalarFormatter(useOffset=False, useMathText=True)
-        # gform = lambda x, pos: "${}$".format(fform._formatSciNotation('%1.10e' % x))
-        # a.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
-        # a2.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
-        #
-        # # shade the level above the IP
-        # xshade = [0., 10.]
-        # a.fill_between(xshade, ipvalue, ymax, facecolor='#adbbff', alpha=0.5)
-        # # label the IP
-        # if self.sett_ip_label_pos_variable.get() == 0:
-        #     iplabelypos = ipvalue + 0.01*totwavenumber_photons
-        #     iplabelyalign = 'bottom'
-        # else:
-        #     iplabelypos = ipvalue - 0.01 * totwavenumber_photons
-        #     iplabelyalign = 'top'
-        # if term_symb_ip is None:
-        #     iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$'
-        # else:
-        #     iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$' + lbreak + term_symb_ip
-        # # ip above or below
-        # a.text(textpad, iplabelypos, iplabelstr, color='k', ha='left', va=iplabelyalign, size=fsz_labels)
-        #
-        # # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
-        # for it in transition_steps:
-        #     if it < ipvalue:
-        #         a.hlines(it, xmin=0, xmax=10)
-        # # Lines for manifold groundstater
-        # for it in range(len(wavenumber_es)):
-        #     a.hlines(mfld_yinc*ipvalue*(1+it), xmin=1.5*it+2.3, xmax=1.5*it+3.7,
-        #              linestyle='solid')
-        #
-        # # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
-        # for it in transition_steps:
-        #     if it < ipvalue:
-        #         a.hlines(it, xmin=0, xmax=10)
-        #
-        # # draw the state we come out of, if not ground state
-        # if float(self.ground_state_value.get()) > 0.:
-        #     a.hlines(float(self.ground_state_value.get()), xmin=0, xmax=10)
-        #
-        # # draw the arrows
-        # deltax = 8.65 / (len(lambda_steps) + 1.) - 0.5
-        # xval = 0.
-        # yval_bott = float(self.ground_state_value.get())
-        # # put in bottom level
-        # if term_symb_gs is None:
-        #     levelstr = '%.*f' %(int(prec_level), wavenumber_gs) + '$\,$cm$^{-1}$'
-        # else:
-        #     levelstr = '%.*f' %(int(prec_level), wavenumber_gs) + '$\,$cm$^{-1}$' + lbreak + term_symb_gs
-        # a.text(10. - textpad, float(self.ground_state_value.get()), levelstr, color='k', ha='right', va='bottom',
-        #        size=fsz_labels)
-        #
-        # for it in range(len(lambda_steps)):
-        #     if lambda_steps[it] >= 700:
-        #         col = self.colir
-        #     elif 500. < lambda_steps[it] < 700.:
-        #         col = self.colpump
-        #     elif 350. < lambda_steps[it] <= 500.:
-        #         col = self.coluv
-        #     else:
-        #         col = self.colfuv
-        #     # xvalue for arrow
-        #     xval += deltax
-        #     wstp = wavenumber_steps[it]
-        #     tstp = transition_steps[it]
-        #     if it == 0 and len(wavenumber_es) > 0:
-        #         a.arrow(firstarrowxmfl, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
-        #                 head_width=sett_arr_head, head_length=totwavenumber_photons/30.)
-        #     else:
-        #         a.arrow(xval, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
-        #                 head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
-        #
-        #     # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
-        #     if it == len(lambda_steps) - 1:
-        #         a.hlines(tstp, xmin=xval-0.5, xmax=xval+0.5, linestyle='solid')
-        #
-        #     # alignment of labels
-        #     if xval <= 5.:
-        #         halignlam = 'left'
-        #         xloc_lambda = xval + textpad
-        #         halignlev = 'right'
-        #         xloc_levelstr = 10. - textpad
-        #     else:
-        #         halignlam = 'right'
-        #         xloc_lambda = xval - textpad
-        #         halignlev = 'left'
-        #         xloc_levelstr = textpad
-        #
-        #     # wavelength text
-        #     lambdastr = '%.*f' %(int(prec_lambda), lambda_steps[it]) + '$\,$nm'
-        #     if it == 0 and len(wavenumber_es) > 0:
-        #         a.text(firstarrowxmfl + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center',
-        #                rotation=90, size=fsz_labels)
-        #     else:
-        #         a.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center', rotation=90,
-        #                size=fsz_labels)
-        #
-        #     print(lambda_steps[it])
-        #     # level text
-        #     if term_symb[it] is None:
-        #         levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$'
-        #     else:
-        #         levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$' + lbreak + term_symb[it]
-        #     if it == len(lambda_steps) - 1:
-        #         leveltextypos = tstp
-        #         leveltextvaalign = 'center'
-        #     else:
-        #         leveltextypos = tstp - 0.01 * totwavenumber_photons
-        #         leveltextvaalign = 'top'
-        #     a.text(xloc_levelstr, leveltextypos, levelstr, color='k', ha=halignlev, va=leveltextvaalign,
-        #            size=fsz_labels)
-        #
-        #     # update yval_bott
-        #     yval_bott = transition_steps[it]
-        #
-        # # create ground state lambda step array
-        # lambda_step_es = []
-        # for it in range(len(wavenumber_es)):
-        #     lambda_step_es.append(1.e7 / (1.e7/lambda_steps[0] - (float(wavenumber_es[it]) - float(wavenumber_gs))))
-        #
-        # # now go through low lying excited states
-        # for it in range(len(wavenumber_es)):
-        #     if lambda_step_es[it] >= 700:
-        #         col = self.colir
-        #     elif 500. < lambda_step_es[it] < 700.:
-        #         col = self.colpump
-        #     elif 350. < lambda_step_es[it] <= 500.:
-        #         col = self.coluv
-        #     else:
-        #         col = self.colfuv
-        #     # xvalue for arrow
-        #     xval = firstarrowxmfl + 1.5 + it * 1.5
-        #     yval = mfld_yinc*ipvalue*(1+it)
-        #     wstp = float(wavenumber_steps[0]) - yval
-        #     a.arrow(xval, yval, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
-        #             head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
-        #
-        #     # wavelength text
-        #     lambdastr = '%.*f' %(int(prec_lambda), lambda_step_es[it]) + '$\,$nm'
-        #     a.text(xval + textpad, yval + wstp/2., lambdastr, color=col, ha='left', va='center', rotation=90,
-        #            size=fsz_labels)
-        #
-        #     # level text
-        #     if term_symb_es_formatted[it] is None:
-        #         levelstr = '%.*f' %(int(prec_level), float(wavenumber_es[it])) + '$\,$cm$^{-1}$'
-        #     else:
-        #         # NO LINEBREAK HERE ON THESE LINES!
-        #         levelstr = '%.*f' %(int(prec_level),float(wavenumber_es[it])) + '$\,$cm$^{-1}$, ' + \
-        #                    term_symb_es_formatted[it]
-        #     a.text(xval + 0.5, yval, levelstr, color='k', ha='left', va='bottom', size=fsz_labels)
-        #
-        # # Title:
-        # if self.title_entry is not '':
-        #     a.set_title(self.title_entry.get(), size=fsz_title)
-        #
-        # # ylabel
-        # a.set_ylabel('Wavenumber (cm$^{-1}$)', size=fsz_axes_labels)
-        # # axis limits
-        # a.set_xlim([0., 10.])
-        # a.set_ylim([0., ymax])
-        #
-        # # eV axis on the right
-        # a2.set_ylabel('Energy (eV)', size=fsz_axes_labels)
-        # a2.set_ylim([0., ymax / 8065.54429])
-        #
-        # # remove x ticks
-        # a.axes.get_xaxis().set_ticks([])
-        #
-        # # tight layout of figure
-        # f.tight_layout()
+        # ### CREATE FIGURE ###
+        # figure width and height)
+        figwidth = self.parent.edt_sett_figwidth.text()
+        figheight = self.parent.edt_sett_figheight.text()
+        if figwidth == '':
+            figwidth = 5
+        else:
+            figwidth = float(figwidth)
+        if figheight == '':
+            figheight = 8
+        else:
+            figheight = float(figheight)
+        self.figure.set_size_inches(figwidth, figheight)
 
-        # if fname is None:
-        #     # a tk.DrawingArea
-        #     canvas = FigureCanvasTkAgg(f, master=pltwin)
-        #     canvas.show()
-        #     canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        #
-        #     toolbar = NavigationToolbar2TkAgg(canvas, pltwin)
-        #     toolbar.update()
-        #     canvas._tkcanvas.pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        # else:
-        #     f.savefig(fname)
+        # seocnd axes -> mirror of first
+        a2 = self.axes.twinx()
 
+        # tick label in scientific notation
+        # a.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
+        fform = matplotlib.ticker.ScalarFormatter(useOffset=False, useMathText=True)
+        gform = lambda x, pos: "${}$".format(fform._formatSciNotation('%1.10e' % x))
+        self.axes.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
+        a2.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
+
+        # shade the level above the IP
+        xshade = [0., 10.]
+        self.axes.fill_between(xshade, ipvalue, ymax, facecolor='#adbbff', alpha=0.5)
+        # label the IP
+        if self.parent.rbtn_iplable_top.isChecked():
+            iplabelypos = ipvalue + 0.01*totwavenumber_photons
+            iplabelyalign = 'bottom'
+        else:
+            iplabelypos = ipvalue - 0.01 * totwavenumber_photons
+            iplabelyalign = 'top'
+        if term_symb_ip is None:
+            iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$'
+        else:
+            iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$' + lbreak + term_symb_ip
+        # ip above or below
+        self.axes.text(textpad, iplabelypos, iplabelstr, color='k', ha='left', va=iplabelyalign, size=fsz_labels)
+
+        # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
+        for it in transition_steps:
+            if it < ipvalue:
+                self.axes.hlines(it, xmin=0, xmax=10)
+        # Lines for manifold groundstater
+        for it in range(len(wavenumber_es)):
+            self.axes.hlines(mfld_yinc*ipvalue*(1+it), xmin=1.5*it+2.3, xmax=1.5*it+3.7,
+                     linestyle='solid')
+
+        # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
+        for it in transition_steps:
+            if it < ipvalue:
+                self.axes.hlines(it, xmin=0, xmax=10)
+
+        # draw the state we come out of, if not ground state
+        if float(wavenumber_gs) > 0.:
+            self.axes.hlines(float(wavenumber_gs), xmin=0, xmax=10)
+
+        # draw the arrows
+        deltax = 8.65 / (len(lambda_steps) + 1.) - 0.5
+        xval = 0.
+        yval_bott = float(wavenumber_gs)
+        # put in bottom level
+        if term_symb_gs is None:
+            levelstr = '%.*f' %(int(prec_level), wavenumber_gs) + '$\,$cm$^{-1}$'
+        else:
+            levelstr = '%.*f' %(int(prec_level), wavenumber_gs) + '$\,$cm$^{-1}$' + lbreak + term_symb_gs
+        self.axes.text(10. - textpad, float(wavenumber_gs), levelstr, color='k', ha='right',
+                       va='bottom', size=fsz_labels)
+
+        for it in range(len(lambda_steps)):
+            if lambda_steps[it] >= 700:
+                col = self.colir
+            elif 500. < lambda_steps[it] < 700.:
+                col = self.colpump
+            elif 350. < lambda_steps[it] <= 500.:
+                col = self.coluv
+            else:
+                col = self.colfuv
+            # xvalue for arrow
+            xval += deltax
+            wstp = wavenumber_steps[it]
+            tstp = transition_steps[it]
+            if it == 0 and len(wavenumber_es) > 0:
+                self.axes.arrow(firstarrowxmfl, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col,
+                                length_includes_head=True, head_width=sett_arr_head,
+                                head_length=totwavenumber_photons/30.)
+            else:
+                self.axes.arrow(xval, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
+                                head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
+
+            # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
+            if it == len(lambda_steps) - 1:
+                self.axes.hlines(tstp, xmin=xval-0.5, xmax=xval+0.5, linestyle='solid')
+
+            # alignment of labels
+            if xval <= 5.:
+                halignlam = 'left'
+                xloc_lambda = xval + textpad
+                halignlev = 'right'
+                xloc_levelstr = 10. - textpad
+            else:
+                halignlam = 'right'
+                xloc_lambda = xval - textpad
+                halignlev = 'left'
+                xloc_levelstr = textpad
+
+            # wavelength text
+            lambdastr = '%.*f' %(int(prec_lambda), lambda_steps[it]) + '$\,$nm'
+            if it == 0 and len(wavenumber_es) > 0:
+                self.axes.text(firstarrowxmfl + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam,
+                               va='center', rotation=90, size=fsz_labels)
+            else:
+                self.axes.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center',
+                               rotation=90, size=fsz_labels)
+
+            # level text
+            if term_symb[it] is None:
+                levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$'
+            else:
+                levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$' + lbreak + term_symb[it]
+            if it == len(lambda_steps) - 1:
+                leveltextypos = tstp
+                leveltextvaalign = 'center'
+            else:
+                leveltextypos = tstp - 0.01 * totwavenumber_photons
+                leveltextvaalign = 'top'
+            self.axes.text(xloc_levelstr, leveltextypos, levelstr, color='k', ha=halignlev, va=leveltextvaalign,
+                   size=fsz_labels)
+
+            # update yval_bott
+            yval_bott = transition_steps[it]
+
+        # create ground state lambda step array
+        lambda_step_es = []
+        for it in range(len(wavenumber_es)):
+            lambda_step_es.append(1.e7 / (1.e7/lambda_steps[0] - (float(wavenumber_es[it]) - float(wavenumber_gs))))
+
+        # now go through low lying excited states
+        for it in range(len(wavenumber_es)):
+            if lambda_step_es[it] >= 700:
+                col = self.colir
+            elif 500. < lambda_step_es[it] < 700.:
+                col = self.colpump
+            elif 350. < lambda_step_es[it] <= 500.:
+                col = self.coluv
+            else:
+                col = self.colfuv
+            # xvalue for arrow
+            xval = firstarrowxmfl + 1.5 + it * 1.5
+            yval = mfld_yinc*ipvalue*(1+it)
+            wstp = float(wavenumber_steps[0]) - yval
+            self.axes.arrow(xval, yval, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
+                            head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
+
+            # wavelength text
+            lambdastr = '%.*f' %(int(prec_lambda), lambda_step_es[it]) + '$\,$nm'
+            self.axes.text(xval + textpad, yval + wstp/2., lambdastr, color=col, ha='left', va='center', rotation=90,
+                           size=fsz_labels)
+
+            # level text
+            if term_symb_es_formatted[it] is None:
+                levelstr = '%.*f' %(int(prec_level), float(wavenumber_es[it])) + '$\,$cm$^{-1}$'
+            else:
+                # NO LINEBREAK HERE ON THESE LINES!
+                levelstr = '%.*f' %(int(prec_level),float(wavenumber_es[it])) + '$\,$cm$^{-1}$, ' + \
+                           term_symb_es_formatted[it]
+            self.axes.text(xval + 0.5, yval, levelstr, color='k', ha='left', va='bottom', size=fsz_labels)
+
+        # Title:
+        title_entry = self.parent.edt_sett_plttitle.text()
+        if title_entry is not '':
+            self.axes.set_title(title_entry, size=fsz_title)
+
+        # ylabel
+        self.axes.set_ylabel('Wavenumber (cm$^{-1}$)', size=fsz_axes_labels)
+        # axis limits
+        self.axes.set_xlim([0., 10.])
+        self.axes.set_ylim([0., ymax])
+
+        # eV axis on the right
+        a2.set_ylabel('Energy (eV)', size=fsz_axes_labels)
+        a2.set_ylim([0., ymax / 8065.54429])
+
+        # remove x ticks
+        self.axes.axes.get_xaxis().set_ticks([])
+
+        # tight layout of figure
+        self.figure.tight_layout()
+
+        if self.saveplt:
+            # get save filename
+            # dialog to query filename
+            # home folder of user platform independent
+            home = expanduser('~')
+            # options
+            options = QFileDialog.Options()
+            # create filetypes
+            filetypes = [['PDF Files (*.pdf)', '.pdf'], ['SVG Files (*.svg)', '.svg'], ['PNG Files (*.png)', '.png'],
+                         ['EPS File (*.eps)', '.eps'], ['All Files (*.*)', '.pdf']]
+            ftypeopt = ''
+            for it in filetypes:
+                ftypeopt += it[0] + ';;'
+            # remove last ;;
+            ftypeopt = ftypeopt[0:-2]
+            # options |= QFileDialog.DontUseNativeDialog
+            filename, filetp = QFileDialog.getSaveFileName(self, 'QFileDialog.getOpenFileName()', home,
+                                                           filter=ftypeopt, options=options)
+            if filename is not '':
+                if filename.find('.') == -1:
+                    for it in filetypes:
+                        if filetp == it[0]:
+                            filename += it[1]
+                # save the file
+                self.figure.savefig(filename)
 
 
 def term_to_string(tstr):
