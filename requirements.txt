@@ -1,0 +1,4 @@
+fbs>=0.8.4
+numpy
+PyQt5==5.9.2
+matplotlib

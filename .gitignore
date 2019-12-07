@@ -1,8 +1,8 @@
-
 *.xml
-
 *.iml
-
-RIMSSchemeDrawer_RT.command
-
+tkinter_version/RIMSSchemeDrawer_RT.command
 *.pyc
+venv
+venv/*
+target
+target/*

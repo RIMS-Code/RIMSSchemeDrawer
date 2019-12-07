@@ -8,7 +8,7 @@ try:
     import ttk
 except ImportError:
     import tkinter as tk
-    from tkinter import tkFont
+    from tkinter import font as tkFont
     from tkinter import filedialog
     from tkinter import messagebox
     from tkinter import simpledialog
@@ -19,10 +19,12 @@ import platform
 import matplotlib
 matplotlib.use('TkAgg')
 
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+try:
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
+except ImportError:
+    from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+
 # implement the default mpl key bindings
-
-
 from matplotlib.figure import Figure
 
 
@@ -540,7 +542,7 @@ class RSD:
                 a.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center', rotation=90,
                        size=fsz_labels)
 
-            print lambda_steps[it]
+            print(lambda_steps[it])
             # level text
             if term_symb[it] is None:
                 levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$'
@@ -627,7 +629,7 @@ class RSD:
             f.savefig(fname)
 
     def test(self):
-        print self.sett_ip_label_pos_variable.get()
+        print(self.sett_ip_label_pos_variable.get())
 
     def help(self):
         messagebox.showinfo('Help', 'This program can be used to automatically generate RIMS scheme figures that look '
@@ -651,7 +653,6 @@ class RSD:
     def quit(self):
         self.master.destroy()
         self.master.quit()
-
 
 def term_to_string(tstr):
     """
