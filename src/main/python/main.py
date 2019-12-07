@@ -1,13 +1,11 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
-from PyQt5.QtWidgets import QWidget, QMainWindow, QAction, QPushButton, QRadioButton, QCheckBox, QButtonGroup, \
-    QTabWidget, QMessageBox, QLabel, QLineEdit, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox, QFileDialog
-from PyQt5.QtCore import pyqtSlot, Qt
+from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QRadioButton, QCheckBox, QButtonGroup, \
+    QMessageBox, QLabel, QLineEdit, QHBoxLayout, QGridLayout, QFileDialog
+from PyQt5.QtCore import Qt
 from PyQt5.Qt import QSize
-from PyQt5.QtGui import QFont, QDoubleValidator, QIntValidator, QIcon
+from PyQt5.QtGui import QFont, QDoubleValidator, QIntValidator
 
-import functools
-import numpy as np
 from os.path import expanduser
 import sys
 import json
@@ -398,6 +396,24 @@ class SchemeDrawer(QMainWindow):
         else:
             return 'cm<sup>-1</sup>'
 
+    def check_fields(self):
+        """
+        Check if the required fields are filled in.
+        """
+        # throw an error if not at least one box is filled
+        if self.edt_level[0].text() == '':
+            QMessageBox.warning(self, 'No entries', 'Need at least one level to make a plot!', QMessageBox.Ok)
+            return False
+
+        # ip value
+        try:
+            ipvalue = float(self.edt_iplevel.text())
+        except ValueError:
+            QMessageBox.warning(self, 'Enter IP', 'Please enter an ionization potential as a number and try again.',
+                                QMessageBox.Ok)
+            return False
+        return True
+
     # buttons
     def plot(self):
         """
@@ -405,6 +421,10 @@ class SchemeDrawer(QMainWindow):
         """
         if self.rundebug:
             print('Plotting...')
+        if not self.check_fields():
+            return
+
+        # open the plotting window
         plotwindow = Plotter(self)
         plotwindow.show()
 

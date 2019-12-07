@@ -1,14 +1,9 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
-from PyQt5.QtWidgets import QWidget, QMainWindow, QAction, QPushButton, QRadioButton, QCheckBox, QButtonGroup, \
-    QTabWidget, QMessageBox, QLabel, QLineEdit, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox, QFileDialog
-from PyQt5.QtCore import pyqtSlot, Qt
-from PyQt5.Qt import QSize
-from PyQt5.QtGui import QFont, QDoubleValidator, QIntValidator, QIcon
+from PyQt5.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QFileDialog
 
 import functools
 import numpy as np
-import sys
 from os.path import expanduser
 
 import matplotlib
@@ -83,11 +78,6 @@ class Plotter(QMainWindow):
         prec_lambda = int(self.parent.edt_sett_preclambda.text())
         prec_level = int(self.parent.edt_sett_preclevel.text())
 
-        # throw an error if not at least one box is filled
-        if self.parent.edt_level[0].text() == '':
-            QMessageBox.warning(self, 'No entries', 'Need at least one level to make a plot!', QMessageBox.Ok)
-            return
-
         # let's first get the wavelengths that we want
         lambdas = []
         for it in range(self.parent.numberofsteps):
@@ -98,13 +88,6 @@ class Plotter(QMainWindow):
         for it in range(self.parent.numberofsteps):
             if not self.parent.chk_lowlying[it].isChecked():
                 lambda_steps.append(lambdas[it])
-
-        try:
-            ipvalue = float(self.parent.edt_iplevel.text())
-        except ValueError:
-            QMessageBox.warning(self, 'Enter IP', 'Please enter an ionization potential as a number and try again.',
-                                QMessageBox.Ok)
-            return
 
         # get the term symbols that were entered
         term_symb_entered = []
