@@ -78,16 +78,20 @@ class Plotter(QMainWindow):
         prec_lambda = int(self.parent.edt_sett_preclambda.text())
         prec_level = int(self.parent.edt_sett_preclevel.text())
 
-        # let's first get the wavelengths that we want
+        # let's first get the wavelengths that we want and a list of bools if states are forbidden
         lambdas = []
+        forbidden = []
         for it in range(self.parent.numberofsteps):
             lambdas.append(self.parent.edt_level[it].text())
+            forbidden.append(self.parent.chk_forbidden[it].isChecked())
 
-        # now only add lambdas that are NOT low lying states!
+        # now only add lambdas that are NOT low lying states, same for forbidden steps!
         lambda_steps = []
+        forbidden_steps = []
         for it in range(self.parent.numberofsteps):
             if not self.parent.chk_lowlying[it].isChecked():
                 lambda_steps.append(lambdas[it])
+                forbidden_steps.append(forbidden[it])
 
         # get the term symbols that were entered
         term_symb_entered = []
@@ -122,13 +126,15 @@ class Plotter(QMainWindow):
                 break
         lambda_steps = np.array(tmp)
 
-        # get more ground states if available
+        # get more ground states if available (and forbidden states)
         wavenumber_es = []
         term_symb_es = []
+        forbidden_es = []
         for it in range(self.parent.numberofsteps):
             if self.parent.chk_lowlying[it].isChecked():
                 wavenumber_es.append(float(self.parent.edt_level[it].text()))
                 term_symb_es.append(self.parent.edt_term[it].text())
+                forbidden_es.append(self.parent.chk_forbidden[it].isChecked())
 
         # create wavenumber array
         wavenumber_steps = 1. / lambda_steps * 1e7
@@ -169,21 +175,13 @@ class Plotter(QMainWindow):
             lbreak = '\n'
 
         # ### CREATE FIGURE ###
-        # figure width and height)
-        figwidth = self.parent.edt_sett_figwidth.text()
-        figheight = self.parent.edt_sett_figheight.text()
-        if figwidth == '':
-            figwidth = 5
-        else:
-            figwidth = float(figwidth)
-        if figheight == '':
-            figheight = 8
-        else:
-            figheight = float(figheight)
-        self.figure.set_size_inches(figwidth, figheight)
-
         # seocnd axes -> mirror of first
         a2 = self.axes.twinx()
+
+        # figure width and height)
+        figwidth = float(self.parent.edt_sett_figwidth.text())
+        figheight = float(self.parent.edt_sett_figheight.text())
+        self.figure.set_size_inches(figwidth, figheight)
 
         # tick label in scientific notation
         # a.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
@@ -194,7 +192,8 @@ class Plotter(QMainWindow):
 
         # shade the level above the IP
         xshade = [0., 10.]
-        self.axes.fill_between(xshade, ipvalue, ymax, facecolor='#adbbff', alpha=0.5)
+        # the * 10. takes care if the user manually extends the range... to a certain degree at least, i.e., ymax*10
+        self.axes.fill_between(xshade, ipvalue, ymax*10., facecolor='#adbbff', alpha=0.5)
         # label the IP
         if self.parent.rbtn_iplable_top.isChecked():
             iplabelypos = ipvalue + 0.01*totwavenumber_photons
@@ -227,7 +226,7 @@ class Plotter(QMainWindow):
         if float(wavenumber_gs) > 0.:
             self.axes.hlines(float(wavenumber_gs), xmin=0, xmax=10)
 
-        # draw the arrows
+        # draw the arrows and cross them out if forbidden
         deltax = 8.65 / (len(lambda_steps) + 1.) - 0.5
         xval = 0.
         yval_bott = float(wavenumber_gs)
@@ -252,13 +251,23 @@ class Plotter(QMainWindow):
             xval += deltax
             wstp = wavenumber_steps[it]
             tstp = transition_steps[it]
-            if it == 0 and len(wavenumber_es) > 0:
-                self.axes.arrow(firstarrowxmfl, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col,
-                                length_includes_head=True, head_width=sett_arr_head,
-                                head_length=totwavenumber_photons/30.)
-            else:
-                self.axes.arrow(xval, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
-                                head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
+            # check if transition is forbidden and no show is activated for the arrow
+            if not forbidden_steps[it] or not self.parent.rbtn_sett_nodisparrow.isChecked():
+                # look for where to plot the array
+                xvalplot = 0.
+                if it == 0 and len(wavenumber_es) > 0:
+                    xvalplot = firstarrowxmfl
+                else:
+                    xvalplot = xval
+                # now plot the arrow
+                self.axes.arrow(xvalplot, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
+                                head_width=sett_arr_head, head_length=totwavenumber_photons/30.)
+
+                # so we don't want to leave the arrow away but it is forbidden: then x it out!
+                if forbidden_steps[it]:
+                    yval_cross = yval_bott + wstp / 2.
+                    self.axes.plot(xvalplot, yval_cross, 'x', color='r', markersize=20,
+                                   markeredgewidth=5.)
 
             # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
             if it == len(lambda_steps) - 1:
@@ -276,14 +285,15 @@ class Plotter(QMainWindow):
                 halignlev = 'left'
                 xloc_levelstr = textpad
 
-            # wavelength text
-            lambdastr = '%.*f' %(int(prec_lambda), lambda_steps[it]) + '$\,$nm'
-            if it == 0 and len(wavenumber_es) > 0:
-                self.axes.text(firstarrowxmfl + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam,
-                               va='center', rotation=90, size=fsz_labels)
-            else:
-                self.axes.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center',
-                               rotation=90, size=fsz_labels)
+            if not forbidden_steps[it] or not self.parent.rbtn_sett_nodisparrow.isChecked():
+                # wavelength text
+                lambdastr = '%.*f' %(int(prec_lambda), lambda_steps[it]) + '$\,$nm'
+                if it == 0 and len(wavenumber_es) > 0:
+                    self.axes.text(firstarrowxmfl + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam,
+                                   va='center', rotation=90, size=fsz_labels)
+                else:
+                    self.axes.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center',
+                                   rotation=90, size=fsz_labels)
 
             # level text
             if term_symb[it] is None:
@@ -297,7 +307,7 @@ class Plotter(QMainWindow):
                 leveltextypos = tstp - 0.01 * totwavenumber_photons
                 leveltextvaalign = 'top'
             self.axes.text(xloc_levelstr, leveltextypos, levelstr, color='k', ha=halignlev, va=leveltextvaalign,
-                   size=fsz_labels)
+                           size=fsz_labels)
 
             # update yval_bott
             yval_bott = transition_steps[it]
@@ -317,17 +327,27 @@ class Plotter(QMainWindow):
                 col = self.coluv
             else:
                 col = self.colfuv
-            # xvalue for arrow
+
+            # values
             xval = firstarrowxmfl + 1.5 + it * 1.5
             yval = mfld_yinc*ipvalue*(1+it)
             wstp = float(wavenumber_steps[0]) - yval
-            self.axes.arrow(xval, yval, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
-                            head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
 
-            # wavelength text
-            lambdastr = '%.*f' %(int(prec_lambda), lambda_step_es[it]) + '$\,$nm'
-            self.axes.text(xval + textpad, yval + wstp/2., lambdastr, color=col, ha='left', va='center', rotation=90,
-                           size=fsz_labels)
+            if not forbidden_es[it] or not self.parent.rbtn_sett_nodisparrow.isChecked():
+                # xvalue for arrow
+                self.axes.arrow(xval, yval, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
+                                head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
+
+                # print cross out if necessary
+                if forbidden_es[it]:
+                    yval_cross = yval + wstp / 2.
+                    self.axes.plot(xval, yval_cross, 'x', color='r', markersize=20,
+                                   markeredgewidth=5.)
+
+                # wavelength text
+                lambdastr = '%.*f' %(int(prec_lambda), lambda_step_es[it]) + '$\,$nm'
+                self.axes.text(xval + textpad, yval + wstp/2., lambdastr, color=col, ha='left', va='center', rotation=90,
+                               size=fsz_labels)
 
             # level text
             if term_symb_es_formatted[it] is None:
@@ -344,13 +364,20 @@ class Plotter(QMainWindow):
             self.axes.set_title(title_entry, size=fsz_title)
 
         # ylabel
-        self.axes.set_ylabel('Wavenumber (cm$^{-1}$)', size=fsz_axes_labels)
+        if self.parent.chk_sett_showcmax.isChecked():
+            self.axes.set_ylabel('Wavenumber (cm$^{-1}$)', size=fsz_axes_labels)
+        else:
+            self.axes.axes.get_yaxis().set_ticks([])
+
         # axis limits
         self.axes.set_xlim([0., 10.])
         self.axes.set_ylim([0., ymax])
 
         # eV axis on the right
-        a2.set_ylabel('Energy (eV)', size=fsz_axes_labels)
+        if self.parent.chk_sett_showevax.isChecked():
+            a2.set_ylabel('Energy (eV)', size=fsz_axes_labels)
+        else:
+            a2.axes.get_yaxis().set_ticks([])
         a2.set_ylim([0., ymax / 8065.54429])
 
         # remove x ticks
