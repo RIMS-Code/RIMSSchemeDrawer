@@ -1,6 +1,6 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
-from PyQt5.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QFileDialog
+from PyQt5.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QFileDialog, QSizePolicy
 
 import functools
 import numpy as np
@@ -32,7 +32,7 @@ class Plotter(QMainWindow):
         # figure stuff
         self.figure = Figure()
         self.canvas = FigureCanvas(self.figure)
-        self.axes = self.figure.subplots()
+        self.axes = self.figure.add_subplot(111)
 
         # add the figure toolbar to the main window
         self.toolbar = NavigationToolbar(self.canvas, self)
@@ -53,11 +53,16 @@ class Plotter(QMainWindow):
         self.colfuv = '#5f00a0'
         self.colpump = '#0aa000'
 
+        # figure size is not working properly with matplotlib argument. so let's force it by setting a fixed
+        # central widget size - some temporary crap but works on mac osx. but does it work on windows? and linux?
+        # test w/ different displays...?
+        figwidth = float(self.parent.edt_sett_figwidth.text())
+        figheight = float(self.parent.edt_sett_figheight.text())
+        self.centralWidget().setFixedWidth(figwidth * 100 + 24)
+        self.centralWidget().setFixedHeight(figheight * 100 + 24)
+
         # now plot the scheme
         self.plotit()
-
-        # redraw the canvas
-        self.canvas.draw()
 
     def plotit(self):
         # textpad
@@ -181,7 +186,7 @@ class Plotter(QMainWindow):
         # figure width and height)
         figwidth = float(self.parent.edt_sett_figwidth.text())
         figheight = float(self.parent.edt_sett_figheight.text())
-        self.figure.set_size_inches(figwidth, figheight)
+        self.figure.set_size_inches(figwidth, figheight, forward=True)
 
         # tick label in scientific notation
         # a.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
@@ -390,6 +395,7 @@ class Plotter(QMainWindow):
             # get save filename
             # dialog to query filename
             # home folder of user platform independent
+            print(self.figure.get_dpi())
             home = expanduser('~')
             # options
             options = QFileDialog.Options()

@@ -42,6 +42,7 @@ class SchemeDrawer(QMainWindow):
         # initialize the UI
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
+        self.width
 
         # settings:
         self.numberofsteps = 7
@@ -429,7 +430,7 @@ class SchemeDrawer(QMainWindow):
                 field.setText(value)
 
         # loop through line edits
-        fillme(self.edt_sett_figwidth, '3.5')
+        fillme(self.edt_sett_figwidth, '5.')
         fillme(self.edt_sett_figheight, '8.')
         fillme(self.edt_sett_fstitle, '14')
         fillme(self.edt_sett_fsaxes, '12')
