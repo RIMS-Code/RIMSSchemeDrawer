@@ -1,12 +1,22 @@
+# Various files
 *.xml
 *.iml
 tkinter_version/RIMSSchemeDrawer_RT.command
 *.pyc
 div
 div/*
+
+# PyCharm
+.idea
+
+# Python virtual environments
 venv
 venv/*
+
+# fbs compiled data
 target
 target/*
-.sublime-project
-.sublime-workspace
+
+# ST3
+*.sublime-project
+*.sublime-workspace
