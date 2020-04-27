@@ -8,3 +8,5 @@ venv
 venv/*
 target
 target/*
+.sublime-project
+.sublime-workspace
