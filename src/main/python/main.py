@@ -17,17 +17,17 @@ class SchemeDrawer(QMainWindow):
     RIMS scheme drawer, the PyQt5 version based on fbs
 
     Developer:  Reto Trappitsch, trappitsch1@llnl.gov
-    Version:    2.1.0
-    Date:       December 7, 2019
+    Version:    2.1.1
+    Date:       May 5, 2020
     """
 
-    def __init__(self, debug=True):
+    def __init__(self):
         # run in debug mode?
-        self.rundebug = debug
+        self.rundebug = False
 
         # program info
-        self.version = '2.1.0'
-        self.version_date = '2019-12-07'
+        self.version = '2.1.1'
+        self.version_date = '2020-05-05'
         self.author = 'Reto Trappitsch'
         self.author_email = 'trappitsch1@llnl.gov'
 
@@ -42,7 +42,6 @@ class SchemeDrawer(QMainWindow):
         # initialize the UI
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
-        self.width
 
         # settings:
         self.numberofsteps = 7
