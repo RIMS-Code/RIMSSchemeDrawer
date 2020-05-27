@@ -1,3 +1,21 @@
+"""
+Copyright (C) 2020 Reto Trappitsch
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+"""
+
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 
 from PyQt5.QtWidgets import QWidget, QMainWindow, QPushButton, QRadioButton, QCheckBox, QButtonGroup, \
@@ -14,11 +32,11 @@ from plotter import Plotter
 
 class SchemeDrawer(QMainWindow):
     """
-    RIMS scheme drawer, the PyQt5 version based on fbs
+    RIMSSchemeDrawer
 
-    Developer:  Reto Trappitsch, trappitsch1@llnl.gov
-    Version:    2.1.1
-    Date:       May 5, 2020
+    Developer:  Reto Trappitsch
+    Version:    2.1.2
+    Date:       May 27, 2020
     """
 
     def __init__(self):
@@ -26,10 +44,9 @@ class SchemeDrawer(QMainWindow):
         self.rundebug = False
 
         # program info
-        self.version = '2.1.1'
+        self.version = '2.1.2'
         self.version_date = '2020-05-05'
         self.author = 'Reto Trappitsch'
-        self.author_email = 'trappitsch1@llnl.gov'
 
         # initialize the thing
         super().__init__()
@@ -737,8 +754,8 @@ class SchemeDrawer(QMainWindow):
                     '<br>Version: ' + self.version + \
                     '<br>Date: ' + self.version_date + \
                     '<p>Author: ' + self.author + \
-                    '<br>E-mail: ' + self.author_email + \
-                    '<p>Please contact the author for bug reports, etc.' \
+                    '<p>Please see the github repository for bug reports, feature requests, and for contacting the ' \
+                    'author.' \
                     '<p>Many tooltips are implemented that can help you with the software. Hover over entries ' \
                     'with the mouse and check those tooltips out.'
         QMessageBox.about(self, 'About', about_msg)

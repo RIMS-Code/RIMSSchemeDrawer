@@ -36,3 +36,11 @@ If you are interested: The file with the configurations shown in the image above
 If you find bugs in the software or would like to have an additional feature, please use github's Issue capability to create an appropriate request. Please also browse the issues to first see if the bug / feature request you want to report is already listed. Feel free to join the discussion in this case!
 
 If you furthermore have ideas on how to implement / fix the bug already, please feel free to discuss it throuh in the Issues tab and create a pull request. Please follow [best practices](https://chris.beams.io/posts/git-commit/) in your commit messages.
+
+
+## License
+
+RIMSSchemeDrawer is Copyright (C) 2020 Reto Trappitsch  
+It is licensed under the GPL (version 2 or greater).
+
+RIMSSchemeDrawer makes use of [PyQt5](https://riverbankcomputing.com/) and the fman build system [fbs](https://build-system.fman.io/).
