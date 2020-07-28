@@ -38,7 +38,7 @@ class SchemeDrawer(QMainWindow):
         self.rundebug = False
 
         # program info
-        self.version = '2.1.2'
+        self.version = '2.1.3'
         self.author = 'Reto Trappitsch'
 
         # initialize the thing
