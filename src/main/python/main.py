@@ -31,13 +31,7 @@ from plotter import Plotter
 
 
 class SchemeDrawer(QMainWindow):
-    """
-    RIMSSchemeDrawer
-
-    Developer:  Reto Trappitsch
-    Version:    2.1.2
-    Date:       May 27, 2020
-    """
+    """RIMSSchemeDrawer."""
 
     def __init__(self):
         # run in debug mode?
@@ -45,7 +39,6 @@ class SchemeDrawer(QMainWindow):
 
         # program info
         self.version = '2.1.2'
-        self.version_date = '2020-05-05'
         self.author = 'Reto Trappitsch'
 
         # initialize the thing
@@ -752,7 +745,6 @@ class SchemeDrawer(QMainWindow):
         about_msg = '<center>' \
                     '<h1>RIMS Scheme drawer program</h1>' \
                     '<br>Version: ' + self.version + \
-                    '<br>Date: ' + self.version_date + \
                     '<p>Author: ' + self.author + \
                     '<p>Please see the github repository for bug reports, feature requests, and for contacting the ' \
                     'author.' \

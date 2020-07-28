@@ -12,6 +12,7 @@ div/*
 # Python virtual environments
 venv
 venv/*
+.python-version
 
 # fbs compiled data
 target
