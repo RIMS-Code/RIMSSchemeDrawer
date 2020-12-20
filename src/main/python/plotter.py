@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 """
 
-from PyQt5.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QFileDialog, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QFileDialog
 
 import numpy as np
 from os.path import expanduser
@@ -26,6 +26,7 @@ matplotlib.use('Qt5Agg')
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+
 
 # plotter - the heart of the whole thing
 class Plotter(QMainWindow):
