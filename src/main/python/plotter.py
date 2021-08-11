@@ -1,5 +1,5 @@
 """
-Copyright (C) 2020 Reto Trappitsch
+Copyright (C) 2020-2021 Reto Trappitsch
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -229,23 +229,23 @@ class Plotter(QMainWindow):
         # ip above or below
         self.axes.text(textpad, iplabelypos, iplabelstr, color='k', ha='left', va=iplabelyalign, size=fsz_labels)
 
-        # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
+        # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
             if it < ipvalue:
-                self.axes.hlines(it, xmin=0, xmax=10)
+                self.axes.hlines(it, xmin=0, xmax=10, color="k")
         # Lines for manifold groundstater
         for it in range(len(wavenumber_es)):
             self.axes.hlines(mfld_yinc*ipvalue*(1+it), xmin=1.5*it+2.3, xmax=1.5*it+3.7,
-                     linestyle='solid')
+                     linestyle='solid', color="k")
 
-        # Draw the vertical lines for every transition and IP, unless transition is above IP (shade area there)
+        # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
             if it < ipvalue:
-                self.axes.hlines(it, xmin=0, xmax=10)
+                self.axes.hlines(it, xmin=0, xmax=10, color="k")
 
         # draw the state we come out of, if not ground state
         if float(wavenumber_gs) > 0.:
-            self.axes.hlines(float(wavenumber_gs), xmin=0, xmax=10)
+            self.axes.hlines(float(wavenumber_gs), xmin=0, xmax=10, color="k")
 
         # draw the arrows and cross them out if forbidden
         deltax = 8.65 / (len(lambda_steps) + 1.) - 0.5
@@ -292,7 +292,7 @@ class Plotter(QMainWindow):
 
             # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
             if it == len(lambda_steps) - 1:
-                self.axes.hlines(tstp, xmin=xval-0.5, xmax=xval+0.5, linestyle='solid')
+                self.axes.hlines(tstp, xmin=xval-0.5, xmax=xval+0.5, linestyle='solid', color="k")
 
             # alignment of labels
             if xval <= 5.:
