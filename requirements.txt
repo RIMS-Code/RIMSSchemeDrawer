@@ -2,4 +2,4 @@ fbs>=0.8.4
 numpy
 PyQt5==5.9.2
 matplotlib
-setuptools==44.0.0
+setuptools==65.5.1
