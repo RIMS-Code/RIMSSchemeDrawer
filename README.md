@@ -40,7 +40,7 @@ If you furthermore have ideas on how to implement / fix the bug already, please 
 
 ## License
 
-RIMSSchemeDrawer is Copyright (C) 2020-2021 Reto Trappitsch  
+RIMSSchemeDrawer is Copyright (C) 2020-2023 Reto Trappitsch  
 It is licensed under the GPL (version 2 or greater).
 
 RIMSSchemeDrawer makes use of [PyQt5](https://riverbankcomputing.com/) and the fman build system [fbs](https://build-system.fman.io/).

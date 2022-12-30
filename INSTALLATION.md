@@ -9,21 +9,21 @@ results.
 
 ## Compilation: TL;DR
 
-You must have python3.5 or 3.6 installed. Create a virtual environment and activate it with:
+This package should work with python 3.7+.
 
 	python -m venv venv
 	source venv/bin/activate
 
 or via conda:
 
-	conda create -n schemedrawer python=3.6
+	conda create -n schemedrawer python=3.8
 	conda activate schemedrawer
 
 Install dependencies:
 
 	pip install -r requirements.txt
 
-Freeze and create installer
+Freeze and create installer (note that you must have `fbs pro` for this to run smootly)
 
 	fbs freeze
 	fbs installer
@@ -33,7 +33,7 @@ Look at the output, it will tell you where the files are.
 
 ## Compilation: Detailed Instructions
 
-This software uses fbs to build the PyQt5, python application.
+This software uses fbs pro to build the PyQt5, python application.
 [https://build-system.fman.io/](https://build-system.fman.io/)  
 Please check out the fbs tutorial for details. 
 
@@ -69,7 +69,7 @@ Note: Please see the [fbs tutorial](https://github.com/mherrmann/fbs-tutorial) f
 
 ### Freezing the software and creating installers
   
-You should be able to run the software now if you are in the project folder by running:
+If you have fbs pro installed, you should be able to run the software now if you are in the project folder by running:
 
     fbs run
 

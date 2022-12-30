@@ -27,7 +27,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
-
 # plotter - the heart of the whole thing
 class Plotter(QMainWindow):
     def __init__(self, parent, saveplt=False):
@@ -74,8 +73,8 @@ class Plotter(QMainWindow):
         # test w/ different displays...?
         figwidth = float(self.parent.edt_sett_figwidth.text())
         figheight = float(self.parent.edt_sett_figheight.text())
-        self.centralWidget().setFixedWidth(figwidth * 100 + 24)
-        self.centralWidget().setFixedHeight(figheight * 100 + 24)
+        self.centralWidget().setFixedWidth(int(figwidth * 100 + 24))
+        self.centralWidget().setFixedHeight(int(figheight * 100 + 24))
 
         # now plot the scheme
         self.plotit()

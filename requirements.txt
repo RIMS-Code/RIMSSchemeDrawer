@@ -1,5 +1,3 @@
-fbs>=0.8.4
-numpy
-PyQt5==5.9.2
-matplotlib
-setuptools==44.0.0
+numpy~=1.21.0
+PyQt5
+matplotlib~=3.3.0

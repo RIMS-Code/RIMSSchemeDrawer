@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6]
+        python-version: [3.8]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -40,6 +40,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install ${{ secrets.FBS_DL }}
       - name: Run fbs
         run: |
           fbs freeze
@@ -58,7 +59,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        python-version: [3.6]
+        python-version: [3.8]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -70,6 +71,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install ${{ secrets.FBS_DL }}
       - name: Run fbs
         run: |
           fbs freeze
@@ -88,7 +90,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        python-version: [3.6]
+        python-version: [3.8]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -100,6 +102,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install ${{ secrets.FBS_DL }}
       - name: Run fbs and freeze application
         run: |
           fbs freeze
