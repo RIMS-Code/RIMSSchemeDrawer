@@ -568,7 +568,7 @@ class SchemeDrawer(QMainWindow):
         filename, _ = QFileDialog.getOpenFileName(self, 'QFileDialog.getOpenFileName()', home,
                                                   filter='JSON Files (*.json);;All Files (*.*)', options=options)
         # user pressed cancel
-        if filename is '':
+        if filename == '':
             return
 
         # load the json file
@@ -685,7 +685,7 @@ class SchemeDrawer(QMainWindow):
         filename, _ = QFileDialog.getSaveFileName(self, 'QFileDialog.getOpenFileName()', home,
                                                        filter='JSON Files (*.json);;All Files (*.*)', options=options)
         # user pressed cancel
-        if filename is '':
+        if filename == '':
             return
         if filename[-5:len(filename)] != '.json':
             filename += '.json'

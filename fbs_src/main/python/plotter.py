@@ -120,13 +120,13 @@ class Plotter(QMainWindow):
                 term_symb_entered.append(self.parent.edt_term[it].text())
 
         # get ground state wavenumber
-        if self.parent.edt_gslevel.text() is '':
+        if self.parent.edt_gslevel.text() == '':
             wavenumber_gs = 0.
         else:
             wavenumber_gs = float(self.parent.edt_gslevel.text())
 
         # now go through the lambda steps and transform into actual wavelengths if not already
-        if self.parent.get_unit() is not 'nm':
+        if self.parent.get_unit() != 'nm':
             lambda_steps_temp = []
             for it in range(len(lambda_steps)):
                 if lambda_steps[it] != '':
@@ -380,7 +380,7 @@ class Plotter(QMainWindow):
 
         # Title:
         title_entry = self.parent.edt_sett_plttitle.text()
-        if title_entry is not '':
+        if title_entry != '':
             self.axes.set_title(title_entry, size=fsz_title)
 
         # ylabel
@@ -425,7 +425,7 @@ class Plotter(QMainWindow):
             # options |= QFileDialog.DontUseNativeDialog
             filename, filetp = QFileDialog.getSaveFileName(self, 'QFileDialog.getOpenFileName()', home,
                                                            filter=ftypeopt, options=options)
-            if filename is not '':
+            if filename != '':
                 if filename.find('.') == -1:
                     for it in filetypes:
                         if filetp == it[0]:
