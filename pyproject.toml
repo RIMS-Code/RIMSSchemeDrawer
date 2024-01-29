@@ -30,7 +30,12 @@ managed = true
 dev-dependencies = [
     "ruff>=0.1.14",
     "pytest>=7.4.4",
+    "hypothesis>=6.97.1",
 ]
+
+[tool.rye.scripts]
+format = "ruff format ."
+lint = "ruff check ."
 
 [tool.hatch.metadata]
 allow-direct-references = true

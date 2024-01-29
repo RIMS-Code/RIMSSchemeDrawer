@@ -22,10 +22,12 @@ import numpy as np
 from os.path import expanduser
 
 import matplotlib
-matplotlib.use('Qt5Agg')
+
+matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+
 
 # plotter - the heart of the whole thing
 class Plotter(QMainWindow):
@@ -36,13 +38,13 @@ class Plotter(QMainWindow):
         self.saveplt = saveplt
 
         # initialize the widget
-        self.title = 'RIMS scheme'
+        self.title = "RIMS scheme"
 
         # matplotlib parameters
         # tick size
         fsz_axes = int(self.parent.edt_sett_fsaxes.text())
-        matplotlib.rc('xtick', labelsize=fsz_axes, direction='in')
-        matplotlib.rc('ytick', labelsize=fsz_axes, direction='in')
+        matplotlib.rc("xtick", labelsize=fsz_axes, direction="in")
+        matplotlib.rc("ytick", labelsize=fsz_axes, direction="in")
 
         # figure stuff
         self.figure = Figure()
@@ -63,10 +65,10 @@ class Plotter(QMainWindow):
         self.main_widget.setLayout(layout)
 
         # Colors for arrows
-        self.colir = '#a00000'
-        self.coluv = '#0012a0'
-        self.colfuv = '#5f00a0'
-        self.colpump = '#0aa000'
+        self.colir = "#a00000"
+        self.coluv = "#0012a0"
+        self.colfuv = "#5f00a0"
+        self.colpump = "#0aa000"
 
         # figure size is not working properly with matplotlib argument. so let's force it by setting a fixed
         # central widget size - some temporary crap but works on mac osx. but does it work on windows? and linux?
@@ -83,9 +85,9 @@ class Plotter(QMainWindow):
         # textpad
         textpad = 0.4
         # percentage to increase for manifold
-        mfld_yinc = 0.04   # in # of ipvalue
+        mfld_yinc = 0.04  # in # of ipvalue
         #
-        firstarrowxmfl = 1.
+        firstarrowxmfl = 1.0
 
         # gett settings from program
         # font sizes
@@ -120,20 +122,25 @@ class Plotter(QMainWindow):
                 term_symb_entered.append(self.parent.edt_term[it].text())
 
         # get ground state wavenumber
-        if self.parent.edt_gslevel.text() == '':
-            wavenumber_gs = 0.
+        if self.parent.edt_gslevel.text() == "":
+            wavenumber_gs = 0.0
         else:
             wavenumber_gs = float(self.parent.edt_gslevel.text())
 
         # now go through the lambda steps and transform into actual wavelengths if not already
-        if self.parent.get_unit() != 'nm':
+        if self.parent.get_unit() != "nm":
             lambda_steps_temp = []
             for it in range(len(lambda_steps)):
-                if lambda_steps[it] != '':
+                if lambda_steps[it] != "":
                     if it == 0:
-                        lambda_steps_temp.append(1.e7 / (float(lambda_steps[it]) - float(wavenumber_gs)))
+                        lambda_steps_temp.append(
+                            1.0e7 / (float(lambda_steps[it]) - float(wavenumber_gs))
+                        )
                     else:
-                        lambda_steps_temp.append(1.e7 / (float(lambda_steps[it]) - float(lambda_steps[it-1])))
+                        lambda_steps_temp.append(
+                            1.0e7
+                            / (float(lambda_steps[it]) - float(lambda_steps[it - 1]))
+                        )
             # write lambda_steps back
             lambda_steps = list(lambda_steps_temp)
 
@@ -157,12 +164,12 @@ class Plotter(QMainWindow):
                 forbidden_es.append(self.parent.chk_forbidden[it].isChecked())
 
         # create wavenumber array
-        wavenumber_steps = 1. / lambda_steps * 1e7
+        wavenumber_steps = 1.0 / lambda_steps * 1e7
 
         transition_steps = np.zeros(len(wavenumber_steps))
         transition_steps[0] = wavenumber_steps[0] + wavenumber_gs
         for it in range(1, len(transition_steps)):
-            transition_steps[it] = transition_steps[it-1] + wavenumber_steps[it]
+            transition_steps[it] = transition_steps[it - 1] + wavenumber_steps[it]
 
         # calculate total excitation in wavenumbers - for scaling later
         totwavenumber_photons = np.sum(wavenumber_steps)
@@ -190,9 +197,9 @@ class Plotter(QMainWindow):
         term_symb_gs = term_to_string(self.parent.edt_gsterm.text())
 
         # break line or put in comma, depending on option
-        lbreak = ', '
+        lbreak = ", "
         if self.parent.chk_sett_linebreaks.isChecked():
-            lbreak = '\n'
+            lbreak = "\n"
 
         # ### CREATE FIGURE ###
         # seocnd axes -> mirror of first
@@ -206,27 +213,42 @@ class Plotter(QMainWindow):
         # tick label in scientific notation
         # a.ticklabel_format(style='sci', scilimits=(-3, 3), axis='both')
         fform = matplotlib.ticker.ScalarFormatter(useOffset=False, useMathText=True)
-        gform = lambda x, pos: "${}$".format(fform._formatSciNotation('%1.10e' % x))
-        self.axes.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
-        a2.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
+        # gform = lambda x, pos: "${}$".format(fform._formatSciNotation("%1.10e" % x))
+        # self.axes.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
+        # a2.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(gform))
 
         # shade the level above the IP
-        xshade = [0., 10.]
+        xshade = [0.0, 10.0]
         # the * 10. takes care if the user manually extends the range... to a certain degree at least, i.e., ymax*10
-        self.axes.fill_between(xshade, ipvalue, ymax*10., facecolor='#adbbff', alpha=0.5)
+        self.axes.fill_between(
+            xshade, ipvalue, ymax * 10.0, facecolor="#adbbff", alpha=0.5
+        )
         # label the IP
         if self.parent.rbtn_iplable_top.isChecked():
-            iplabelypos = ipvalue + 0.01*totwavenumber_photons
-            iplabelyalign = 'bottom'
+            iplabelypos = ipvalue + 0.01 * totwavenumber_photons
+            iplabelyalign = "bottom"
         else:
             iplabelypos = ipvalue - 0.01 * totwavenumber_photons
-            iplabelyalign = 'top'
+            iplabelyalign = "top"
         if term_symb_ip is None:
-            iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$'
+            iplabelstr = "IP, %.*f" % (int(prec_level), ipvalue) + "$\,$cm$^{-1}$"
         else:
-            iplabelstr = 'IP, %.*f' %(int(prec_level), ipvalue) + '$\,$cm$^{-1}$' + lbreak + term_symb_ip
+            iplabelstr = (
+                "IP, %.*f" % (int(prec_level), ipvalue)
+                + "$\,$cm$^{-1}$"
+                + lbreak
+                + term_symb_ip
+            )
         # ip above or below
-        self.axes.text(textpad, iplabelypos, iplabelstr, color='k', ha='left', va=iplabelyalign, size=fsz_labels)
+        self.axes.text(
+            textpad,
+            iplabelypos,
+            iplabelstr,
+            color="k",
+            ha="left",
+            va=iplabelyalign,
+            size=fsz_labels,
+        )
 
         # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
@@ -234,8 +256,13 @@ class Plotter(QMainWindow):
                 self.axes.hlines(it, xmin=0, xmax=10, color="k")
         # Lines for manifold groundstater
         for it in range(len(wavenumber_es)):
-            self.axes.hlines(mfld_yinc*ipvalue*(1+it), xmin=1.5*it+2.3, xmax=1.5*it+3.7,
-                     linestyle='solid', color="k")
+            self.axes.hlines(
+                mfld_yinc * ipvalue * (1 + it),
+                xmin=1.5 * it + 2.3,
+                xmax=1.5 * it + 3.7,
+                linestyle="solid",
+                color="k",
+            )
 
         # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
@@ -243,27 +270,39 @@ class Plotter(QMainWindow):
                 self.axes.hlines(it, xmin=0, xmax=10, color="k")
 
         # draw the state we come out of, if not ground state
-        if float(wavenumber_gs) > 0.:
+        if float(wavenumber_gs) > 0.0:
             self.axes.hlines(float(wavenumber_gs), xmin=0, xmax=10, color="k")
 
         # draw the arrows and cross them out if forbidden
-        deltax = 8.65 / (len(lambda_steps) + 1.) - 0.5
-        xval = 0.
+        deltax = 8.65 / (len(lambda_steps) + 1.0) - 0.5
+        xval = 0.0
         yval_bott = float(wavenumber_gs)
         # put in bottom level
         if term_symb_gs is None:
-            levelstr = '%.*f' %(int(prec_level), wavenumber_gs) + '$\,$cm$^{-1}$'
+            levelstr = "%.*f" % (int(prec_level), wavenumber_gs) + "$\,$cm$^{-1}$"
         else:
-            levelstr = '%.*f' %(int(prec_level), wavenumber_gs) + '$\,$cm$^{-1}$' + lbreak + term_symb_gs
-        self.axes.text(10. - textpad, float(wavenumber_gs), levelstr, color='k', ha='right',
-                       va='bottom', size=fsz_labels)
+            levelstr = (
+                "%.*f" % (int(prec_level), wavenumber_gs)
+                + "$\,$cm$^{-1}$"
+                + lbreak
+                + term_symb_gs
+            )
+        self.axes.text(
+            10.0 - textpad,
+            float(wavenumber_gs),
+            levelstr,
+            color="k",
+            ha="right",
+            va="bottom",
+            size=fsz_labels,
+        )
 
         for it in range(len(lambda_steps)):
             if lambda_steps[it] >= 700:
                 col = self.colir
-            elif 500. < lambda_steps[it] < 700.:
+            elif 500.0 < lambda_steps[it] < 700.0:
                 col = self.colpump
-            elif 350. < lambda_steps[it] <= 500.:
+            elif 350.0 < lambda_steps[it] <= 500.0:
                 col = self.coluv
             else:
                 col = self.colfuv
@@ -272,62 +311,114 @@ class Plotter(QMainWindow):
             wstp = wavenumber_steps[it]
             tstp = transition_steps[it]
             # check if transition is forbidden and no show is activated for the arrow
-            if not forbidden_steps[it] or not self.parent.rbtn_sett_nodisparrow.isChecked():
+            if (
+                not forbidden_steps[it]
+                or not self.parent.rbtn_sett_nodisparrow.isChecked()
+            ):
                 # look for where to plot the array
-                xvalplot = 0.
+                xvalplot = 0.0
                 if it == 0 and len(wavenumber_es) > 0:
                     xvalplot = firstarrowxmfl
                 else:
                     xvalplot = xval
                 # now plot the arrow
-                self.axes.arrow(xvalplot, yval_bott, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
-                                head_width=sett_arr_head, head_length=totwavenumber_photons/30.)
+                self.axes.arrow(
+                    xvalplot,
+                    yval_bott,
+                    0,
+                    wstp,
+                    width=sett_arr,
+                    fc=col,
+                    ec=col,
+                    length_includes_head=True,
+                    head_width=sett_arr_head,
+                    head_length=totwavenumber_photons / 30.0,
+                )
 
                 # so we don't want to leave the arrow away but it is forbidden: then x it out!
                 if forbidden_steps[it]:
-                    yval_cross = yval_bott + wstp / 2.
-                    self.axes.plot(xvalplot, yval_cross, 'x', color='r', markersize=20,
-                                   markeredgewidth=5.)
+                    yval_cross = yval_bott + wstp / 2.0
+                    self.axes.plot(
+                        xvalplot,
+                        yval_cross,
+                        "x",
+                        color="r",
+                        markersize=20,
+                        markeredgewidth=5.0,
+                    )
 
             # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
             if it == len(lambda_steps) - 1:
-                self.axes.hlines(tstp, xmin=xval-0.5, xmax=xval+0.5, linestyle='solid', color="k")
+                self.axes.hlines(
+                    tstp, xmin=xval - 0.5, xmax=xval + 0.5, linestyle="solid", color="k"
+                )
 
             # alignment of labels
-            if xval <= 5.:
-                halignlam = 'left'
+            if xval <= 5.0:
+                halignlam = "left"
                 xloc_lambda = xval + textpad
-                halignlev = 'right'
-                xloc_levelstr = 10. - textpad
+                halignlev = "right"
+                xloc_levelstr = 10.0 - textpad
             else:
-                halignlam = 'right'
+                halignlam = "right"
                 xloc_lambda = xval - textpad
-                halignlev = 'left'
+                halignlev = "left"
                 xloc_levelstr = textpad
 
-            if not forbidden_steps[it] or not self.parent.rbtn_sett_nodisparrow.isChecked():
+            if (
+                not forbidden_steps[it]
+                or not self.parent.rbtn_sett_nodisparrow.isChecked()
+            ):
                 # wavelength text
-                lambdastr = '%.*f' %(int(prec_lambda), lambda_steps[it]) + '$\,$nm'
+                lambdastr = "%.*f" % (int(prec_lambda), lambda_steps[it]) + "$\,$nm"
                 if it == 0 and len(wavenumber_es) > 0:
-                    self.axes.text(firstarrowxmfl + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam,
-                                   va='center', rotation=90, size=fsz_labels)
+                    self.axes.text(
+                        firstarrowxmfl + textpad,
+                        tstp - wstp / 2.0,
+                        lambdastr,
+                        color=col,
+                        ha=halignlam,
+                        va="center",
+                        rotation=90,
+                        size=fsz_labels,
+                    )
                 else:
-                    self.axes.text(xval + textpad, tstp - wstp/2., lambdastr, color=col, ha=halignlam, va='center',
-                                   rotation=90, size=fsz_labels)
+                    self.axes.text(
+                        xval + textpad,
+                        tstp - wstp / 2.0,
+                        lambdastr,
+                        color=col,
+                        ha=halignlam,
+                        va="center",
+                        rotation=90,
+                        size=fsz_labels,
+                    )
 
             # level text
             if term_symb[it] is None:
-                levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$'
+                levelstr = "%.*f" % (int(prec_level), tstp) + "$\,$cm$^{-1}$"
             else:
-                levelstr = '%.*f' %(int(prec_level), tstp) + '$\,$cm$^{-1}$' + lbreak + term_symb[it]
+                levelstr = (
+                    "%.*f" % (int(prec_level), tstp)
+                    + "$\,$cm$^{-1}$"
+                    + lbreak
+                    + term_symb[it]
+                )
             if it == len(lambda_steps) - 1:
                 leveltextypos = tstp
-                leveltextvaalign = 'center'
+                leveltextvaalign = "center"
             else:
                 leveltextypos = tstp - 0.01 * totwavenumber_photons
-                leveltextvaalign = 'top'
-            self.axes.text(xloc_levelstr, leveltextypos, levelstr, color='k', ha=halignlev, va=leveltextvaalign,
-                           size=fsz_labels)
+                leveltextvaalign = "top"
+            self.axes.text(
+                xloc_levelstr,
+                leveltextypos,
+                levelstr,
+                color="k",
+                ha=halignlev,
+                va=leveltextvaalign,
+                size=fsz_labels,
+            )
 
             # update yval_bott
             yval_bott = transition_steps[it]
@@ -335,70 +426,117 @@ class Plotter(QMainWindow):
         # create ground state lambda step array
         lambda_step_es = []
         for it in range(len(wavenumber_es)):
-            lambda_step_es.append(1.e7 / (1.e7/lambda_steps[0] - (float(wavenumber_es[it]) - float(wavenumber_gs))))
+            lambda_step_es.append(
+                1.0e7
+                / (
+                    1.0e7 / lambda_steps[0]
+                    - (float(wavenumber_es[it]) - float(wavenumber_gs))
+                )
+            )
 
         # now go through low lying excited states
         for it in range(len(wavenumber_es)):
             if lambda_step_es[it] >= 700:
                 col = self.colir
-            elif 500. < lambda_step_es[it] < 700.:
+            elif 500.0 < lambda_step_es[it] < 700.0:
                 col = self.colpump
-            elif 350. < lambda_step_es[it] <= 500.:
+            elif 350.0 < lambda_step_es[it] <= 500.0:
                 col = self.coluv
             else:
                 col = self.colfuv
 
             # values
             xval = firstarrowxmfl + 1.5 + it * 1.5
-            yval = mfld_yinc*ipvalue*(1+it)
+            yval = mfld_yinc * ipvalue * (1 + it)
             wstp = float(wavenumber_steps[0]) - yval
 
-            if not forbidden_es[it] or not self.parent.rbtn_sett_nodisparrow.isChecked():
+            if (
+                not forbidden_es[it]
+                or not self.parent.rbtn_sett_nodisparrow.isChecked()
+            ):
                 # xvalue for arrow
-                self.axes.arrow(xval, yval, 0, wstp, width=sett_arr, fc=col, ec=col, length_includes_head=True,
-                                head_width=sett_arr_head, head_length=totwavenumber_photons / 30.)
+                self.axes.arrow(
+                    xval,
+                    yval,
+                    0,
+                    wstp,
+                    width=sett_arr,
+                    fc=col,
+                    ec=col,
+                    length_includes_head=True,
+                    head_width=sett_arr_head,
+                    head_length=totwavenumber_photons / 30.0,
+                )
 
                 # print cross out if necessary
                 if forbidden_es[it]:
-                    yval_cross = yval + wstp / 2.
-                    self.axes.plot(xval, yval_cross, 'x', color='r', markersize=20,
-                                   markeredgewidth=5.)
+                    yval_cross = yval + wstp / 2.0
+                    self.axes.plot(
+                        xval,
+                        yval_cross,
+                        "x",
+                        color="r",
+                        markersize=20,
+                        markeredgewidth=5.0,
+                    )
 
                 # wavelength text
-                lambdastr = '%.*f' %(int(prec_lambda), lambda_step_es[it]) + '$\,$nm'
-                self.axes.text(xval + textpad, yval + wstp/2., lambdastr, color=col, ha='left', va='center', rotation=90,
-                               size=fsz_labels)
+                lambdastr = "%.*f" % (int(prec_lambda), lambda_step_es[it]) + "$\,$nm"
+                self.axes.text(
+                    xval + textpad,
+                    yval + wstp / 2.0,
+                    lambdastr,
+                    color=col,
+                    ha="left",
+                    va="center",
+                    rotation=90,
+                    size=fsz_labels,
+                )
 
             # level text
             if term_symb_es_formatted[it] is None:
-                levelstr = '%.*f' %(int(prec_level), float(wavenumber_es[it])) + '$\,$cm$^{-1}$'
+                levelstr = (
+                    "%.*f" % (int(prec_level), float(wavenumber_es[it]))
+                    + "$\,$cm$^{-1}$"
+                )
             else:
                 # NO LINEBREAK HERE ON THESE LINES!
-                levelstr = '%.*f' %(int(prec_level),float(wavenumber_es[it])) + '$\,$cm$^{-1}$, ' + \
-                           term_symb_es_formatted[it]
-            self.axes.text(xval + 0.5, yval, levelstr, color='k', ha='left', va='bottom', size=fsz_labels)
+                levelstr = (
+                    "%.*f" % (int(prec_level), float(wavenumber_es[it]))
+                    + "$\,$cm$^{-1}$, "
+                    + term_symb_es_formatted[it]
+                )
+            self.axes.text(
+                xval + 0.5,
+                yval,
+                levelstr,
+                color="k",
+                ha="left",
+                va="bottom",
+                size=fsz_labels,
+            )
 
         # Title:
         title_entry = self.parent.edt_sett_plttitle.text()
-        if title_entry != '':
+        if title_entry != "":
             self.axes.set_title(title_entry, size=fsz_title)
 
         # ylabel
         if self.parent.chk_sett_showcmax.isChecked():
-            self.axes.set_ylabel('Wavenumber (cm$^{-1}$)', size=fsz_axes_labels)
+            self.axes.set_ylabel("Wavenumber (cm$^{-1}$)", size=fsz_axes_labels)
         else:
             self.axes.axes.get_yaxis().set_ticks([])
 
         # axis limits
-        self.axes.set_xlim([0., 10.])
-        self.axes.set_ylim([0., ymax])
+        self.axes.set_xlim([0.0, 10.0])
+        self.axes.set_ylim([0.0, ymax])
 
         # eV axis on the right
         if self.parent.chk_sett_showevax.isChecked():
-            a2.set_ylabel('Energy (eV)', size=fsz_axes_labels)
+            a2.set_ylabel("Energy (eV)", size=fsz_axes_labels)
         else:
             a2.axes.get_yaxis().set_ticks([])
-        a2.set_ylim([0., ymax / 8065.54429])
+        a2.set_ylim([0.0, ymax / 8065.54429])
 
         # remove x ticks
         self.axes.axes.get_xaxis().set_ticks([])
@@ -411,22 +549,32 @@ class Plotter(QMainWindow):
             # dialog to query filename
             # home folder of user platform independent
             print(self.figure.get_dpi())
-            home = expanduser('~')
+            home = expanduser("~")
             # options
             options = QFileDialog.Options()
             # create filetypes
-            filetypes = [['PDF Files (*.pdf)', '.pdf'], ['SVG Files (*.svg)', '.svg'], ['PNG Files (*.png)', '.png'],
-                         ['EPS File (*.eps)', '.eps'], ['All Files (*.*)', '.pdf']]
-            ftypeopt = ''
+            filetypes = [
+                ["PDF Files (*.pdf)", ".pdf"],
+                ["SVG Files (*.svg)", ".svg"],
+                ["PNG Files (*.png)", ".png"],
+                ["EPS File (*.eps)", ".eps"],
+                ["All Files (*.*)", ".pdf"],
+            ]
+            ftypeopt = ""
             for it in filetypes:
-                ftypeopt += it[0] + ';;'
+                ftypeopt += it[0] + ";;"
             # remove last ;;
             ftypeopt = ftypeopt[0:-2]
             # options |= QFileDialog.DontUseNativeDialog
-            filename, filetp = QFileDialog.getSaveFileName(self, 'QFileDialog.getOpenFileName()', home,
-                                                           filter=ftypeopt, options=options)
-            if filename != '':
-                if filename.find('.') == -1:
+            filename, filetp = QFileDialog.getSaveFileName(
+                self,
+                "QFileDialog.getOpenFileName()",
+                home,
+                filter=ftypeopt,
+                options=options,
+            )
+            if filename != "":
+                if filename.find(".") == -1:
                     for it in filetypes:
                         if filetp == it[0]:
                             filename += it[1]
@@ -434,31 +582,31 @@ class Plotter(QMainWindow):
                 self.figure.savefig(filename)
 
 
-def term_to_string(tstr):
+def term_to_string(tstr: str):
     """
     Converts a term symbol string to a LaTeX enabled matplotlib string
-    :param tstr:   string to convert
-    :return:       string LaTeX enabled for Matplotlib
+    :param tstr:   Input string to convert
+    :return:       Output string LaTeX enabled for Matplotlib
     """
-    if tstr == '':
+    if tstr == "":
         return None
 
     # some exceptionslike AI and IP
-    if tstr == 'IP':
-        return 'IP'
-    if tstr == 'AI':
-        return 'AI'
-    if tstr == 'Rydberg':
-        return 'Rydberg'
-    if tstr == 'Ryd':
-        return 'Ryd'
+    if tstr == "IP":
+        return "IP"
+    if tstr == "AI":
+        return "AI"
+    if tstr == "Rydberg":
+        return "Rydberg"
+    if tstr == "Ryd":
+        return "Ryd"
 
     # if there is an equal sign in there, leave it as is
-    if tstr.find('=') != -1:
+    if tstr.find("=") != -1:
         return tstr
 
     # find the first slash and start looking for the letter after that
-    start = tstr.find('/') + 1
+    start = tstr.find("/") + 1
     letterind = -1
     for it in range(start, len(tstr)):
         try:
@@ -480,8 +628,8 @@ def term_to_string(tstr):
         return tstr
 
     # set up the three parts for the latex string
-    tmp1 = '$^{' + tstr[0:letterind] + '}$'
+    tmp1 = "$^{" + tstr[0:letterind] + "}$"
     tmp2 = tstr[letterind]
-    tmp3 = '$_{' + tstr[letterind+1:] + '}$'
+    tmp3 = "$_{" + tstr[letterind + 1 :] + "}$"
 
-    return tmp1+tmp2+tmp3
+    return tmp1 + tmp2 + tmp3

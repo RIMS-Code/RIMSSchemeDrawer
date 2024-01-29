@@ -21,3 +21,9 @@ target/*
 # ST3
 *.sublime-project
 *.sublime-workspace
+
+# testing
+.hypothesis
+
+#PyCharm
+.idea
