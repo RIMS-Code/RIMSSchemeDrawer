@@ -338,12 +338,10 @@ class Plotter:
             # alignment of labels
             if xval <= 5.0:
                 halignlam = "left"
-                xloc_lambda = xval + textpad
                 halignlev = "right"
                 xloc_levelstr = 10.0 - textpad
             else:
                 halignlam = "right"
-                xloc_lambda = xval - textpad
                 halignlev = "left"
                 xloc_levelstr = textpad
 
