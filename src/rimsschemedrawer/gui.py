@@ -1,24 +1,8 @@
-"""
-Copyright (C) 2020-2021 Reto Trappitsch
+"""GUI Application for plotting RIMS schemes."""
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-"""
-
+import importlib.metadata
 import json
 from os.path import expanduser
-import sys
 
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg,
@@ -26,29 +10,18 @@ from matplotlib.backends.backend_qtagg import (
 )
 from matplotlib.figure import Figure
 
-from qtpy.QtWidgets import (
-    QApplication,
-    QWidget,
-    QMainWindow,
-    QPushButton,
-    QRadioButton,
-    QCheckBox,
-    QButtonGroup,
-    QMessageBox,
-    QLabel,
-    QLineEdit,
-    QHBoxLayout,
-    QVBoxLayout,
-    QGridLayout,
-    QFileDialog,
-)
-from qtpy.QtCore import Qt, QSize
-from qtpy.QtGui import QFont, QDoubleValidator, QIntValidator
+try:
+    from qtpy import QtCore, QtGui, QtWidgets
+except ImportError as e:
+    raise ImportError(
+        "ImportError: No GUI environment found. "
+        "Please install this package with 'pip install rimsschemedrawer[gui]'"
+    ) from e
 
-from plotter import Plotter
+from rimsschemedrawer.plotter import Plotter
 
 
-class SchemeDrawer(QMainWindow):
+class SchemeDrawer(QtWidgets.QMainWindow):
     """RIMSSchemeDrawer."""
 
     def __init__(self):
@@ -57,6 +30,7 @@ class SchemeDrawer(QMainWindow):
 
         # program info
         self.author = "Reto Trappitsch"
+        self.version = importlib.metadata.version("rimsschemedrawer")
 
         # initialize the thing
         super().__init__()
@@ -72,62 +46,62 @@ class SchemeDrawer(QMainWindow):
 
         # settings:
         self.numberofsteps = 7
-        self.lineedit_size = QSize(100, 20)
+        self.lineedit_size = QtCore.QSize(100, 20)
 
         # entries and labels necessary
-        self.rbtngrp_units = QButtonGroup()
-        self.rbtn_nm = QRadioButton("nm")
-        self.rbtn_cm = QRadioButton()
+        self.rbtngrp_units = QtWidgets.QButtonGroup()
+        self.rbtn_nm = QtWidgets.QRadioButton("nm")
+        self.rbtn_cm = QtWidgets.QRadioButton()
         self.lbl_steps = []
         self.edt_level = []
         self.edt_term = []
-        self.edt_gslevel = QLineEdit()
-        self.edt_gsterm = QLineEdit()
-        self.edt_iplevel = QLineEdit()
-        self.edt_ipterm = QLineEdit()
+        self.edt_gslevel = QtWidgets.QLineEdit()
+        self.edt_gsterm = QtWidgets.QLineEdit()
+        self.edt_iplevel = QtWidgets.QLineEdit()
+        self.edt_ipterm = QtWidgets.QLineEdit()
         self.chk_lowlying = []
         self.chk_forbidden = []
 
         # settings line edits
-        self.edt_sett_figwidth = QLineEdit()
-        self.edt_sett_figheight = QLineEdit()
-        self.edt_sett_fstitle = QLineEdit()
-        self.edt_sett_fsaxes = QLineEdit()
-        self.edt_sett_fsaxlbl = QLineEdit()
-        self.chk_sett_linebreaks = QCheckBox("Line breaks?")
-        self.chk_sett_showcmax = QCheckBox()  # no label -> label in layout
+        self.edt_sett_figwidth = QtWidgets.QLineEdit()
+        self.edt_sett_figheight = QtWidgets.QLineEdit()
+        self.edt_sett_fstitle = QtWidgets.QLineEdit()
+        self.edt_sett_fsaxes = QtWidgets.QLineEdit()
+        self.edt_sett_fsaxlbl = QtWidgets.QLineEdit()
+        self.chk_sett_linebreaks = QtWidgets.QCheckBox("Line breaks?")
+        self.chk_sett_showcmax = QtWidgets.QCheckBox()  # no label -> label in layout
         self.chk_sett_showcmax.setChecked(True)
-        self.chk_sett_showevax = QCheckBox("Show eV axis labels?")
+        self.chk_sett_showevax = QtWidgets.QCheckBox("Show eV axis labels?")
         self.chk_sett_showevax.setChecked(True)
-        self.edt_sett_fslbl = QLineEdit()
-        self.edt_sett_headspace = QLineEdit()
-        self.edt_sett_arrwidth = QLineEdit()
-        self.edt_sett_arrheadwidth = QLineEdit()
-        self.edt_sett_preclambda = QLineEdit()
-        self.edt_sett_preclevel = QLineEdit()
-        self.rbtngrp_iplabel = QButtonGroup()
-        self.rbtn_iplable_top = QRadioButton("Top")
-        self.rbtn_iplable_bottom = QRadioButton("Bott.")
-        self.rbtngrp_sett_forbidden = QButtonGroup()
-        self.rbtn_sett_xoutarrow = QRadioButton("x-out")
-        self.rbtn_sett_nodisparrow = QRadioButton("Don't show")
-        self.edt_sett_plttitle = QLineEdit()
+        self.edt_sett_fslbl = QtWidgets.QLineEdit()
+        self.edt_sett_headspace = QtWidgets.QLineEdit()
+        self.edt_sett_arrwidth = QtWidgets.QLineEdit()
+        self.edt_sett_arrheadwidth = QtWidgets.QLineEdit()
+        self.edt_sett_preclambda = QtWidgets.QLineEdit()
+        self.edt_sett_preclevel = QtWidgets.QLineEdit()
+        self.rbtngrp_iplabel = QtWidgets.QButtonGroup()
+        self.rbtn_iplable_top = QtWidgets.QRadioButton("Top")
+        self.rbtn_iplable_bottom = QtWidgets.QRadioButton("Bott.")
+        self.rbtngrp_sett_forbidden = QtWidgets.QButtonGroup()
+        self.rbtn_sett_xoutarrow = QtWidgets.QRadioButton("x-out")
+        self.rbtn_sett_nodisparrow = QtWidgets.QRadioButton("Don't show")
+        self.edt_sett_plttitle = QtWidgets.QLineEdit()
 
         # push buttons
-        self.btn_plot = QPushButton("Plot")
-        self.btn_save = QPushButton("Save Plot")
-        self.btn_load_conf = QPushButton("Load Config")
-        self.btn_save_conf = QPushButton("Save Config")
-        self.btn_test = QPushButton("Test")
-        self.btn_about = QPushButton("About")
-        self.btn_quit = QPushButton("Quit")
+        self.btn_plot = QtWidgets.QPushButton("Plot")
+        self.btn_save = QtWidgets.QPushButton("Save Plot")
+        self.btn_load_conf = QtWidgets.QPushButton("Load Config")
+        self.btn_save_conf = QtWidgets.QPushButton("Save Config")
+        self.btn_test = QtWidgets.QPushButton("Test")
+        self.btn_about = QtWidgets.QPushButton("About")
+        self.btn_quit = QtWidgets.QPushButton("Quit")
 
         # main widget
-        self.mainwidget = QWidget()
+        self.mainwidget = QtWidgets.QWidget()
         self.setCentralWidget(self.mainwidget)
 
         # style forms
-        self.fontheader = QFont()
+        self.fontheader = QtGui.QFont()
         self.fontheader.setBold(True)
 
         # initialize the UI
@@ -153,7 +127,7 @@ class SchemeDrawer(QMainWindow):
             bottomrowindex = self.numberofsteps + 2
 
         # define the grid layout
-        layout = QGridLayout()  # columns
+        layout = QtWidgets.QGridLayout()  # columns
 
         # ### column 1: labels for states
         # radiobuttons for nm or cm-1
@@ -161,12 +135,12 @@ class SchemeDrawer(QMainWindow):
         self.rbtngrp_units.addButton(self.rbtn_cm)
         # set default
         self.rbtn_nm.setChecked(True)
-        cmlabel = QLabel("cm<sup>-1</sup>")
+        cmlabel = QtWidgets.QLabel("cm<sup>-1</sup>")
         self.rbtn_nm.setToolTip("Enter steps of laser scheme in nm")
         self.rbtn_cm.setToolTip("Enter steps of laser scheme in cm<sup>-1</sup>.")
         cmlabel.setToolTip("Enter steps of laser scheme in cm<sup>-1</sup>.")
         # add to layout
-        rbtn_layout = QHBoxLayout()
+        rbtn_layout = QtWidgets.QHBoxLayout()
         rbtn_layout.addWidget(self.rbtn_nm)
         rbtn_layout.addStretch()
         rbtn_layout.addWidget(self.rbtn_cm)
@@ -176,38 +150,39 @@ class SchemeDrawer(QMainWindow):
 
         # headers for all
         # level
-        lbl_level = QLabel("Level")
+        lbl_level = QtWidgets.QLabel("Level")
         lbl_level.setFont(self.fontheader)
         layout.addWidget(lbl_level, 0, 1, 1, 1)
         # term symbol
-        lbl_trmsymb = QLabel("Term Symbol")
+        lbl_trmsymb = QtWidgets.QLabel("Term Symbol")
         lbl_trmsymb.setFont(self.fontheader)
         layout.addWidget(lbl_trmsymb, 0, 2, 1, 1)
         # ground state manifold?
-        lbl_gsmani = QLabel("GS Manifold?")
+        lbl_gsmani = QtWidgets.QLabel("GS Manifold?")
         lbl_gsmani.setFont(self.fontheader)
         layout.addWidget(lbl_gsmani, 0, 3, 1, 1)
         # Forbidden transition
-        lbl_forbidden = QLabel("Forbidden?")
+        lbl_forbidden = QtWidgets.QLabel("Forbidden?")
         lbl_forbidden.setFont(self.fontheader)
         layout.addWidget(lbl_forbidden, 0, 4, 1, 1)
         # Settings
-        lbl_sett = QLabel("Settings")
+        lbl_sett = QtWidgets.QLabel("Settings")
         lbl_sett.setFont(self.fontheader)
         layout.addWidget(lbl_sett, 0, 5, 1, 1)
         # plot title
-        lbl_plttit = QLabel("Plot Title")
+        lbl_plttit = QtWidgets.QLabel("Plot Title")
         lbl_plttit.setFont(self.fontheader)
         layout.addWidget(lbl_plttit, 0, 7, 1, 1)
 
         # ground state
-        lbl_gs = QLabel("Ground state (cm<sup>-1</sup>)")
+        lbl_gs = QtWidgets.QLabel("Ground state (cm<sup>-1</sup>)")
         layout.addWidget(lbl_gs, 1, 0, 1, 1)
         layout.addWidget(self.edt_gslevel, 1, 1, 1, 1)
         layout.addWidget(self.edt_gsterm, 1, 2, 1, 1)
         self.edt_gslevel.setToolTip("Set the ground state level in cm<sup>-1</sup>.")
         tt_termsymbol = (
-            "For example, 2P3 for <sup>2</sup>P<sub>3</sub>. If only J-state is known, you "
+            "For example, 2P3 for <sup>2</sup>P<sub>3</sub>. If only J-state is "
+            "known, you "
             "can also enter something like 'J=3'."
         )
         self.edt_gsterm.setToolTip(
@@ -218,32 +193,32 @@ class SchemeDrawer(QMainWindow):
         for it in range(self.numberofsteps):
             stepnumb = it + 1
             # make label and append
-            self.lbl_steps.append(QLabel())
+            self.lbl_steps.append(QtWidgets.QLabel())
             layout.addWidget(self.lbl_steps[it], 2 + it, 0, 1, 1)
             # level steps
-            self.edt_level.append(QLineEdit())
+            self.edt_level.append(QtWidgets.QLineEdit())
             self.edt_level[it].setFixedSize(self.lineedit_size)
-            self.edt_level[it].setValidator(QDoubleValidator())
-            self.edt_level[it].setAlignment(Qt.AlignRight)
+            self.edt_level[it].setValidator(QtGui.QDoubleValidator())
+            self.edt_level[it].setAlignment(QtCore.Qt.AlignRight)
             self.edt_level[it].setToolTip(
                 "Enter the level of the given step in the selected unit."
             )
             layout.addWidget(self.edt_level[it], 2 + it, 1, 1, 1)
             # term symbol steps
-            self.edt_term.append(QLineEdit())
+            self.edt_term.append(QtWidgets.QLineEdit())
             self.edt_term[it].setFixedSize(self.lineedit_size)
             self.edt_term[it].setToolTip(
                 "Enter term symbol for selected step. " + tt_termsymbol
             )
             layout.addWidget(self.edt_term[it], 2 + it, 2, 1, 1)
             # check boxes
-            self.chk_lowlying.append(QCheckBox("Low-lying state?"))
+            self.chk_lowlying.append(QtWidgets.QCheckBox("Low-lying state?"))
             layout.addWidget(self.chk_lowlying[it], 2 + it, 3, 1, 1)
             self.chk_lowlying[it].toggled.connect(self.set_label_names)
             self.chk_lowlying[it].setToolTip("Check if this is a low-lying state?")
             # forbidden transition
-            self.chk_forbidden.append(QCheckBox())
-            tmplayout = QHBoxLayout()
+            self.chk_forbidden.append(QtWidgets.QCheckBox())
+            tmplayout = QtWidgets.QHBoxLayout()
             tmplayout.addStretch()
             tmplayout.addWidget(self.chk_forbidden[it])
             tmplayout.addStretch()
@@ -256,7 +231,7 @@ class SchemeDrawer(QMainWindow):
         self.set_label_names()
 
         # add IP label:
-        ip_lbl = QLabel("IP (cm<sup>-1</sup>)")
+        ip_lbl = QtWidgets.QLabel("IP (cm<sup>-1</sup>)")
         layout.addWidget(ip_lbl, 2 + len(self.lbl_steps), 0, 1, 1)
         layout.addWidget(self.edt_iplevel, 2 + len(self.lbl_steps), 1, 1, 1)
         layout.addWidget(self.edt_ipterm, 2 + len(self.lbl_steps), 2, 1, 1)
@@ -265,12 +240,12 @@ class SchemeDrawer(QMainWindow):
 
         # set sizes and validators of boxes defined outside loop
         self.edt_gslevel.setFixedSize(self.lineedit_size)
-        self.edt_gslevel.setValidator(QDoubleValidator())
-        self.edt_gslevel.setAlignment(Qt.AlignRight)
+        self.edt_gslevel.setValidator(QtGui.QDoubleValidator())
+        self.edt_gslevel.setAlignment(QtCore.Qt.AlignRight)
         self.edt_gsterm.setFixedSize(self.lineedit_size)
         self.edt_iplevel.setFixedSize(self.lineedit_size)
-        self.edt_iplevel.setValidator(QDoubleValidator())
-        self.edt_iplevel.setAlignment(Qt.AlignRight)
+        self.edt_iplevel.setValidator(QtGui.QDoubleValidator())
+        self.edt_iplevel.setAlignment(QtCore.Qt.AlignRight)
         self.edt_ipterm.setFixedSize(self.lineedit_size)
 
         # button group for ip label
@@ -282,24 +257,26 @@ class SchemeDrawer(QMainWindow):
         self.rbtngrp_sett_forbidden.addButton(self.rbtn_sett_nodisparrow)
 
         # labels for settings
-        layout.addWidget(QLabel("Figure Width x Height:"), 1, 5, 1, 1)
-        layout.addWidget(QLabel("Font size title:"), 2, 5, 1, 1)
-        layout.addWidget(QLabel("Font size axes:"), 3, 5, 1, 1)
-        layout.addWidget(QLabel("Font size axes label:"), 4, 5, 1, 1)
-        layout.addWidget(QLabel("Font size labels:"), 5, 5, 1, 1)
-        layout.addWidget(QLabel("Headspace (cm<sup>-1</sup>):"), 6, 5, 1, 1)
-        layout.addWidget(QLabel("Arrow width:"), 7, 5, 1, 1)
-        layout.addWidget(QLabel("Arrow head width:"), 8, 5, 1, 1)
-        layout.addWidget(QLabel("Precision wavelength:"), 9, 5, 1, 1)
-        layout.addWidget(QLabel("Precision level:"), 10, 5, 1, 1)
-        layout.addWidget(QLabel("IP label position:"), 11, 5, 1, 1)
-        layout.addWidget(QLabel("Display forbidden transitions:"), 12, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Figure Width x Height:"), 1, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size title:"), 2, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size axes:"), 3, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size axes label:"), 4, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size labels:"), 5, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Headspace (cm<sup>-1</sup>):"), 6, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Arrow width:"), 7, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Arrow head width:"), 8, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Precision wavelength:"), 9, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Precision level:"), 10, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("IP label position:"), 11, 5, 1, 1)
+        layout.addWidget(
+            QtWidgets.QLabel("Display forbidden transitions:"), 12, 5, 1, 1
+        )
         # line edits and buttons, include tooltips
-        tmplayout = QHBoxLayout()
+        tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.edt_sett_figwidth)
         self.edt_sett_figwidth.setToolTip("Width of figure in inches.")
         tmplayout.addStretch()
-        tmplayout.addWidget(QLabel("x"))
+        tmplayout.addWidget(QtWidgets.QLabel("x"))
         tmplayout.addStretch()
         tmplayout.addWidget(self.edt_sett_figheight)
         self.edt_sett_figheight.setToolTip("Height of figure in inches.")
@@ -311,7 +288,7 @@ class SchemeDrawer(QMainWindow):
         layout.addWidget(self.edt_sett_fsaxlbl, 4, 6, 1, 1)
         self.edt_sett_fsaxlbl.setToolTip("Font size of axes labels.")
         # line breaks
-        tmplayout = QHBoxLayout()
+        tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_linebreaks)
         tmplayout.addStretch()
         layout.addLayout(tmplayout, 4, 7, 1, 1)
@@ -322,10 +299,10 @@ class SchemeDrawer(QMainWindow):
         )
         layout.addWidget(self.edt_sett_fslbl, 5, 6, 1, 1)
         # check box show cm-1 axis
-        tmplayout = QHBoxLayout()
+        tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_showcmax)
         tmplayout.addStretch()
-        tmplabel = QLabel("Show cm-1 axis labels?")
+        tmplabel = QtWidgets.QLabel("Show cm-1 axis labels?")
         tmplayout.addWidget(tmplabel)
         layout.addLayout(tmplayout, 5, 7, 1, 1)
         self.chk_sett_showcmax.setToolTip(
@@ -341,7 +318,7 @@ class SchemeDrawer(QMainWindow):
         self.edt_sett_fslbl.setToolTip("Font size of the labels.")
         layout.addWidget(self.edt_sett_headspace, 6, 6, 1, 1)
         # check box show eV axis
-        tmplayout = QHBoxLayout()
+        tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_showevax)
         tmplayout.addStretch()
         layout.addLayout(tmplayout, 6, 7, 1, 1)
@@ -378,7 +355,7 @@ class SchemeDrawer(QMainWindow):
         self.edt_sett_preclevel.setToolTip(
             "Set the precision with which the wavenumber\n" "is displayed on the plot."
         )
-        tmplayout = QHBoxLayout()
+        tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.rbtn_iplable_top)
         self.rbtn_iplable_top.setChecked(True)  # set top as default
         tmplayout.addStretch()
@@ -386,7 +363,7 @@ class SchemeDrawer(QMainWindow):
         self.rbtn_iplable_top.setToolTip("Display the IP label above the line.")
         self.rbtn_iplable_bottom.setToolTip("Display the IP label below the line.")
         layout.addLayout(tmplayout, 11, 6, 1, 1)
-        tmplayout = QHBoxLayout()
+        tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.rbtn_sett_xoutarrow)
         self.rbtn_sett_xoutarrow.setChecked(True)  # set top as default
         tmplayout.addStretch()
@@ -404,29 +381,29 @@ class SchemeDrawer(QMainWindow):
         # set sizes
         self.edt_sett_plttitle.setFixedSize(self.lineedit_size)
         # validators
-        self.edt_sett_figwidth.setValidator(QDoubleValidator())
-        self.edt_sett_figheight.setValidator(QDoubleValidator())
-        self.edt_sett_fstitle.setValidator(QIntValidator())
-        self.edt_sett_fsaxes.setValidator(QIntValidator())
-        self.edt_sett_fsaxlbl.setValidator(QIntValidator())
-        self.edt_sett_fslbl.setValidator(QIntValidator())
-        self.edt_sett_headspace.setValidator(QDoubleValidator())
-        self.edt_sett_arrwidth.setValidator(QDoubleValidator())
-        self.edt_sett_arrheadwidth.setValidator(QDoubleValidator())
-        self.edt_sett_preclambda.setValidator(QIntValidator())
-        self.edt_sett_preclevel.setValidator(QIntValidator())
+        self.edt_sett_figwidth.setValidator(QtGui.QDoubleValidator())
+        self.edt_sett_figheight.setValidator(QtGui.QDoubleValidator())
+        self.edt_sett_fstitle.setValidator(QtGui.QIntValidator())
+        self.edt_sett_fsaxes.setValidator(QtGui.QIntValidator())
+        self.edt_sett_fsaxlbl.setValidator(QtGui.QIntValidator())
+        self.edt_sett_fslbl.setValidator(QtGui.QIntValidator())
+        self.edt_sett_headspace.setValidator(QtGui.QDoubleValidator())
+        self.edt_sett_arrwidth.setValidator(QtGui.QDoubleValidator())
+        self.edt_sett_arrheadwidth.setValidator(QtGui.QDoubleValidator())
+        self.edt_sett_preclambda.setValidator(QtGui.QIntValidator())
+        self.edt_sett_preclevel.setValidator(QtGui.QIntValidator())
         # alignment
-        self.edt_sett_figwidth.setAlignment(Qt.AlignCenter)
-        self.edt_sett_figheight.setAlignment(Qt.AlignCenter)
-        self.edt_sett_fstitle.setAlignment(Qt.AlignRight)
-        self.edt_sett_fsaxes.setAlignment(Qt.AlignRight)
-        self.edt_sett_fsaxlbl.setAlignment(Qt.AlignRight)
-        self.edt_sett_fslbl.setAlignment(Qt.AlignRight)
-        self.edt_sett_headspace.setAlignment(Qt.AlignRight)
-        self.edt_sett_arrwidth.setAlignment(Qt.AlignRight)
-        self.edt_sett_arrheadwidth.setAlignment(Qt.AlignRight)
-        self.edt_sett_preclambda.setAlignment(Qt.AlignRight)
-        self.edt_sett_preclevel.setAlignment(Qt.AlignRight)
+        self.edt_sett_figwidth.setAlignment(QtCore.Qt.AlignCenter)
+        self.edt_sett_figheight.setAlignment(QtCore.Qt.AlignCenter)
+        self.edt_sett_fstitle.setAlignment(QtCore.Qt.AlignRight)
+        self.edt_sett_fsaxes.setAlignment(QtCore.Qt.AlignRight)
+        self.edt_sett_fsaxlbl.setAlignment(QtCore.Qt.AlignRight)
+        self.edt_sett_fslbl.setAlignment(QtCore.Qt.AlignRight)
+        self.edt_sett_headspace.setAlignment(QtCore.Qt.AlignRight)
+        self.edt_sett_arrwidth.setAlignment(QtCore.Qt.AlignRight)
+        self.edt_sett_arrheadwidth.setAlignment(QtCore.Qt.AlignRight)
+        self.edt_sett_preclambda.setAlignment(QtCore.Qt.AlignRight)
+        self.edt_sett_preclevel.setAlignment(QtCore.Qt.AlignRight)
 
         # push buttons
         layout.addWidget(self.btn_plot, 2, 7, 1, 1)
@@ -567,11 +544,11 @@ class SchemeDrawer(QMainWindow):
         """
         # throw an error if not at least one box is filled
         if self.edt_level[0].text() == "":
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "No entries",
                 "Need at least one level to make a plot!",
-                QMessageBox.Ok,
+                QtWidgets.QMessageBox.Ok,
             )
             return False
 
@@ -579,11 +556,11 @@ class SchemeDrawer(QMainWindow):
         try:
             ipvalue = float(self.edt_iplevel.text())
         except ValueError:
-            QMessageBox.warning(
+            QtWidgets.QMessageBox.warning(
                 self,
                 "Enter IP",
                 "Please enter an ionization potential as a number and try again.",
-                QMessageBox.Ok,
+                QtWidgets.QMessageBox.Ok,
             )
             return False
         return True
@@ -604,7 +581,7 @@ class SchemeDrawer(QMainWindow):
         # open the plotting window
         data = self.write_json()
 
-        window = PlotDisplay(data)
+        PlotDisplay(data, parent=self)
 
     def save(self):
         """
@@ -624,11 +601,11 @@ class SchemeDrawer(QMainWindow):
         # home folder of user platform independent
         home = expanduser("~")
         # options
-        options = QFileDialog.Options()
-        # options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getOpenFileName(
+        options = QtWidgets.QFileDialog.Options()
+        # options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
-            "QFileDialog.getOpenFileName()",
+            "QtWidgets.QFileDialog.getOpenFileName()",
             home,
             filter="JSON Files (*.json);;All Files (*.*)",
             options=options,
@@ -647,7 +624,7 @@ class SchemeDrawer(QMainWindow):
             Sets a given line edit from the dictionary, but also checks if available.
             :param category:    <string>    Category the entry is in
             :param entry:       <string>    Entry with the value
-            :param lineedit:    <QLineEdit> The object where the text should be set
+            :param lineedit:    <QtWidgets.QLineEdit> The object for the text
             """
             try:
                 lineedit.setText(savedict[category][entry])
@@ -803,11 +780,11 @@ class SchemeDrawer(QMainWindow):
         # home folder of user platform independent
         home = expanduser("~")
         # options
-        options = QFileDialog.Options()
-        # options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getSaveFileName(
+        options = QtWidgets.QFileDialog.Options()
+        # options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
-            "QFileDialog.getOpenFileName()",
+            "QtWidgets.QFileDialog.getOpenFileName()",
             home,
             filter="JSON Files (*.json);;All Files (*.*)",
             options=options,
@@ -825,7 +802,7 @@ class SchemeDrawer(QMainWindow):
 
     def about(self):
         """
-        Gives a QMessagebox with an about thing
+        Gives a QtWidgets.QMessageBox with an about thing
         :return:
         """
         about_msg = (
@@ -835,12 +812,14 @@ class SchemeDrawer(QMainWindow):
             + self.version
             + "<p>Author: "
             + self.author
-            + "<p>Please see the github repository for bug reports, feature requests, and for contacting the "
+            + "<p>Please see the github repository for bug reports, feature requests, "
+            "and for contacting the"
             "author."
-            "<p>Many tooltips are implemented that can help you with the software. Hover over entries "
+            "<p>Many tooltips are implemented that can help you with the software. "
+            "Hover over entries"
             "with the mouse and check those tooltips out."
         )
-        QMessageBox.about(self, "About", about_msg)
+        QtWidgets.QMessageBox.about(self, "About", about_msg)
 
     def test(self):
         """
@@ -851,72 +830,27 @@ class SchemeDrawer(QMainWindow):
 
 
 class MplCanvas(FigureCanvasQTAgg):
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, width=5, height=4, dpi=100):
+        super().__init__()
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         super(MplCanvas, self).__init__(fig)
 
 
-class PlotDisplay(QMainWindow):
-    def __init__(self, json_data: dict, *args, **kwargs):
-        super(PlotDisplay, self).__init__(*args, **kwargs)
+class PlotDisplay(QtWidgets.QMainWindow):
+    def __init__(self, json_data: dict, parent: QtWidgets.QWidget = None):
+        super(PlotDisplay, self).__init__(parent=parent)
 
-        # Create the maptlotlib FigureCanvas object,
-        # which defines a single set of axes as self.axes.
-        sc = MplCanvas(self, width=5, height=4, dpi=100)
-
-        # # Create our pandas DataFrame with some simple
-        # # data and headers.
-        # df = pd.DataFrame(
-        #     [
-        #         [0, 10],
-        #         [5, 15],
-        #         [2, 20],
-        #         [15, 25],
-        #         [4, 10],
-        #     ],
-        #     columns=["A", "B"],
-        # )
-        #
-        # # plot the pandas DataFrame, passing in the
-        # # matplotlib Canvas axes.
-        # df.plot(ax=sc.axes)
+        sc = MplCanvas(width=5, height=4, dpi=100)
         Plotter(json_data, fig_ax=(sc.figure, sc.axes))
 
-        # Create toolbar, passing canvas as first parament, parent (self, the MainWindow) as second.
         toolbar = NavigationToolbar(sc, self)
 
-        layout = QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.addWidget(toolbar)
         layout.addWidget(sc)
 
-        # Create a placeholder widget to hold our toolbar and canvas.
-        widget = QWidget()
+        widget = QtWidgets.QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
         self.show()
-
-
-# class PlotDisplayOld(QMainWindow):
-#     def __init__(self, fig: Figure, parent=None) -> None:
-#         """Initialize the plot display main window.
-#
-#         :param fig: Figure to display.
-#         :param parent: Parent windget.
-#         """
-#         super().__init__(parent=parent)
-#         self._main = QWidget()
-#         self.setCentralWidget(self._main)
-#         layout = QVBoxLayout(self._main)
-#
-#         self.canvas = FigureCanvas(Figure(fig))
-#         # Ideally one would use self.addToolBar here, but it is slightly
-#         # incompatible between PyQt6 and other bindings, so we just add the
-#         # toolbar as a plain widget instead.
-#         layout.addWidget(NavigationToolbar(self.canvas, self))
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = SchemeDrawer()
-    app.exec()

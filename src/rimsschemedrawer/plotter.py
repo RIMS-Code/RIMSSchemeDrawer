@@ -40,10 +40,6 @@ class Plotter:
         self.colfuv = "#5f00a0"
         self.colpump = "#0aa000"
 
-        # fixme: remove this comment
-        # figure size is not working properly with matplotlib argument. so let's force it by setting a fixed
-        # central widget size - some temporary crap but works on mac osx. but does it work on windows? and linux?
-        # test w/ different displays...?
         self.figwidth = float(data["settings"]["fig_width"])
         self.figheight = float(data["settings"]["fig_height"])
 
@@ -102,8 +98,6 @@ class Plotter:
         lambda_steps = []
         forbidden_steps = []
         for it in range(number_of_steps):
-            # fixme remove
-            print(it)
             try:
                 if not self.data["scheme"][f"step_lowlying{it}"]:
                     lambda_steps.append(lambdas[it])
@@ -312,8 +306,8 @@ class Plotter:
             # check if transition is forbidden and no show is activated for the arrow
             if (
                 not forbidden_steps[it]
-                # fixme this is not in current gui, saved to json!
-                or not self.data["settings"].get("show_arrows_forbidden", True)
+                or self.data["settings"].get("show_forbidden_transitions", "x-out")
+                == "x-out"
             ):
                 # look for where to plot the array
                 xvalplot = 0.0
@@ -363,8 +357,10 @@ class Plotter:
                 halignlev = "left"
                 xloc_levelstr = textpad
 
-            if not forbidden_steps[it] or not self.data["settings"].get(
-                "show_arrows_forbidden", True
+            if (
+                not forbidden_steps[it]
+                or self.data["settings"].get("show_forbidden_transitions", "x-out")
+                == "x-out"
             ):
                 # wavelength text
                 lambdastr = "%.*f" % (int(prec_lambda), lambda_steps[it]) + "$\\,$nm"
@@ -447,8 +443,10 @@ class Plotter:
             yval = mfld_yinc * ipvalue * (1 + it)
             wstp = float(wavenumber_steps[0]) - yval
 
-            if not forbidden_es[it] or not self.data["settings"].get(
-                "show_arrows_forbidden", True
+            if (
+                not forbidden_es[it]
+                or self.data["settings"].get("show_forbidden_transitions", "x-out")
+                == "x-out"
             ):
                 # xvalue for arrow
                 self._axes.arrow(

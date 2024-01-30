@@ -1,5 +1,5 @@
 # Init package
 
-from . import utils
+from .plotter import Plotter
 
-__all__ = ["utils"]
+__all__ = ["Plotter"]
