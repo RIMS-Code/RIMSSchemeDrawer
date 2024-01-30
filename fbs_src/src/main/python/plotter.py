@@ -535,7 +535,7 @@ class Plotter(QMainWindow):
         if self.parent.chk_sett_showevax.isChecked():
             a2.set_ylabel("Energy (eV)", size=fsz_axes_labels)
         else:
-            a2.axes.get_yaxis().set_ticks([])
+            a2._axes.get_yaxis().set_ticks([])
         a2.set_ylim([0.0, ymax / 8065.54429])
 
         # remove x ticks
