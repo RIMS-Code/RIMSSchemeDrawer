@@ -9,4 +9,6 @@ def test_plotter(data_path):
     fin = data_path.joinpath("ti.json")
     data = ut.json_reader(fin)
 
-    _ = Plotter(data, saveplt="/home/reto/Desktop/test.pdf")
+    # fixme: replace with temp path
+    fig = Plotter(data)
+    fig.savefig("/home/reto/Desktop/test.pdf")

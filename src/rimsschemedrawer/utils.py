@@ -6,6 +6,32 @@ from typing import Dict
 
 import matplotlib
 
+DEFAULT_SETTINGS = {
+    "settings": {
+        "plot_title": "",
+        "fig_width": 5.0,
+        "fig_height": 8.0,
+        "fs_title": 14,
+        "fs_axes": 12,
+        "fs_axes_labels": 12,
+        "fs_labels": 14,
+        "headspace": 2000,
+        "arrow_width": 0.2,
+        "arrow_head_width": 0.6,
+        "prec_wavelength": 3,
+        "prec_level": 0,
+        "line_breaks": False,
+        "ip_label_pos": "Top",
+        "show_forbidden_transitions": "x-out",
+        "show_cm-1_axis": True,
+        "show_eV_axis": True,
+    },
+    "scheme": {
+        "gs_term": "",
+        "ip_term": "",
+    },
+}
+
 
 def json_reader(fin: Path) -> Dict:
     """Read a json file and return a dictionary.

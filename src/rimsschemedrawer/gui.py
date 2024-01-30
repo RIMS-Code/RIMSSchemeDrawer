@@ -19,6 +19,7 @@ except ImportError as e:
     ) from e
 
 from rimsschemedrawer.plotter import Plotter
+import rimsschemedrawer.utils as ut
 
 
 class SchemeDrawer(QtWidgets.QMainWindow):
@@ -465,17 +466,40 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 field.setText(value)
 
         # loop through line edits
-        fillme(self.edt_sett_figwidth, "5.")
-        fillme(self.edt_sett_figheight, "8.")
-        fillme(self.edt_sett_fstitle, "14")
-        fillme(self.edt_sett_fsaxes, "12")
-        fillme(self.edt_sett_fslbl, "14")
-        fillme(self.edt_sett_fsaxlbl, "12")
-        fillme(self.edt_sett_headspace, "2000")
-        fillme(self.edt_sett_arrwidth, "0.2")
-        fillme(self.edt_sett_arrheadwidth, "0.6")
-        fillme(self.edt_sett_preclambda, "3")
-        fillme(self.edt_sett_preclevel, "0")
+        fillme(
+            self.edt_sett_figwidth, str(ut.DEFAULT_SETTINGS["settings"]["fig_width"])
+        )
+        fillme(
+            self.edt_sett_figheight,
+            str(ut.DEFAULT_SETTINGS["settings"]["fig_height"]),
+        )
+        fillme(self.edt_sett_fstitle, str(ut.DEFAULT_SETTINGS["settings"]["fs_title"]))
+        fillme(self.edt_sett_fsaxes, str(ut.DEFAULT_SETTINGS["settings"]["fs_axes"]))
+        fillme(self.edt_sett_fslbl, str(ut.DEFAULT_SETTINGS["settings"]["fs_labels"]))
+        fillme(
+            self.edt_sett_fsaxlbl,
+            str(ut.DEFAULT_SETTINGS["settings"]["fs_axes_labels"]),
+        )
+        fillme(
+            self.edt_sett_headspace,
+            str(ut.DEFAULT_SETTINGS["settings"]["headspace"]),
+        )
+        fillme(
+            self.edt_sett_arrwidth,
+            str(ut.DEFAULT_SETTINGS["settings"]["arrow_width"]),
+        )
+        fillme(
+            self.edt_sett_arrheadwidth,
+            str(ut.DEFAULT_SETTINGS["settings"]["arrow_head_width"]),
+        )
+        fillme(
+            self.edt_sett_preclambda,
+            str(ut.DEFAULT_SETTINGS["settings"]["prec_wavelength"]),
+        )
+        fillme(
+            self.edt_sett_preclevel,
+            str(ut.DEFAULT_SETTINGS["settings"]["prec_level"]),
+        )
 
     def fill_testing_values(self):
         """

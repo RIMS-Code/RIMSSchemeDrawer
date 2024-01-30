@@ -1,5 +1,7 @@
 """Plotting functions and class for the rims scheme drawer."""
 
+from typing import Any
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -8,11 +10,10 @@ from rimsschemedrawer import utils as ut
 
 
 class Plotter:
-    def __init__(self, data: dict, saveplt=None, **kwargs):
+    def __init__(self, data: dict, **kwargs):
         """Initialize the plotting class.
 
         :param data: Dictionary with the data to plot, directly from json file.
-        :param saveplt: Name to save the plot to.
         :param kwargs: Additional keyword arguments.
             - number_of_steps: How many scheme steps to consider, default is 7.
                 This number can be higher than the number of available steps!
@@ -20,7 +21,6 @@ class Plotter:
                 creating new ones.
         """
         self.data = data
-        self.saveplt = saveplt
 
         # set kwargs
         self.number_of_steps = kwargs.get("number_of_steps", 7)
@@ -52,9 +52,40 @@ class Plotter:
         return self._axes
 
     @property
+    def default_plotting_values(self) -> dict:
+        """Return the default plotting values."""
+        default_values = ut.DEFAULT_SETTINGS  # edits it in place, which is okay!
+
+        # add default values for backwards compatibility with old json files
+        for it in range(self.number_of_steps):
+            default_values["scheme"][f"step_forbidden{it}"] = False
+
+        return default_values
+
+    @property
     def figure(self) -> plt.Figure:
         """Return the figure."""
         return self._figure
+
+    def savefig(self, fout: str):
+        """Save the figure to a file.
+
+        :param fout: File name to save the plot to. The file extension determines
+            the file type.
+        """
+        self._figure.savefig(fout)
+
+    def _get_dict_entry(self, main_key: str, entry_key: str) -> Any:
+        """Get a dictionary key and fill with default if not available."""
+        try:
+            return self.data[main_key][entry_key]
+        except KeyError:
+            try:
+                return self.default_plotting_values[main_key][entry_key]
+            except KeyError as e:
+                raise KeyError(
+                    f"Could not find {main_key}/{entry_key} in data or default values."
+                ) from e
 
     def _plotit(self):
         # textpad
@@ -64,16 +95,15 @@ class Plotter:
         #
         firstarrowxmfl = 1.0
 
-        # gett settings from program
-
-        fsz_title = int(self.data["settings"].get("fs_title", 14))
-        fsz_axes_labels = int(self.data["settings"].get("fs_axes_labels", 14))
-        fsz_labels = int(self.data["settings"].get("fs_labels", 12))
-        sett_headspace = float(self.data["settings"].get("headspace", 2700))
-        sett_arr = float(self.data["settings"].get("arrow_width", 0.2))
-        sett_arr_head = float(self.data["settings"].get("arrow_head_width", 0.6))
-        prec_lambda = int(self.data["settings"].get("prec_wavelength", 3))
-        prec_level = int(self.data["settings"].get("prec_level", 0))
+        # get settings from program
+        fsz_title = int(self._get_dict_entry("settings", "fs_title"))
+        fsz_axes_labels = int(self._get_dict_entry("settings", "fs_axes_labels"))
+        fsz_labels = int(self._get_dict_entry("settings", "fs_labels"))
+        sett_headspace = float(self._get_dict_entry("settings", "headspace"))
+        sett_arr = float(self._get_dict_entry("settings", "arrow_width"))
+        sett_arr_head = float(self._get_dict_entry("settings", "arrow_head_width"))
+        prec_lambda = int(self._get_dict_entry("settings", "prec_wavelength"))
+        prec_level = int(self._get_dict_entry("settings", "prec_level"))
 
         # let's first get the wavelengths that we want and a list of bools if states are forbidden
         lambdas = []
@@ -82,13 +112,12 @@ class Plotter:
         it = 0  # assign it here so we can use it later updated
         for it in range(self.number_of_steps):
             try:
-                if (stp_level := self.data["scheme"][f"step_level{it}"]) == "":
+                if (
+                    stp_level := self._get_dict_entry("scheme", f"step_level{it}")
+                ) == "":
                     break
                 lambdas.append(float(stp_level))
-                try:  # not all schemes have a forbidden step!
-                    forbidden.append(self.data["scheme"][f"step_forbidden{it}"])
-                except KeyError:
-                    continue
+                forbidden.append(self._get_dict_entry("scheme", f"step_forbidden{it}"))
             except KeyError:
                 break
 
@@ -99,7 +128,7 @@ class Plotter:
         forbidden_steps = []
         for it in range(number_of_steps):
             try:
-                if not self.data["scheme"][f"step_lowlying{it}"]:
+                if not self._get_dict_entry("scheme", f"step_lowlying{it}"):
                     lambda_steps.append(lambdas[it])
                     try:
                         forbidden_steps.append(forbidden[it])
@@ -112,16 +141,18 @@ class Plotter:
         term_symb_entered = []
         for it in range(self.number_of_steps):
             try:
-                if not self.data["scheme"][f"step_lowlying{it}"]:
-                    term_symb_entered.append(self.data["scheme"][f"step_term{it}"])
+                if not self._get_dict_entry("scheme", f"step_lowlying{it}"):
+                    term_symb_entered.append(
+                        self._get_dict_entry("scheme", f"step_term{it}")
+                    )
             except KeyError:
                 break
 
         # get ground state wavenumber
-        wavenumber_gs = float(self.data["scheme"].get("gs_level", 0.0))
+        wavenumber_gs = float(self._get_dict_entry("scheme", "gs_level"))
 
         # now go through the lambda steps and transform into actual wavelengths if not already
-        unit = self.data["scheme"]["unit"]
+        unit = self._get_dict_entry("scheme", "unit")
         if unit != "nm":
             lambda_steps_temp = []
             for it in range(len(lambda_steps)):
@@ -153,13 +184,16 @@ class Plotter:
         forbidden_es = []
         for it in range(number_of_steps):
             try:
-                if self.data["scheme"][f"step_lowlying{it}"]:
-                    wavenumber_es.append(float(self.data["scheme"][f"step_level{it}"]))
-                    term_symb_es.append(self.data["scheme"][f"step_term{it}"])
-                    try:
-                        forbidden_es.append(self.data["scheme"][f"step_forbidden{it}"])
-                    except KeyError:
-                        forbidden_es.append(False)
+                if self._get_dict_entry("scheme", f"step_lowlying{it}"):
+                    wavenumber_es.append(
+                        float(self._get_dict_entry("scheme", f"step_level{it}"))
+                    )
+                    term_symb_es.append(
+                        self._get_dict_entry("scheme", f"step_term{it}")
+                    )
+                    forbidden_es.append(
+                        self._get_dict_entry("scheme", f"step_forbidden{it}")
+                    )
             except KeyError:
                 break
 
@@ -175,7 +209,7 @@ class Plotter:
         totwavenumber_photons = np.sum(wavenumber_steps)
 
         # get the ipvalue
-        ipvalue = float(self.data["scheme"]["ip_level"])
+        ipvalue = float(self._get_dict_entry("scheme", "ip_level"))
 
         # ymax:
         if ipvalue > totwavenumber_photons + wavenumber_gs:
@@ -193,13 +227,14 @@ class Plotter:
         for it in range(len(term_symb_es)):
             term_symb_es_formatted.append(ut.term_to_string(term_symb_es[it]))
         # get term symbol for ip and gs
-        term_symb_ip = ut.term_to_string(self.data["scheme"].get("ip_term", ""))
-        term_symb_gs = ut.term_to_string(self.data["scheme"].get("gs_term", ""))
+        term_symb_ip = ut.term_to_string(self._get_dict_entry("scheme", "ip_term"))
+        term_symb_gs = ut.term_to_string(self._get_dict_entry("scheme", "gs_term"))
 
         # break line or put in comma, depending on option
-        lbreak = ", "
-        if self.data["settings"].get("line_breaks", False):
+        if self._get_dict_entry("settings", "line_breaks"):
             lbreak = "\n"
+        else:
+            lbreak = ", "
 
         # ### CREATE FIGURE ###
         # seocnd axes -> mirror of first
@@ -217,7 +252,7 @@ class Plotter:
             xshade, ipvalue, ymax * 10.0, facecolor="#adbbff", alpha=0.5
         )
         # label the IP
-        if self.data["settings"].get("ip_label_pos", "Top") == "Top":
+        if self._get_dict_entry("settings", "ip_label_pos") == "Top":
             iplabelypos = ipvalue + 0.01 * totwavenumber_photons
             iplabelyalign = "bottom"
         else:
@@ -306,11 +341,10 @@ class Plotter:
             # check if transition is forbidden and no show is activated for the arrow
             if (
                 not forbidden_steps[it]
-                or self.data["settings"].get("show_forbidden_transitions", "x-out")
+                or self._get_dict_entry("settings", "show_forbidden_transitions")
                 == "x-out"
             ):
                 # look for where to plot the array
-                xvalplot = 0.0
                 if it == 0 and len(wavenumber_es) > 0:
                     xvalplot = firstarrowxmfl
                 else:
@@ -359,7 +393,7 @@ class Plotter:
 
             if (
                 not forbidden_steps[it]
-                or self.data["settings"].get("show_forbidden_transitions", "x-out")
+                or self._get_dict_entry("settings", "show_forbidden_transitions")
                 == "x-out"
             ):
                 # wavelength text
@@ -445,7 +479,7 @@ class Plotter:
 
             if (
                 not forbidden_es[it]
-                or self.data["settings"].get("show_forbidden_transitions", "x-out")
+                or self._get_dict_entry("settings", "show_forbidden_transitions")
                 == "x-out"
             ):
                 # xvalue for arrow
@@ -511,13 +545,13 @@ class Plotter:
             )
 
         # Title:
-        title_entry = self.data["settings"].get("plot_title", "")
+        title_entry = self._get_dict_entry("settings", "plot_title")
         if title_entry != "":
             self._axes.set_title(title_entry, size=fsz_title)
 
         # ylabel
         self._axes.yaxis.set_major_formatter(ut.my_formatter)  # scientific labels
-        if self.data["settings"].get("show_cm-1_axis", True):
+        if self._get_dict_entry("settings", "show_cm-1_axis"):
             self._axes.set_ylabel("Wavenumber (cm$^{-1}$)", size=fsz_axes_labels)
         else:
             self._axes._axes.get_yaxis().set_ticks([])
@@ -527,7 +561,7 @@ class Plotter:
         self._axes.set_ylim([0.0, ymax])
 
         # eV axis on the right
-        if self.data["settings"].get("show_eV_axis", True):
+        if self._get_dict_entry("settings", "show_eV_axis"):
             a2.set_ylabel("Energy (eV)", size=fsz_axes_labels)
         else:
             a2._axes.get_yaxis().set_ticks([])
@@ -538,6 +572,3 @@ class Plotter:
 
         # tight layout of figure
         self._figure.tight_layout()
-
-        if self.saveplt is not None:
-            self._figure.savefig(self.saveplt)
