@@ -2,7 +2,7 @@
 
 import importlib.metadata
 import json
-from os.path import expanduser
+from pathlib import Path
 
 from matplotlib.backends.backend_qtagg import (
     FigureCanvasQTAgg,
@@ -32,6 +32,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # program info
         self.author = "Reto Trappitsch"
         self.version = importlib.metadata.version("rimsschemedrawer")
+
+        # user settings - maybe to be remembered at some point
+        self.user_path = Path.home()
 
         # initialize the thing
         super().__init__()
@@ -106,10 +109,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # initialize the UI
         self.initUI()
-
-        # set testing values if debugging
-        if self.rundebug:
-            self.fill_testing_values()
 
         # set default values
         self.fill_default_values()
@@ -490,34 +489,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             str(ut.DEFAULT_SETTINGS["settings"]["prec_level"]),
         )
 
-    def fill_testing_values(self):
-        """
-        For testing: Ti scheme
-        """
-        self.edt_gslevel.setText("0")
-        self.edt_level[0].setText("465.777")
-
-        # low lying states cm-1
-        self.chk_lowlying[1].setChecked(True)
-        self.chk_lowlying[2].setChecked(True)
-        self.edt_level[1].setText("170")
-        self.edt_level[2].setText("387")
-
-        # higher states
-        self.edt_level[3].setText("416.158")
-        self.edt_level[4].setText("881.399")
-        self.edt_gslevel.setText("0")
-        self.edt_iplevel.setText("55072")
-
-        self.edt_gsterm.setText("3F2")
-        self.edt_term[0].setText("3F3")
-        self.edt_term[1].setText("3F4")
-        self.edt_term[2].setText("3G3")
-        self.edt_term[3].setText("3G4")
-
-        # headspace
-        self.edt_sett_headspace.setText("3000")
-
     def set_label_names(self):
         # get the unit
         unit = self.get_unit()
@@ -533,7 +504,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 app = "nd"
             elif stepnumb == 3:
                 app = "rd"
-            # set the namestring according to if low lying is toggled or not
+            # set the namestring according to if low-lying is toggled or not
             if self.chk_lowlying[it].isChecked():
                 stepnumb -= 1
                 namestring = "Low lying st (cm<sup>-1</sup>)"
@@ -596,30 +567,33 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         PlotDisplay(data, parent=self)
 
-    def load_config(self):
+    def load_config(self, **kwargs):
         """
         Load a configuration file that has previously been saved
-        """
-        # get the filename
-        # home folder of user platform independent
-        home = expanduser("~")
-        # options
-        options = QtWidgets.QFileDialog.Options()
-        # options |= QtWidgets.QFileDialog.DontUseNativeDialog
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self,
-            "QtWidgets.QFileDialog.getOpenFileName()",
-            home,
-            filter="JSON Files (*.json);;All Files (*.*)",
-            options=options,
-        )
-        # user pressed cancel
-        if filename == "":
-            return
 
+        :param kwargs:  <dict>  Dictionary with additional keyword arguments
+            - fname: <Path>  Path to the file to load
+        """
+        filename = kwargs.get("fname", None)
+
+        if filename is None:
+            options = QtWidgets.QFileDialog.Options()
+            filename, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self,
+                "QtWidgets.QFileDialog.getOpenFileName()",
+                str(self.user_path.absolute()),
+                filter="JSON Files (*.json);;All Files (*.*)",
+                options=options,
+            )
+            # user pressed cancel
+            if filename == "":
+                return
+
+            filename = Path(filename)
+
+        self.user_path = filename.parent
         # load the json file
-        with open(filename, "r") as read_file:
-            savedict = json.load(read_file)
+        savedict = ut.json_reader(filename)
 
         # function for setting line edits
         def set_line_edits(category, entry, lineedit):
@@ -656,14 +630,14 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 else:
                     self.chk_lowlying[it].setChecked(False)
             except KeyError:
-                pass
+                self.chk_lowlying[it].setChecked(False)
             try:
                 if savedict["scheme"]["step_forbidden" + str(it)]:
                     self.chk_forbidden[it].setChecked(True)
                 else:
                     self.chk_forbidden[it].setChecked(False)
             except KeyError:
-                pass
+                self.chk_forbidden[it].setChecked(False)
         set_line_edits("scheme", "ip_level", self.edt_iplevel)
         set_line_edits("scheme", "ip_term", self.edt_ipterm)
 
@@ -683,7 +657,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.rbtn_iplable_bottom.setChecked(True)
         except KeyError:
-            pass
+            self.rbtn_iplable_bottom.setChecked(True)
         # how to display forbidden transitions
         try:
             if savedict["settings"]["show_forbidden_transitions"] == "x-out":
@@ -691,7 +665,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.rbtn_sett_nodisparrow.setChecked(True)
         except KeyError:
-            pass
+            self.rbtn_sett_xoutarrow.setChecked(True)
         # line breaks
         try:
             if savedict["settings"]["line_breaks"]:
@@ -699,7 +673,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_linebreaks.setChecked(False)
         except KeyError:
-            pass
+            self.chk_sett_linebreaks.setChecked(True)
         # show cm-1 axis
         try:
             if savedict["settings"]["show_cm-1_axis"]:
@@ -707,7 +681,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_showcmax.setChecked(False)
         except KeyError:
-            pass
+            self.chk_sett_showcmax.setChecked(True)
         # show eV axis
         try:
             if savedict["settings"]["show_eV_axis"]:
@@ -715,7 +689,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_showevax.setChecked(False)
         except KeyError:
-            pass
+            self.chk_sett_showevax.setChecked(True)
+
         set_line_edits("settings", "plot_title", self.edt_sett_plttitle)
         set_line_edits("settings", "prec_level", self.edt_sett_preclevel)
         set_line_edits("settings", "prec_wavelength", self.edt_sett_preclambda)
@@ -779,24 +754,20 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         """
         Save the current configuration as a .json file the user defines
         """
-        # ask for the filename
-        # home folder of user platform independent
-        home = expanduser("~")
-        # options
         options = QtWidgets.QFileDialog.Options()
-        # options |= QtWidgets.QFileDialog.DontUseNativeDialog
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
             self,
             "QtWidgets.QFileDialog.getOpenFileName()",
-            home,
+            str(self.user_path.absolute()),
             filter="JSON Files (*.json);;All Files (*.*)",
             options=options,
         )
         # user pressed cancel
         if filename == "":
             return
-        if filename[-5 : len(filename)] != ".json":
-            filename += ".json"
+
+        filename = Path(filename)
+        self.user_path = filename.parent
 
         savedict = self.write_json()
 
@@ -828,8 +799,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         """
         Development testing routine, with the according button
         """
-        window = PlotDisplay(parent=self)
-        window.show()
+        fname = Path.home().joinpath(
+            "Documents/code/RIMSCode/RIMSSchemeDrawer/examples/example_titanium.json"
+        )
+        self.load_config(fname=fname)
 
 
 class MplCanvas(FigureCanvasQTAgg):
