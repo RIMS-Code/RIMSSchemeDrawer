@@ -90,7 +90,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # push buttons
         self.btn_plot = QtWidgets.QPushButton("Plot")
-        self.btn_save = QtWidgets.QPushButton("Save Plot")
         self.btn_load_conf = QtWidgets.QPushButton("Load Config")
         self.btn_save_conf = QtWidgets.QPushButton("Save Config")
         self.btn_test = QtWidgets.QPushButton("Test")
@@ -408,7 +407,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # push buttons
         layout.addWidget(self.btn_plot, 2, 7, 1, 1)
-        layout.addWidget(self.btn_save, 3, 7, 1, 1)
         if self.rundebug:
             layout.addWidget(self.btn_test, bottomrowindex - 4, 7, 1, 1)
         layout.addWidget(self.btn_load_conf, bottomrowindex - 3, 7, 1, 1)
@@ -422,15 +420,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # buttons
         self.btn_plot.clicked.connect(self.plot)
         self.btn_plot.setToolTip("Plot the scheme.")
-        self.btn_save.clicked.connect(self.save)
-        self.btn_save.setToolTip(
-            "Save the figure directly without plotting.\n"
-            "The default format is pdf. Consider using\n"
-            "the default setting, since it will result\n"
-            "in a vector graphics. You can always check\n"
-            "the matplotlib library documentation to find\n"
-            "out what formats are possible."
-        )
         self.btn_load_conf.clicked.connect(self.load_config)
         self.btn_load_conf.setToolTip("Load a saved configuration file.")
         self.btn_save_conf.clicked.connect(self.save_config)
@@ -606,16 +595,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         data = self.write_json()
 
         PlotDisplay(data, parent=self)
-
-    def save(self):
-        """
-        Save the figure, default is pdf.
-        """
-        # fixme
-        pass
-        # if self.rundebug:
-        #     print("Save figure directly")
-        # plotwindow = Plotter(self, saveplt=True)
 
     def load_config(self):
         """
