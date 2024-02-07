@@ -1,6 +1,6 @@
 [project]
 name = "rimsschemedrawer"
-version = "3.0.0"
+version = "3.0.0.dev0"
 description = "Drawing of RIMS schemes in python and/or with a Python GUI."
 authors = [
     { name = "Reto Trappitsch", email = "reto@galactic-forensics.space" }
@@ -35,9 +35,8 @@ dev-dependencies = [
 ]
 
 [tool.rye.scripts]
-format = "ruff format ."
-lint = "ruff check ."
-test = "pytest ."
+test = "pytest"
+test_cov = "pytest --cov --cov-report xml"
 
 [tool.hatch.metadata]
 allow-direct-references = true
@@ -47,3 +46,4 @@ packages = ["src/rimsschemedrawer"]
 
 [tool.pytest.ini_options]
 testpaths = "tests"
+addopts = "--cov=rimsschemedrawer -v"

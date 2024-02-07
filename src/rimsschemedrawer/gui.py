@@ -781,7 +781,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         """
         about_msg = (
             "<center>"
-            "<h1>RIMS Scheme drawer program</h1>"
+            "<h1>RIMS Scheme drawer</h1>"
             "<br>Version: "
             + self.version
             + "<p>Author: "

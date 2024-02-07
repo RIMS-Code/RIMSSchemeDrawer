@@ -1,5 +1,8 @@
 # Installation
 
+The following instructions are for installation of the GUI for release version `2.1.4`.
+Instructions for installation from source are given for the development version.
+
 ## GUI
 
 To install the GUI, 
@@ -19,6 +22,12 @@ You can now run the drawer by simply running the installed executable:
 ```bash
 rimsschemedrawer
 ```
+
+## Development version (`v3`)
+
+This version is currently under development.
+To install development versions and pre-releases from `pypi`,
+please see the main [README](README.md).
 
 ## From Source
 
@@ -65,7 +74,7 @@ or
 rimsschemedrawer
 ```
 
-## Development
+## Contribute
 
 If you use `rye` and follow the instructions above
 for installation from source,
@@ -73,6 +82,6 @@ you will have all required dependencies for development installed.
 
 The following additional commands can be useful:
 
-- `rye run format`: Format the code with [`ruff`](https://docs.astral.sh/ruff/formatter/)
-- `rye run lint`: Lint the code with [`ruff`](https://docs.astral.sh/ruff/formatter/)
+- `rye format`: Format the code with [`ruff`](https://docs.astral.sh/ruff/formatter/)
+- `rye lint`: Lint the code with [`ruff`](https://docs.astral.sh/ruff/formatter/)
 - `rye run test`: Test the code with [`pytest`](https://docs.pytest.org/)
