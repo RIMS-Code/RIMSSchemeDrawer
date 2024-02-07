@@ -5,11 +5,16 @@ tkinter_version/RIMSSchemeDrawer_RT.command
 *.pyc
 div
 div/*
+__pycache__/
+*.py[co]
+.DS_Store
+*.log
 
 # PyCharm
 .idea
 
 # Python virtual environments
+.venv
 venv
 venv/*
 .python-version
@@ -33,3 +38,5 @@ target/*
 
 # builds
 dist/
+*.egg-info/
+*.dist-info/
