@@ -9,8 +9,8 @@ import matplotlib
 DEFAULT_SETTINGS = {
     "settings": {
         "plot_title": "",
-        "fig_width": 5.0,
-        "fig_height": 8.0,
+        "fig_width": 5,
+        "fig_height": 8,
         "fs_title": 14,
         "fs_axes": 12,
         "fs_axes_labels": 12,
@@ -41,7 +41,7 @@ def json_reader(fin: Path) -> Dict:
 
     :return: Dictionary with parameters for drawing the scheme.
     """
-    with open(fin, "r") as f:
+    with open(fin) as f:
         data = json.load(f)
 
     # check for new file format

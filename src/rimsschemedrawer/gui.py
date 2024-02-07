@@ -93,9 +93,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # push buttons
         self.btn_plot = QtWidgets.QPushButton("Plot")
+        self.btn_test = QtWidgets.QPushButton("Test")
         self.btn_load_conf = QtWidgets.QPushButton("Load Config")
         self.btn_save_conf = QtWidgets.QPushButton("Save Config")
-        self.btn_test = QtWidgets.QPushButton("Test")
+        self.btn_reset_formatting = QtWidgets.QPushButton("Reset Formatting")
         self.btn_about = QtWidgets.QPushButton("About")
         self.btn_quit = QtWidgets.QPushButton("Quit")
 
@@ -108,7 +109,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.fontheader.setBold(True)
 
         # initialize the UI
-        self.initUI()
+        self.init_ui()
 
         # set default values
         self.fill_default_values()
@@ -116,7 +117,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # show the UI
         self.show()
 
-    def initUI(self):
+    def init_ui(self):
         """
         Initialize the UI
         """
@@ -289,7 +290,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_linebreaks)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 4, 7, 1, 1)
+        layout.addLayout(tmplayout, 3, 7, 1, 1)
         self.chk_sett_linebreaks.setToolTip(
             "Should there be a line break between\n"
             "the state and the term symbol? Play\n"
@@ -302,7 +303,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         tmplayout.addStretch()
         tmplabel = QtWidgets.QLabel("Show cm-1 axis labels?")
         tmplayout.addWidget(tmplabel)
-        layout.addLayout(tmplayout, 5, 7, 1, 1)
+        layout.addLayout(tmplayout, 4, 7, 1, 1)
         self.chk_sett_showcmax.setToolTip(
             "Show the cm<sup>-1</sup> (left) axis? You can turn this off in case you "
             "want to stich plots together afterwards! This function will also hide the "
@@ -319,7 +320,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_showevax)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 6, 7, 1, 1)
+        layout.addLayout(tmplayout, 5, 7, 1, 1)
         self.chk_sett_showevax.setToolTip(
             "Show the eV (right) axis? You can turn this\n"
             " off in case you want to stich plots together\n"
@@ -406,9 +407,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # push buttons
         layout.addWidget(self.btn_plot, 2, 7, 1, 1)
         if self.rundebug:
-            layout.addWidget(self.btn_test, bottomrowindex - 4, 7, 1, 1)
-        layout.addWidget(self.btn_load_conf, bottomrowindex - 3, 7, 1, 1)
-        layout.addWidget(self.btn_save_conf, bottomrowindex - 2, 7, 1, 1)
+            layout.addWidget(self.btn_test, bottomrowindex - 6, 7, 1, 1)
+        layout.addWidget(self.btn_load_conf, bottomrowindex - 4, 7, 1, 1)
+        layout.addWidget(self.btn_save_conf, bottomrowindex - 3, 7, 1, 1)
+        layout.addWidget(self.btn_reset_formatting, bottomrowindex - 2, 7, 1, 1)
         layout.addWidget(self.btn_about, bottomrowindex - 1, 7, 1, 1)
         layout.addWidget(self.btn_quit, bottomrowindex, 7, 1, 1)
 
@@ -431,6 +433,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "is only meant for debugging and could have\n"
             "weird effects when using the software."
         )
+        self.btn_reset_formatting.clicked.connect(self.fill_default_values)
+        self.btn_reset_formatting.setToolTip(
+            "Reset the formatting variables to default values."
+        )
         self.btn_about.clicked.connect(self.about)
         self.btn_about.setToolTip("Displays an about page with info on the program")
         self.btn_quit.clicked.connect(self.close)
@@ -439,7 +445,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # set the layout to the widget
         self.mainwidget.setLayout(layout)
 
-    def fill_default_values(self):
+    def fill_default_values(self, reset=False):
         """
         Routine to fill default values in check boxes if they are empty.
         This is such that the user can't leave required fields empty
@@ -449,8 +455,29 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             """
             Fills values of line edits, if currently empty
             """
-            if field.text() == "":
-                field.setText(value)
+            field.setText(value)
+
+        def set_radiobutton(btn: QtWidgets.QRadioButton, field: str, comp):
+            """Set a radiobutton's state by comparing field with comp.
+
+            The radiobutton's state is set to field==comp
+
+            :param btn: Radiobutton
+            :param field: The field in 'settings' to use to compare
+            :param comp: Comparator.
+            """
+            btn.setChecked(ut.DEFAULT_SETTINGS["settings"][field] == comp)
+
+        def set_checkbox(box: QtWidgets.QCheckBox, field: str):
+            """Set a checkbox' state by field value.
+
+            The checkbox' state is set to boolean value of field.
+
+            :param box: Checkbox to set
+            :param field: The field in 'settings' to use to compare
+            :param comp: Comparator.
+            """
+            box.setChecked(ut.DEFAULT_SETTINGS["settings"][field])
 
         # loop through line edits
         fillme(
@@ -487,6 +514,19 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             self.edt_sett_preclevel,
             str(ut.DEFAULT_SETTINGS["settings"]["prec_level"]),
         )
+
+        # set radiobuttons
+        set_radiobutton(self.rbtn_iplable_top, "ip_label_pos", "Top")
+        set_radiobutton(self.rbtn_iplable_bottom, "ip_label_pos", "Bottom")
+        set_radiobutton(self.rbtn_sett_xoutarrow, "show_forbidden_transitions", "x-out")
+        set_radiobutton(
+            self.rbtn_sett_nodisparrow, "show_forbidden_transitions", "noshow"
+        )
+
+        # set checkboxes
+        set_checkbox(self.chk_sett_linebreaks, "line_breaks")
+        set_checkbox(self.chk_sett_showcmax, "show_cm-1_axis")
+        set_checkbox(self.chk_sett_showevax, "show_eV_axis")
 
     def set_label_names(self):
         # get the unit
@@ -809,12 +849,12 @@ class MplCanvas(FigureCanvasQTAgg):
         super().__init__()
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
-        super(MplCanvas, self).__init__(fig)
+        super().__init__(fig)
 
 
 class PlotDisplay(QtWidgets.QMainWindow):
     def __init__(self, json_data: dict, parent: QtWidgets.QWidget = None):
-        super(PlotDisplay, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         sc = MplCanvas(width=5, height=4, dpi=100)
         Plotter(json_data, fig_ax=(sc.figure, sc.axes))
