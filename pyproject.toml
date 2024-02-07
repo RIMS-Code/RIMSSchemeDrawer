@@ -46,4 +46,4 @@ packages = ["src/rimsschemedrawer"]
 
 [tool.pytest.ini_options]
 testpaths = "tests"
-addopts = "--cov=rimsschemedrawer -v"
+addopts = "--cov -v"
