@@ -190,7 +190,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # individual steps
         for it in range(self.numberofsteps):
-            stepnumb = it + 1
             # make label and append
             self.lbl_steps.append(QtWidgets.QLabel())
             layout.addWidget(self.lbl_steps[it], 2 + it, 0, 1, 1)
@@ -538,7 +537,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # ip value
         try:
-            ipvalue = float(self.edt_iplevel.text())
+            _ = float(self.edt_iplevel.text())
         except ValueError:
             QtWidgets.QMessageBox.warning(
                 self,
