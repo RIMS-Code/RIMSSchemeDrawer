@@ -13,7 +13,7 @@ readme = "README.md"
 requires-python = ">= 3.8"
 license = { text = "MIT" }
 
-[project.scripts]
+[project.gui-scripts]
 rimsschemedrawer = "rimsschemedrawer.app:run_gui"
 
 [project.optional-dependencies]
@@ -21,6 +21,12 @@ gui = [
     "PyQt6>=6.6.1",
     "qtpy>=2.4.1",
 ]
+
+[project.urls]
+Homepage = "https://github.com/RIMS-Code/RIMSSchemeDrawer"
+Documentation = "https://github.com/RIMS-Code/RIMSSchemeDrawer"
+Repository = "https://github.com/RIMS-Code/RIMSSchemeDrawer.git"
+Issues = "https://github.com/RIMS-Code/RIMSSchemeDrawer/issues"
 
 [build-system]
 requires = ["hatchling"]
