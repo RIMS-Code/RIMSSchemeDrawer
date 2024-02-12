@@ -26,6 +26,7 @@ DEFAULT_SETTINGS = {
         "show_transition_strength": False,
         "show_cm-1_axis": True,
         "show_eV_axis": True,
+        "plot_darkmode": False,
     },
     "scheme": {
         "gs_term": "",

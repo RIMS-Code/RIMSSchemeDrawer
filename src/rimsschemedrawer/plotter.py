@@ -31,14 +31,31 @@ class Plotter:
         matplotlib.rc("xtick", labelsize=fsz_axes, direction="in")
         matplotlib.rc("ytick", labelsize=fsz_axes, direction="in")
 
+        # dark mode?
+        darkmode = data["settings"].get(
+            "plot_darkmode", ut.DEFAULT_SETTINGS["settings"]["plot_darkmode"]
+        )
+
         # figure stuff
+        if darkmode:
+            plt.style.use("dark_background")
         self._figure, self._axes = kwargs.get("fig_ax", plt.subplots(1, 1))
 
         # Colors for arrows
-        self.colir = "#a00000"
-        self.coluv = "#0012a0"
-        self.colfuv = "#5f00a0"
-        self.colpump = "#0aa000"
+        if darkmode:
+            self.colmain = "#ffffff"
+            self.colir = "#d27878"
+            self.coluv = "#8c96df"
+            self.colfuv = "#9365b2"
+            self.colpump = "#60a55b"
+            self.colhdr = "#343f74"  # header color
+        else:
+            self.colmain = "#000000"
+            self.colir = "#a00000"
+            self.coluv = "#0012a0"
+            self.colfuv = "#5f00a0"
+            self.colpump = "#0aa000"
+            self.colhdr = "#adbbff"  # header color
 
         self.figwidth = float(data["settings"]["fig_width"])
         self.figheight = float(data["settings"]["fig_height"])
@@ -264,7 +281,7 @@ class Plotter:
         xshade = [0.0, 10.0]
         # the * 10. takes care if the user manually extends the range... to a certain degree at least, i.e., ymax*10
         self._axes.fill_between(
-            xshade, ipvalue, ymax * 10.0, facecolor="#adbbff", alpha=0.5
+            xshade, ipvalue, ymax * 10.0, facecolor=self.colhdr, alpha=0.5
         )
         # label the IP
         if self._get_dict_entry("settings", "ip_label_pos") == "Top":
@@ -287,7 +304,7 @@ class Plotter:
             textpad,
             iplabelypos,
             iplabelstr,
-            color="k",
+            color=self.colmain,
             ha="left",
             va=iplabelyalign,
             size=fsz_labels,
@@ -296,7 +313,7 @@ class Plotter:
         # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
             if it < ipvalue:
-                self._axes.hlines(it, xmin=0, xmax=10, color="k")
+                self._axes.hlines(it, xmin=0, xmax=10, color=self.colmain)
         # Lines for manifold groundstater
         for it in range(len(wavenumber_es)):
             self._axes.hlines(
@@ -304,17 +321,17 @@ class Plotter:
                 xmin=1.5 * it + 2.3,
                 xmax=1.5 * it + 3.7,
                 linestyle="solid",
-                color="k",
+                color=self.colmain,
             )
 
         # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
         for it in transition_steps:
             if it < ipvalue:
-                self._axes.hlines(it, xmin=0, xmax=10, color="k")
+                self._axes.hlines(it, xmin=0, xmax=10, color=self.colmain)
 
         # draw the state we come out of, if not ground state
         if float(wavenumber_gs) > 0.0:
-            self._axes.hlines(float(wavenumber_gs), xmin=0, xmax=10, color="k")
+            self._axes.hlines(float(wavenumber_gs), xmin=0, xmax=10, color=self.colmain)
 
         # draw the arrows and cross them out if forbidden
         deltax = 8.65 / (len(lambda_steps) + 1.0) - 0.5
@@ -334,7 +351,7 @@ class Plotter:
             10.0 - textpad,
             float(wavenumber_gs),
             levelstr,
-            color="k",
+            color=self.colmain,
             ha="right",
             va="bottom",
             size=fsz_labels,
@@ -393,7 +410,11 @@ class Plotter:
             # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
             if it == len(lambda_steps) - 1:
                 self._axes.hlines(
-                    tstp, xmin=xval - 0.5, xmax=xval + 0.5, linestyle="solid", color="k"
+                    tstp,
+                    xmin=xval - 0.5,
+                    xmax=xval + 0.5,
+                    linestyle="solid",
+                    color=self.colmain,
                 )
 
             # alignment of labels
@@ -465,7 +486,7 @@ class Plotter:
                 xloc_levelstr,
                 leveltextypos,
                 levelstr,
-                color="k",
+                color=self.colmain,
                 ha=halignlev,
                 va=leveltextvaalign,
                 size=fsz_labels,
@@ -572,7 +593,7 @@ class Plotter:
                 xval + 0.5,
                 yval,
                 levelstr,
-                color="k",
+                color=self.colmain,
                 ha="left",
                 va="bottom",
                 size=fsz_labels,
