@@ -134,7 +134,7 @@ class Plotter:
                     add_value = float(tstrength)
                 transition_strengths.append(add_value)
             except KeyError:
-                break
+                transition_strengths.append("")
 
         # now only add lambdas that are NOT low-lying states, same for forbidden steps!
         lambda_steps = []
