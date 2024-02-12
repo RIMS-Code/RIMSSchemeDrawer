@@ -73,6 +73,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_sett_fstitle = QtWidgets.QLineEdit()
         self.edt_sett_fsaxes = QtWidgets.QLineEdit()
         self.edt_sett_fsaxlbl = QtWidgets.QLineEdit()
+        self.chk_sett_trans_strength = QtWidgets.QCheckBox("Transition strengths?")
         self.chk_sett_linebreaks = QtWidgets.QCheckBox("Line breaks?")
         self.chk_sett_showcmax = QtWidgets.QCheckBox()  # no label -> label in layout
         self.chk_sett_showcmax.setChecked(True)
@@ -305,11 +306,17 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_sett_fsaxes.setToolTip("Font size of axes ticks.")
         layout.addWidget(self.edt_sett_fsaxlbl, 4, 7, 1, 1)
         self.edt_sett_fsaxlbl.setToolTip("Font size of axes labels.")
+        # transition_strengths
+        tmplayout = QtWidgets.QHBoxLayout()
+        tmplayout.addWidget(self.chk_sett_trans_strength)
+        tmplayout.addStretch()
+        layout.addLayout(tmplayout, 3, 8, 1, 1)
+        self.chk_sett_trans_strength.setToolTip("Display the transition strength?")
         # line breaks
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_linebreaks)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 3, 8, 1, 1)
+        layout.addLayout(tmplayout, 4, 8, 1, 1)
         self.chk_sett_linebreaks.setToolTip(
             "Should there be a line break between\n"
             "the state and the term symbol? Play\n"
@@ -322,7 +329,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         tmplayout.addStretch()
         tmplabel = QtWidgets.QLabel("Show cm-1 axis labels?")
         tmplayout.addWidget(tmplabel)
-        layout.addLayout(tmplayout, 4, 8, 1, 1)
+        layout.addLayout(tmplayout, 5, 8, 1, 1)
         self.chk_sett_showcmax.setToolTip(
             "Show the cm<sup>-1</sup> (left) axis? You can turn this off in case you "
             "want to stich plots together afterwards! This function will also hide the "
@@ -339,7 +346,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_showevax)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 5, 8, 1, 1)
+        layout.addLayout(tmplayout, 6, 8, 1, 1)
         self.chk_sett_showevax.setToolTip(
             "Show the eV (right) axis? You can turn this\n"
             " off in case you want to stich plots together\n"
@@ -426,7 +433,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # push buttons
         layout.addWidget(self.btn_plot, 2, 8, 1, 1)
         if self.rundebug:
-            layout.addWidget(self.btn_test, bottomrowindex - 6, 8, 1, 1)
+            layout.addWidget(self.btn_test, bottomrowindex - 5, 8, 1, 1)
         layout.addWidget(self.btn_load_conf, bottomrowindex - 4, 8, 1, 1)
         layout.addWidget(self.btn_save_conf, bottomrowindex - 3, 8, 1, 1)
         layout.addWidget(self.btn_reset_formatting, bottomrowindex - 2, 8, 1, 1)
@@ -552,6 +559,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
 
             # set checkboxes
+            set_checkbox(self.chk_sett_trans_strength, "show_transition_strength")
             set_checkbox(self.chk_sett_linebreaks, "line_breaks")
             set_checkbox(self.chk_sett_showcmax, "show_cm-1_axis")
             set_checkbox(self.chk_sett_showevax, "show_eV_axis")
@@ -727,7 +735,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.rbtn_iplable_bottom.setChecked(True)
         except KeyError:
-            self.rbtn_iplable_bottom.setChecked(True)
+            if ut.DEFAULT_SETTINGS["settings"]["ip_label_pos"] == "Top":
+                self.rbtn_iplable_top.setChecked(True)
+            else:
+                self.rbtn_iplable_bottom.setChecked(True)
         # how to display forbidden transitions
         try:
             if savedict["settings"]["show_forbidden_transitions"] == "x-out":
@@ -735,7 +746,20 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.rbtn_sett_nodisparrow.setChecked(True)
         except KeyError:
-            self.rbtn_sett_xoutarrow.setChecked(True)
+            if ut.DEFAULT_SETTINGS["settings"]["show_forbidden_transitions"] == "x-out":
+                self.rbtn_sett_xoutarrow.setChecked(True)
+            else:
+                self.rbtn_sett_nodisparrow.setChecked(True)
+        # transition strength
+        try:
+            if savedict["settings"]["show_transition_strength"]:
+                self.chk_sett_trans_strength.setChecked(True)
+            else:
+                self.chk_sett_trans_strength.setChecked(False)
+        except KeyError:
+            self.chk_sett_trans_strength.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["show_transition_strength"]
+            )
         # line breaks
         try:
             if savedict["settings"]["line_breaks"]:
@@ -743,7 +767,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_linebreaks.setChecked(False)
         except KeyError:
-            self.chk_sett_linebreaks.setChecked(True)
+            self.chk_sett_linebreaks.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["line_breaks"]
+            )
         # show cm-1 axis
         try:
             if savedict["settings"]["show_cm-1_axis"]:
@@ -751,7 +777,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_showcmax.setChecked(False)
         except KeyError:
-            self.chk_sett_showcmax.setChecked(True)
+            self.chk_sett_showcmax.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["show_cm-1_axis"]
+            )
         # show eV axis
         try:
             if savedict["settings"]["show_eV_axis"]:
@@ -759,7 +787,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_showevax.setChecked(False)
         except KeyError:
-            self.chk_sett_showevax.setChecked(True)
+            self.chk_sett_showevax.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["show_eV_axis"]
+            )
 
         set_line_edits("settings", "plot_title", self.edt_sett_plttitle)
         set_line_edits("settings", "prec_level", self.edt_sett_preclevel)
@@ -815,6 +845,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             dispforbidden = "noshow"
         savedict["settings"]["show_forbidden_transitions"] = dispforbidden
         savedict["settings"]["plot_title"] = self.edt_sett_plttitle.text()
+        savedict["settings"][
+            "show_transition_strength"
+        ] = self.chk_sett_trans_strength.isChecked()
         savedict["settings"]["line_breaks"] = self.chk_sett_linebreaks.isChecked()
         savedict["settings"]["show_cm-1_axis"] = self.chk_sett_showcmax.isChecked()
         savedict["settings"]["show_eV_axis"] = self.chk_sett_showevax.isChecked()

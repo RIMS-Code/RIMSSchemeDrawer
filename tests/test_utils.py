@@ -34,6 +34,25 @@ def test_json_reader_new(data_path, tmp_path):
     assert "settings" in data_in.keys()
 
 
+@pytest.mark.parametrize(
+    "values",
+    [
+        [1.2345e6, 3, "$1.234 \\times 10^{6}$"],
+        [0.001, 2, "$1.00 \\times 10^{-3}$"],
+        [1, 1, "$1.0 \\times 10^{0}$"],
+    ],
+)
+def test_my_exp_formatter(values):
+    """Format exponential values as LaTeX strings."""
+    value = values[0]
+    prec = values[1]
+    str_exp = values[2]
+
+    str_ret = ut.my_exp_formatter(value, prec)
+
+    assert str_ret == str_exp
+
+
 @given(value=st.floats(min_value=0, allow_infinity=False))
 def test_my_formatter(value):
     """Return properly formatted LaTeX code."""
