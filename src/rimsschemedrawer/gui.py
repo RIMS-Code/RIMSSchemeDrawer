@@ -59,6 +59,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.lbl_steps = []
         self.edt_level = []
         self.edt_term = []
+        self.edt_transition_strengths = []
         self.edt_gslevel = QtWidgets.QLineEdit()
         self.edt_gsterm = QtWidgets.QLineEdit()
         self.edt_iplevel = QtWidgets.QLineEdit()
@@ -72,6 +73,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_sett_fstitle = QtWidgets.QLineEdit()
         self.edt_sett_fsaxes = QtWidgets.QLineEdit()
         self.edt_sett_fsaxlbl = QtWidgets.QLineEdit()
+        self.chk_sett_trans_strength = QtWidgets.QCheckBox("Transition strengths?")
         self.chk_sett_linebreaks = QtWidgets.QCheckBox("Line breaks?")
         self.chk_sett_showcmax = QtWidgets.QCheckBox()  # no label -> label in layout
         self.chk_sett_showcmax.setChecked(True)
@@ -93,9 +95,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # push buttons
         self.btn_plot = QtWidgets.QPushButton("Plot")
+        self.btn_test = QtWidgets.QPushButton("Test")
         self.btn_load_conf = QtWidgets.QPushButton("Load Config")
         self.btn_save_conf = QtWidgets.QPushButton("Save Config")
-        self.btn_test = QtWidgets.QPushButton("Test")
+        self.btn_reset_formatting = QtWidgets.QPushButton("Reset Formatting")
         self.btn_about = QtWidgets.QPushButton("About")
         self.btn_quit = QtWidgets.QPushButton("Quit")
 
@@ -108,7 +111,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.fontheader.setBold(True)
 
         # initialize the UI
-        self.initUI()
+        self.init_ui()
 
         # set default values
         self.fill_default_values()
@@ -116,7 +119,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # show the UI
         self.show()
 
-    def initUI(self):
+    def init_ui(self):
         """
         Initialize the UI
         """
@@ -156,22 +159,26 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         lbl_trmsymb = QtWidgets.QLabel("Term Symbol")
         lbl_trmsymb.setFont(self.fontheader)
         layout.addWidget(lbl_trmsymb, 0, 2, 1, 1)
+        # transition strength
+        lbl_trsstrength = QtWidgets.QLabel("Tr. strength (s<sup>-1</sup>)")
+        lbl_trsstrength.setFont(self.fontheader)
+        layout.addWidget(lbl_trsstrength, 0, 3, 1, 1)
         # ground state manifold?
         lbl_gsmani = QtWidgets.QLabel("GS Manifold?")
         lbl_gsmani.setFont(self.fontheader)
-        layout.addWidget(lbl_gsmani, 0, 3, 1, 1)
+        layout.addWidget(lbl_gsmani, 0, 4, 1, 1)
         # Forbidden transition
         lbl_forbidden = QtWidgets.QLabel("Forbidden?")
         lbl_forbidden.setFont(self.fontheader)
-        layout.addWidget(lbl_forbidden, 0, 4, 1, 1)
+        layout.addWidget(lbl_forbidden, 0, 5, 1, 1)
         # Settings
         lbl_sett = QtWidgets.QLabel("Settings")
         lbl_sett.setFont(self.fontheader)
-        layout.addWidget(lbl_sett, 0, 5, 1, 1)
+        layout.addWidget(lbl_sett, 0, 6, 1, 1)
         # plot title
         lbl_plttit = QtWidgets.QLabel("Plot Title")
         lbl_plttit.setFont(self.fontheader)
-        layout.addWidget(lbl_plttit, 0, 7, 1, 1)
+        layout.addWidget(lbl_plttit, 0, 8, 1, 1)
 
         # ground state
         lbl_gs = QtWidgets.QLabel("Ground state (cm<sup>-1</sup>)")
@@ -197,11 +204,12 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             self.edt_level.append(QtWidgets.QLineEdit())
             self.edt_level[it].setFixedSize(self.lineedit_size)
             self.edt_level[it].setValidator(QtGui.QDoubleValidator())
-            self.edt_level[it].setAlignment(QtCore.Qt.AlignRight)
+            self.edt_level[it].setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
             self.edt_level[it].setToolTip(
                 "Enter the level of the given step in the selected unit."
             )
             layout.addWidget(self.edt_level[it], 2 + it, 1, 1, 1)
+
             # term symbol steps
             self.edt_term.append(QtWidgets.QLineEdit())
             self.edt_term[it].setFixedSize(self.lineedit_size)
@@ -209,9 +217,22 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 "Enter term symbol for selected step. " + tt_termsymbol
             )
             layout.addWidget(self.edt_term[it], 2 + it, 2, 1, 1)
+
+            # transition strength
+            self.edt_transition_strengths.append(QtWidgets.QLineEdit())
+            self.edt_transition_strengths[it].setFixedSize(self.lineedit_size)
+            self.edt_transition_strengths[it].setValidator(QtGui.QDoubleValidator())
+            self.edt_transition_strengths[it].setAlignment(
+                QtCore.Qt.AlignmentFlag.AlignRight
+            )
+            self.edt_transition_strengths[it].setToolTip(
+                "Enter transition strength for selected step in s<sup>-1</sup>."
+            )
+            layout.addWidget(self.edt_transition_strengths[it], 2 + it, 3, 1, 1)
+
             # check boxes
             self.chk_lowlying.append(QtWidgets.QCheckBox("Low-lying state?"))
-            layout.addWidget(self.chk_lowlying[it], 2 + it, 3, 1, 1)
+            layout.addWidget(self.chk_lowlying[it], 2 + it, 4, 1, 1)
             self.chk_lowlying[it].toggled.connect(self.set_label_names)
             self.chk_lowlying[it].setToolTip("Check if this is a low-lying state?")
             # forbidden transition
@@ -220,7 +241,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             tmplayout.addStretch()
             tmplayout.addWidget(self.chk_forbidden[it])
             tmplayout.addStretch()
-            layout.addLayout(tmplayout, 2 + it, 4, 1, 1)
+            layout.addLayout(tmplayout, 2 + it, 5, 1, 1)
             self.chk_forbidden[it].setToolTip(
                 "Check this box to mark the\n" "transition as forbidden."
             )
@@ -255,19 +276,19 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.rbtngrp_sett_forbidden.addButton(self.rbtn_sett_nodisparrow)
 
         # labels for settings
-        layout.addWidget(QtWidgets.QLabel("Figure Width x Height:"), 1, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Font size title:"), 2, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Font size axes:"), 3, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Font size axes label:"), 4, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Font size labels:"), 5, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Headspace (cm<sup>-1</sup>):"), 6, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Arrow width:"), 7, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Arrow head width:"), 8, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Precision wavelength:"), 9, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Precision level:"), 10, 5, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("IP label position:"), 11, 5, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Figure Width x Height:"), 1, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size title:"), 2, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size axes:"), 3, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size axes label:"), 4, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size labels:"), 5, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Headspace (cm<sup>-1</sup>):"), 6, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Arrow width:"), 7, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Arrow head width:"), 8, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Precision wavelength:"), 9, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Precision level:"), 10, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("IP label position:"), 11, 6, 1, 1)
         layout.addWidget(
-            QtWidgets.QLabel("Display forbidden transitions:"), 12, 5, 1, 1
+            QtWidgets.QLabel("Display forbidden transitions:"), 12, 6, 1, 1
         )
         # line edits and buttons, include tooltips
         tmplayout = QtWidgets.QHBoxLayout()
@@ -278,31 +299,37 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         tmplayout.addStretch()
         tmplayout.addWidget(self.edt_sett_figheight)
         self.edt_sett_figheight.setToolTip("Height of figure in inches.")
-        layout.addLayout(tmplayout, 1, 6, 1, 1)
-        layout.addWidget(self.edt_sett_fstitle, 2, 6, 1, 1)
+        layout.addLayout(tmplayout, 1, 7, 1, 1)
+        layout.addWidget(self.edt_sett_fstitle, 2, 7, 1, 1)
         self.edt_sett_fstitle.setToolTip("Font size of the plot title.")
-        layout.addWidget(self.edt_sett_fsaxes, 3, 6, 1, 1)
+        layout.addWidget(self.edt_sett_fsaxes, 3, 7, 1, 1)
         self.edt_sett_fsaxes.setToolTip("Font size of axes ticks.")
-        layout.addWidget(self.edt_sett_fsaxlbl, 4, 6, 1, 1)
+        layout.addWidget(self.edt_sett_fsaxlbl, 4, 7, 1, 1)
         self.edt_sett_fsaxlbl.setToolTip("Font size of axes labels.")
+        # transition_strengths
+        tmplayout = QtWidgets.QHBoxLayout()
+        tmplayout.addWidget(self.chk_sett_trans_strength)
+        tmplayout.addStretch()
+        layout.addLayout(tmplayout, 3, 8, 1, 1)
+        self.chk_sett_trans_strength.setToolTip("Display the transition strength?")
         # line breaks
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_linebreaks)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 4, 7, 1, 1)
+        layout.addLayout(tmplayout, 4, 8, 1, 1)
         self.chk_sett_linebreaks.setToolTip(
             "Should there be a line break between\n"
             "the state and the term symbol? Play\n"
             "with this to make the the plot look nicer."
         )
-        layout.addWidget(self.edt_sett_fslbl, 5, 6, 1, 1)
+        layout.addWidget(self.edt_sett_fslbl, 5, 7, 1, 1)
         # check box show cm-1 axis
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_showcmax)
         tmplayout.addStretch()
         tmplabel = QtWidgets.QLabel("Show cm-1 axis labels?")
         tmplayout.addWidget(tmplabel)
-        layout.addLayout(tmplayout, 5, 7, 1, 1)
+        layout.addLayout(tmplayout, 5, 8, 1, 1)
         self.chk_sett_showcmax.setToolTip(
             "Show the cm<sup>-1</sup> (left) axis? You can turn this off in case you "
             "want to stich plots together afterwards! This function will also hide the "
@@ -314,12 +341,12 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "ticks."
         )
         self.edt_sett_fslbl.setToolTip("Font size of the labels.")
-        layout.addWidget(self.edt_sett_headspace, 6, 6, 1, 1)
+        layout.addWidget(self.edt_sett_headspace, 6, 7, 1, 1)
         # check box show eV axis
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_showevax)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 6, 7, 1, 1)
+        layout.addLayout(tmplayout, 6, 8, 1, 1)
         self.chk_sett_showevax.setToolTip(
             "Show the eV (right) axis? You can turn this\n"
             " off in case you want to stich plots together\n"
@@ -333,23 +360,23 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "on top to fit all the text in. The value"
             "is given in cm<sup>-1</sup>."
         )
-        layout.addWidget(self.edt_sett_arrwidth, 7, 6, 1, 1)
+        layout.addWidget(self.edt_sett_arrwidth, 7, 7, 1, 1)
         self.edt_sett_arrwidth.setToolTip(
             "Set the width of the arrow line in\n"
             "undefine dunits. Play to get the ideal\n"
             "settings."
         )
-        layout.addWidget(self.edt_sett_arrheadwidth, 8, 6, 1, 1)
+        layout.addWidget(self.edt_sett_arrheadwidth, 8, 7, 1, 1)
         self.edt_sett_arrheadwidth.setToolTip(
             "Set the width of the arrwo head in\n"
             "undefined units. Play to get the ideal\n"
             "settings."
         )
-        layout.addWidget(self.edt_sett_preclambda, 9, 6, 1, 1)
+        layout.addWidget(self.edt_sett_preclambda, 9, 7, 1, 1)
         self.edt_sett_preclambda.setToolTip(
             "Set the precision with which the wavelength\n" "is displayed on the plot."
         )
-        layout.addWidget(self.edt_sett_preclevel, 10, 6, 1, 1)
+        layout.addWidget(self.edt_sett_preclevel, 10, 7, 1, 1)
         self.edt_sett_preclevel.setToolTip(
             "Set the precision with which the wavenumber\n" "is displayed on the plot."
         )
@@ -360,7 +387,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         tmplayout.addWidget(self.rbtn_iplable_bottom)
         self.rbtn_iplable_top.setToolTip("Display the IP label above the line.")
         self.rbtn_iplable_bottom.setToolTip("Display the IP label below the line.")
-        layout.addLayout(tmplayout, 11, 6, 1, 1)
+        layout.addLayout(tmplayout, 11, 7, 1, 1)
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.rbtn_sett_xoutarrow)
         self.rbtn_sett_xoutarrow.setChecked(True)  # set top as default
@@ -372,8 +399,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.rbtn_sett_nodisparrow.setToolTip(
             "Don't show arrows for forbidden\n" "transitions."
         )
-        layout.addLayout(tmplayout, 12, 6, 1, 1)
-        layout.addWidget(self.edt_sett_plttitle, 1, 7, 1, 1)
+        layout.addLayout(tmplayout, 12, 7, 1, 1)
+        layout.addWidget(self.edt_sett_plttitle, 1, 8, 1, 1)
         self.edt_sett_plttitle.setToolTip("Title of the plot.")
 
         # set sizes
@@ -404,13 +431,14 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_sett_preclevel.setAlignment(QtCore.Qt.AlignRight)
 
         # push buttons
-        layout.addWidget(self.btn_plot, 2, 7, 1, 1)
+        layout.addWidget(self.btn_plot, 2, 8, 1, 1)
         if self.rundebug:
-            layout.addWidget(self.btn_test, bottomrowindex - 4, 7, 1, 1)
-        layout.addWidget(self.btn_load_conf, bottomrowindex - 3, 7, 1, 1)
-        layout.addWidget(self.btn_save_conf, bottomrowindex - 2, 7, 1, 1)
-        layout.addWidget(self.btn_about, bottomrowindex - 1, 7, 1, 1)
-        layout.addWidget(self.btn_quit, bottomrowindex, 7, 1, 1)
+            layout.addWidget(self.btn_test, bottomrowindex - 5, 8, 1, 1)
+        layout.addWidget(self.btn_load_conf, bottomrowindex - 4, 8, 1, 1)
+        layout.addWidget(self.btn_save_conf, bottomrowindex - 3, 8, 1, 1)
+        layout.addWidget(self.btn_reset_formatting, bottomrowindex - 2, 8, 1, 1)
+        layout.addWidget(self.btn_about, bottomrowindex - 1, 8, 1, 1)
+        layout.addWidget(self.btn_quit, bottomrowindex, 8, 1, 1)
 
         # connect it all up
         self.rbtn_nm.toggled.connect(self.set_label_names)
@@ -431,6 +459,12 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "is only meant for debugging and could have\n"
             "weird effects when using the software."
         )
+        self.btn_reset_formatting.clicked.connect(
+            lambda: self.fill_default_values(True)
+        )
+        self.btn_reset_formatting.setToolTip(
+            "Reset the formatting variables to default values."
+        )
         self.btn_about.clicked.connect(self.about)
         self.btn_about.setToolTip("Displays an about page with info on the program")
         self.btn_quit.clicked.connect(self.close)
@@ -439,18 +473,42 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # set the layout to the widget
         self.mainwidget.setLayout(layout)
 
-    def fill_default_values(self):
+    def fill_default_values(self, reset: bool = False):
         """
         Routine to fill default values in check boxes if they are empty.
-        This is such that the user can't leave required fields empty
+        This is such that the user can't leave required fields empty.
+
+        :param reset: If True, will overwrite fields that contain values.
         """
 
         def fillme(field, value):
             """
             Fills values of line edits, if currently empty
             """
-            if field.text() == "":
+            if reset or field.text() == "":
                 field.setText(value)
+
+        def set_radiobutton(btn: QtWidgets.QRadioButton, field: str, comp):
+            """Set a radiobutton's state by comparing field with comp.
+
+            The radiobutton's state is set to field==comp
+
+            :param btn: Radiobutton
+            :param field: The field in 'settings' to use to compare
+            :param comp: Comparator.
+            """
+            btn.setChecked(ut.DEFAULT_SETTINGS["settings"][field] == comp)
+
+        def set_checkbox(box: QtWidgets.QCheckBox, field: str):
+            """Set a checkbox' state by field value.
+
+            The checkbox' state is set to boolean value of field.
+
+            :param box: Checkbox to set
+            :param field: The field in 'settings' to use to compare
+            :param comp: Comparator.
+            """
+            box.setChecked(ut.DEFAULT_SETTINGS["settings"][field])
 
         # loop through line edits
         fillme(
@@ -487,6 +545,24 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             self.edt_sett_preclevel,
             str(ut.DEFAULT_SETTINGS["settings"]["prec_level"]),
         )
+
+        # radiobuttons and checkboxes only to be set on reset:
+        if reset:
+            # set radiobuttons
+            set_radiobutton(self.rbtn_iplable_top, "ip_label_pos", "Top")
+            set_radiobutton(self.rbtn_iplable_bottom, "ip_label_pos", "Bottom")
+            set_radiobutton(
+                self.rbtn_sett_xoutarrow, "show_forbidden_transitions", "x-out"
+            )
+            set_radiobutton(
+                self.rbtn_sett_nodisparrow, "show_forbidden_transitions", "noshow"
+            )
+
+            # set checkboxes
+            set_checkbox(self.chk_sett_trans_strength, "show_transition_strength")
+            set_checkbox(self.chk_sett_linebreaks, "line_breaks")
+            set_checkbox(self.chk_sett_showcmax, "show_cm-1_axis")
+            set_checkbox(self.chk_sett_showevax, "show_eV_axis")
 
     def set_label_names(self):
         # get the unit
@@ -621,17 +697,20 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         for it in range(
             len(self.edt_level)
         ):  # only loop through as many entries as there are
-            set_line_edits("scheme", "step_level" + str(it), self.edt_level[it])
-            set_line_edits("scheme", "step_term" + str(it), self.edt_term[it])
+            set_line_edits("scheme", f"step_level{it}", self.edt_level[it])
+            set_line_edits("scheme", f"step_term{it}", self.edt_term[it])
+            set_line_edits(
+                "scheme", f"trans_strength{it}", self.edt_transition_strengths[it]
+            )
             try:
-                if savedict["scheme"]["step_lowlying" + str(it)]:
+                if savedict["scheme"][f"step_lowlying{it}"]:
                     self.chk_lowlying[it].setChecked(True)
                 else:
                     self.chk_lowlying[it].setChecked(False)
             except KeyError:
                 self.chk_lowlying[it].setChecked(False)
             try:
-                if savedict["scheme"]["step_forbidden" + str(it)]:
+                if savedict["scheme"][f"step_forbidden{it}"]:
                     self.chk_forbidden[it].setChecked(True)
                 else:
                     self.chk_forbidden[it].setChecked(False)
@@ -656,7 +735,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.rbtn_iplable_bottom.setChecked(True)
         except KeyError:
-            self.rbtn_iplable_bottom.setChecked(True)
+            if ut.DEFAULT_SETTINGS["settings"]["ip_label_pos"] == "Top":
+                self.rbtn_iplable_top.setChecked(True)
+            else:
+                self.rbtn_iplable_bottom.setChecked(True)
         # how to display forbidden transitions
         try:
             if savedict["settings"]["show_forbidden_transitions"] == "x-out":
@@ -664,7 +746,20 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.rbtn_sett_nodisparrow.setChecked(True)
         except KeyError:
-            self.rbtn_sett_xoutarrow.setChecked(True)
+            if ut.DEFAULT_SETTINGS["settings"]["show_forbidden_transitions"] == "x-out":
+                self.rbtn_sett_xoutarrow.setChecked(True)
+            else:
+                self.rbtn_sett_nodisparrow.setChecked(True)
+        # transition strength
+        try:
+            if savedict["settings"]["show_transition_strength"]:
+                self.chk_sett_trans_strength.setChecked(True)
+            else:
+                self.chk_sett_trans_strength.setChecked(False)
+        except KeyError:
+            self.chk_sett_trans_strength.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["show_transition_strength"]
+            )
         # line breaks
         try:
             if savedict["settings"]["line_breaks"]:
@@ -672,7 +767,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_linebreaks.setChecked(False)
         except KeyError:
-            self.chk_sett_linebreaks.setChecked(True)
+            self.chk_sett_linebreaks.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["line_breaks"]
+            )
         # show cm-1 axis
         try:
             if savedict["settings"]["show_cm-1_axis"]:
@@ -680,7 +777,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_showcmax.setChecked(False)
         except KeyError:
-            self.chk_sett_showcmax.setChecked(True)
+            self.chk_sett_showcmax.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["show_cm-1_axis"]
+            )
         # show eV axis
         try:
             if savedict["settings"]["show_eV_axis"]:
@@ -688,7 +787,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             else:
                 self.chk_sett_showevax.setChecked(False)
         except KeyError:
-            self.chk_sett_showevax.setChecked(True)
+            self.chk_sett_showevax.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["show_eV_axis"]
+            )
 
         set_line_edits("settings", "plot_title", self.edt_sett_plttitle)
         set_line_edits("settings", "prec_level", self.edt_sett_preclevel)
@@ -709,12 +810,13 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         savedict["scheme"]["gs_level"] = self.edt_gslevel.text()
         savedict["scheme"]["gs_term"] = self.edt_gsterm.text()
         for it in range(len(self.lbl_steps)):
-            savedict["scheme"]["step_level" + str(it)] = self.edt_level[it].text()
-            savedict["scheme"]["step_term" + str(it)] = self.edt_term[it].text()
-            savedict["scheme"]["step_lowlying" + str(it)] = self.chk_lowlying[
+            savedict["scheme"][f"step_level{it}"] = self.edt_level[it].text()
+            savedict["scheme"][f"step_term{it}"] = self.edt_term[it].text()
+            savedict["scheme"][f"trans_strength{it}"] = self.edt_transition_strengths[
                 it
-            ].isChecked()
-            savedict["scheme"]["step_forbidden" + str(it)] = self.chk_forbidden[
+            ].text()
+            savedict["scheme"][f"step_lowlying{it}"] = self.chk_lowlying[it].isChecked()
+            savedict["scheme"][f"step_forbidden{it}"] = self.chk_forbidden[
                 it
             ].isChecked()
         savedict["scheme"]["ip_level"] = self.edt_iplevel.text()
@@ -743,6 +845,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             dispforbidden = "noshow"
         savedict["settings"]["show_forbidden_transitions"] = dispforbidden
         savedict["settings"]["plot_title"] = self.edt_sett_plttitle.text()
+        savedict["settings"][
+            "show_transition_strength"
+        ] = self.chk_sett_trans_strength.isChecked()
         savedict["settings"]["line_breaks"] = self.chk_sett_linebreaks.isChecked()
         savedict["settings"]["show_cm-1_axis"] = self.chk_sett_showcmax.isChecked()
         savedict["settings"]["show_eV_axis"] = self.chk_sett_showevax.isChecked()
@@ -766,6 +871,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             return
 
         filename = Path(filename)
+        filename = filename.with_suffix(".json")
+
         self.user_path = filename.parent
 
         savedict = self.write_json()
@@ -809,12 +916,12 @@ class MplCanvas(FigureCanvasQTAgg):
         super().__init__()
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
-        super(MplCanvas, self).__init__(fig)
+        super().__init__(fig)
 
 
 class PlotDisplay(QtWidgets.QMainWindow):
     def __init__(self, json_data: dict, parent: QtWidgets.QWidget = None):
-        super(PlotDisplay, self).__init__(parent=parent)
+        super().__init__(parent=parent)
 
         sc = MplCanvas(width=5, height=4, dpi=100)
         Plotter(json_data, fig_ax=(sc.figure, sc.axes))

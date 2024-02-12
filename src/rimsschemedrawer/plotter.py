@@ -123,13 +123,28 @@ class Plotter:
 
         number_of_steps = it
 
+        # transition strengths
+        transition_strengths = []
+        for it in range(self.number_of_steps):
+            try:
+                tstrength = self._get_dict_entry("scheme", f"trans_strength{it}")
+                if tstrength == "":
+                    add_value = ""
+                else:
+                    add_value = float(tstrength)
+                transition_strengths.append(add_value)
+            except KeyError:
+                transition_strengths.append("")
+
         # now only add lambdas that are NOT low-lying states, same for forbidden steps!
         lambda_steps = []
+        transition_strengths_steps = []
         forbidden_steps = []
         for it in range(number_of_steps):
             try:
                 if not self._get_dict_entry("scheme", f"step_lowlying{it}"):
                     lambda_steps.append(lambdas[it])
+                    transition_strengths_steps.append(transition_strengths[it])
                     try:
                         forbidden_steps.append(forbidden[it])
                     except IndexError:
@@ -169,7 +184,7 @@ class Plotter:
             # write lambda_steps back
             lambda_steps = list(lambda_steps_temp)
 
-        # make lambda_steps into an np.array
+        # make lambda_steps into a np.array
         tmp = []
         for it in lambda_steps:
             try:
@@ -237,7 +252,7 @@ class Plotter:
             lbreak = ", "
 
         # ### CREATE FIGURE ###
-        # seocnd axes -> mirror of first
+        # second axes -> mirror of first
         a2 = self._axes.twinx()
 
         # figure width and height)
@@ -396,8 +411,15 @@ class Plotter:
                 or self._get_dict_entry("settings", "show_forbidden_transitions")
                 == "x-out"
             ):
-                # wavelength text
+                # wavelength text and transition strength
                 lambdastr = "%.*f" % (int(prec_lambda), lambda_steps[it]) + "$\\,$nm"
+                if (
+                    self._get_dict_entry("settings", "show_transition_strength")
+                    and (tmp_strength := transition_strengths_steps[it]) != ""
+                ):
+                    lambdastr += (
+                        f"\nA={ut.my_exp_formatter(tmp_strength, 1)}$\\,s^{{-1}}$"
+                    )
                 if it == 0 and len(wavenumber_es) > 0:
                     self._axes.text(
                         firstarrowxmfl + textpad,
@@ -406,6 +428,7 @@ class Plotter:
                         color=col,
                         ha=halignlam,
                         va="center",
+                        ma="center",
                         rotation=90,
                         size=fsz_labels,
                     )
@@ -417,6 +440,7 @@ class Plotter:
                         color=col,
                         ha=halignlam,
                         va="center",
+                        ma="center",
                         rotation=90,
                         size=fsz_labels,
                     )
@@ -452,6 +476,7 @@ class Plotter:
 
         # create ground state lambda step array
         lambda_step_es = []
+        transition_strengths_es = []
         for it in range(len(wavenumber_es)):
             lambda_step_es.append(
                 1.0e7
@@ -460,6 +485,7 @@ class Plotter:
                     - (float(wavenumber_es[it]) - float(wavenumber_gs))
                 )
             )
+            transition_strengths_es.append(transition_strengths[it])
 
         # now go through low lying excited states
         for it in range(len(wavenumber_es)):
@@ -510,6 +536,13 @@ class Plotter:
 
                 # wavelength text
                 lambdastr = "%.*f" % (int(prec_lambda), lambda_step_es[it]) + "$\\,$nm"
+                if (
+                    self._get_dict_entry("settings", "show_transition_strength")
+                    and (tmp_strength := transition_strengths_es[it]) != ""
+                ):
+                    lambdastr += (
+                        f"\nA={ut.my_exp_formatter(tmp_strength, 1)}$\\,s^{{-1}}$"
+                    )
                 self._axes.text(
                     xval + textpad,
                     yval + wstp / 2.0,
@@ -517,6 +550,7 @@ class Plotter:
                     color=col,
                     ha="left",
                     va="center",
+                    ma="center",
                     rotation=90,
                     size=fsz_labels,
                 )

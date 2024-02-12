@@ -9,8 +9,8 @@ import matplotlib
 DEFAULT_SETTINGS = {
     "settings": {
         "plot_title": "",
-        "fig_width": 5.0,
-        "fig_height": 8.0,
+        "fig_width": 5,
+        "fig_height": 8,
         "fs_title": 14,
         "fs_axes": 12,
         "fs_axes_labels": 12,
@@ -23,6 +23,7 @@ DEFAULT_SETTINGS = {
         "line_breaks": False,
         "ip_label_pos": "Top",
         "show_forbidden_transitions": "x-out",
+        "show_transition_strength": False,
         "show_cm-1_axis": True,
         "show_eV_axis": True,
     },
@@ -41,7 +42,7 @@ def json_reader(fin: Path) -> Dict:
 
     :return: Dictionary with parameters for drawing the scheme.
     """
-    with open(fin, "r") as f:
+    with open(fin) as f:
         data = json.load(f)
 
     # check for new file format
@@ -49,6 +50,13 @@ def json_reader(fin: Path) -> Dict:
         data = data["rims_scheme"]
 
     return data
+
+
+def my_exp_formatter(val: float, prec: int) -> str:
+    """Format a value with a given precision to LaTeX output."""
+    value_str = f"{val:.{prec}e}"
+    numb, exp = value_str.split("e")
+    return f"${numb} \\times 10^{{{int(exp)}}}$"
 
 
 def my_formatter(val: float, *args) -> str:
