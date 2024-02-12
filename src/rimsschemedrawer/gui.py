@@ -838,6 +838,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             return
 
         filename = Path(filename)
+        filename = filename.with_suffix(".json")
+
         self.user_path = filename.parent
 
         savedict = self.write_json()
