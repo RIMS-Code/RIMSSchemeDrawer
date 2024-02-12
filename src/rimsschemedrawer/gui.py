@@ -203,7 +203,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             self.edt_level.append(QtWidgets.QLineEdit())
             self.edt_level[it].setFixedSize(self.lineedit_size)
             self.edt_level[it].setValidator(QtGui.QDoubleValidator())
-            self.edt_level[it].setAlignment(QtCore.Qt.AlignRight)
+            self.edt_level[it].setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
             self.edt_level[it].setToolTip(
                 "Enter the level of the given step in the selected unit."
             )
@@ -221,7 +221,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             self.edt_transition_strengths.append(QtWidgets.QLineEdit())
             self.edt_transition_strengths[it].setFixedSize(self.lineedit_size)
             self.edt_transition_strengths[it].setValidator(QtGui.QDoubleValidator())
-            self.edt_transition_strengths[it].setAlignment(QtCore.Qt.AlignRight)
+            self.edt_transition_strengths[it].setAlignment(
+                QtCore.Qt.AlignmentFlag.AlignRight
+            )
             self.edt_transition_strengths[it].setToolTip(
                 "Enter transition strength for selected step in s<sup>-1</sup>."
             )
@@ -687,20 +689,20 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         for it in range(
             len(self.edt_level)
         ):  # only loop through as many entries as there are
-            set_line_edits("scheme", "step_level" + str(it), self.edt_level[it])
-            set_line_edits("scheme", "step_term" + str(it), self.edt_term[it])
+            set_line_edits("scheme", f"step_level{it}", self.edt_level[it])
+            set_line_edits("scheme", f"step_term{it}", self.edt_term[it])
             set_line_edits(
-                "scheme", "trans_strength" + str(it), self.edt_transition_strengths[it]
+                "scheme", f"trans_strength{it}", self.edt_transition_strengths[it]
             )
             try:
-                if savedict["scheme"]["step_lowlying" + str(it)]:
+                if savedict["scheme"][f"step_lowlying{it}"]:
                     self.chk_lowlying[it].setChecked(True)
                 else:
                     self.chk_lowlying[it].setChecked(False)
             except KeyError:
                 self.chk_lowlying[it].setChecked(False)
             try:
-                if savedict["scheme"]["step_forbidden" + str(it)]:
+                if savedict["scheme"][f"step_forbidden{it}"]:
                     self.chk_forbidden[it].setChecked(True)
                 else:
                     self.chk_forbidden[it].setChecked(False)
@@ -778,15 +780,13 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         savedict["scheme"]["gs_level"] = self.edt_gslevel.text()
         savedict["scheme"]["gs_term"] = self.edt_gsterm.text()
         for it in range(len(self.lbl_steps)):
-            savedict["scheme"]["step_level" + str(it)] = self.edt_level[it].text()
-            savedict["scheme"]["step_term" + str(it)] = self.edt_term[it].text()
+            savedict["scheme"][f"step_level{it}"] = self.edt_level[it].text()
+            savedict["scheme"][f"step_term{it}"] = self.edt_term[it].text()
             savedict["scheme"][f"trans_strength{it}"] = self.edt_transition_strengths[
                 it
             ].text()
-            savedict["scheme"]["step_lowlying" + str(it)] = self.chk_lowlying[
-                it
-            ].isChecked()
-            savedict["scheme"]["step_forbidden" + str(it)] = self.chk_forbidden[
+            savedict["scheme"][f"step_lowlying{it}"] = self.chk_lowlying[it].isChecked()
+            savedict["scheme"][f"step_forbidden{it}"] = self.chk_forbidden[
                 it
             ].isChecked()
         savedict["scheme"]["ip_level"] = self.edt_iplevel.text()
