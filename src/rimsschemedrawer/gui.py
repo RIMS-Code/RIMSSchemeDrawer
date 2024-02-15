@@ -954,6 +954,8 @@ class PlotDisplay(QtWidgets.QMainWindow):
 
         if darkmode:
             plt.style.use("dark_background")
+        else:
+            plt.style.use("default")
         sc = MplCanvas(width=5, height=4, dpi=100)
         Plotter(json_data, fig_ax=(sc.figure, sc.axes))
 
