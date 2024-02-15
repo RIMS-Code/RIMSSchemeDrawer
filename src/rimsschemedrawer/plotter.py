@@ -171,15 +171,9 @@ class Plotter:
         else:
             iplabelypos = ipvalue - 0.01 * totwavenumber_photons
             iplabelyalign = "top"
-        if term_symb_ip is None:
-            iplabelstr = "IP, %.*f" % (int(prec_level), ipvalue) + "$\\,$cm$^{-1}$"
-        else:
-            iplabelstr = (
-                "IP, %.*f" % (int(prec_level), ipvalue)
-                + "$\\,$cm$^{-1}$"
-                + lbreak
-                + term_symb_ip
-            )
+        iplabelstr = f"IP, {ipvalue:.{prec_level}f}$\\,$cm$^{{-1}}$"
+        if term_symb_ip is not None:
+            iplabelstr += f"{lbreak}{term_symb_ip}"
         # ip above or below
         self._axes.text(
             textpad,
@@ -214,15 +208,9 @@ class Plotter:
         xval = 0.0
         yval_bott = wavenumber_gs
         # put in bottom level
-        if term_symb_gs is None:
-            levelstr = "%.*f" % (prec_level, wavenumber_gs) + "$\\,$cm$^{-1}$"
-        else:
-            levelstr = (
-                "%.*f" % (prec_level, wavenumber_gs)
-                + "$\\,$cm$^{-1}$"
-                + lbreak
-                + term_symb_gs
-            )
+        levelstr = f"{wavenumber_gs:.{prec_level}f}$\\,$cm$^{{-1}}$"
+        if term_symb_gs is not None:
+            levelstr += f"{lbreak}{term_symb_gs}"
         self._axes.text(
             10.0 - textpad,
             wavenumber_gs,
@@ -301,7 +289,7 @@ class Plotter:
 
             if not forbidden_steps[it] or show_forbidden_trans == "x-out":
                 # wavelength text and transition strength
-                lambdastr = "%.*f" % (int(prec_lambda), lambda_steps[it]) + "$\\,$nm"
+                lambdastr = f"{lambda_steps[it]:.{prec_lambda}f}$\\,$nm"
                 if (
                     show_trans_strength
                     and (tmp_strength := transition_strengths_steps[it]) != ""
@@ -335,15 +323,9 @@ class Plotter:
                     )
 
             # level text
-            if term_symb[it] is None:
-                levelstr = "%.*f" % (int(prec_level), tstp) + "$\\,$cm$^{-1}$"
-            else:
-                levelstr = (
-                    "%.*f" % (int(prec_level), tstp)
-                    + "$\\,$cm$^{-1}$"
-                    + lbreak
-                    + term_symb[it]
-                )
+            levelstr = f"{tstp:.{prec_level}f}$\\,$cm$^{{-1}}$"
+            if term_symb[it] is not None:
+                levelstr += f"{lbreak}{term_symb[it]}"
             if it == len(lambda_steps) - 1:
                 leveltextypos = tstp
                 leveltextvaalign = "center"
@@ -420,7 +402,7 @@ class Plotter:
                     )
 
                 # wavelength text
-                lambdastr = "%.*f" % (int(prec_lambda), lambda_step_es[it]) + "$\\,$nm"
+                lambdastr = f"{lambda_step_es[it]:.{prec_lambda}f}$\\,$nm"
                 if (
                     show_trans_strength
                     and (tmp_strength := transition_strengths_es[it]) != ""
@@ -441,18 +423,10 @@ class Plotter:
                 )
 
             # level text
-            if term_symb_es_formatted[it] is None:
-                levelstr = (
-                    "%.*f" % (int(prec_level), float(wavenumber_es[it]))
-                    + "$\\,$cm$^{-1}$"
-                )
-            else:
+            levelstr = f"{wavenumber_es[it]:.{prec_level}f}$\\,$cm$^{{-1}}$"
+            if term_symb_es_formatted[it] is not None:
                 # NO LINEBREAK HERE ON THESE LINES!
-                levelstr = (
-                    "%.*f" % (int(prec_level), float(wavenumber_es[it]))
-                    + "$\\,$cm$^{-1}$, "
-                    + term_symb_es_formatted[it]
-                )
+                levelstr += f", {term_symb_es_formatted[it]}"
             self._axes.text(
                 xval + 0.5,
                 yval,
