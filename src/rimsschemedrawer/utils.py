@@ -1,10 +1,9 @@
 # Utility functions for the rims scheme drawer
 
-import json
-from pathlib import Path
-from typing import Dict
+from typing import Union
 
 import matplotlib
+import numpy as np
 
 DEFAULT_SETTINGS = {
     "settings": {
@@ -35,22 +34,13 @@ DEFAULT_SETTINGS = {
 }
 
 
-def json_reader(fin: Path) -> Dict:
-    """Read a json file and return a dictionary.
+def cm_2_to_nm(cm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    """Convert a wavenumber in cm^-1 to a wavelength in nm.
 
-    This can take old or new files and return the data that
-    can be read by the program.
-
-    :return: Dictionary with parameters for drawing the scheme.
+    :param cm: Wavenumber in cm^-1.
+    :return: Wavelength in nm.
     """
-    with open(fin) as f:
-        data = json.load(f)
-
-    # check for new file format
-    if "rims_scheme" in data.keys():
-        data = data["rims_scheme"]
-
-    return data
+    return 1e7 / cm
 
 
 def my_exp_formatter(val: float, prec: int) -> str:
@@ -76,6 +66,28 @@ def my_formatter(val: float, *args) -> str:
         val_ret = f"${fform.format_data(val)}$"
 
     return val_ret
+
+
+def nm_to_cm_2(nm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    """Convert a wavelength in nm to wavenumber in cm^-1.
+
+    :param nm: Wavelength in nm.
+    :return: Wavenumber in cm^-1.
+    """
+    return 1e7 / nm
+
+
+def nparr_to_str(arr: np.ndarray) -> np.ndarray:
+    """Convert a numpy array to a string array.
+
+    Replace numbers that are zero with "".
+
+    :param arr: Numpy array to convert.
+    :return: String array.
+    """
+    ret_val = arr.astype(str)
+    ret_val[arr == 0] = ""
+    return ret_val
 
 
 def term_to_string(tstr: str):

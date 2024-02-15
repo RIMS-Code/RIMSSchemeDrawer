@@ -11,6 +11,8 @@ from matplotlib.backends.backend_qtagg import (
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 
+import rimsschemedrawer.json_parser
+
 try:
     from qtpy import QtCore, QtGui, QtWidgets
 except ImportError as e:
@@ -678,7 +680,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         self.user_path = filename.parent
         # load the json file
-        savedict = ut.json_reader(filename)
+        savedict = rimsschemedrawer.json_parser.json_reader(filename)
 
         # function for setting line edits
         def set_line_edits(category, entry, lineedit):
