@@ -36,6 +36,9 @@ class Plotter:
         # figure stuff
         if darkmode:
             plt.style.use("dark_background")
+        else:
+            plt.style.use("default")
+
         self._figure, self._axes = kwargs.get("fig_ax", plt.subplots(1, 1))
 
         # Colors for arrows
