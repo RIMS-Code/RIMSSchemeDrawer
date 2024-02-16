@@ -42,7 +42,7 @@ class Plotter:
             self.coluv = "#8c96df"
             self.colfuv = "#9365b2"
             self.colpump = "#60a55b"
-            self.colhdr = "#343f74"  # header color
+            self.colhdr = "#4b5482"  # header color
         else:
             self.colmain = "#000000"
             self.colir = "#a00000"
@@ -170,19 +170,10 @@ class Plotter:
             size=fsz_labels,
         )
 
-        # Draw the horizontal lines for every transition below IP and for IP
-        for it in transition_steps:
+        # Draw the horizontal lines for every transition except last and for IP
+        for it in transition_steps[:-1]:
             if it < ipvalue:
                 self._axes.hlines(it, xmin=0, xmax=10, color=self.colmain)
-        # Lines for manifold ground states
-        for it in range(np.sum(self.config_parser.is_low_lying)):
-            self._axes.hlines(
-                mfld_yinc * ipvalue * (1 + it),
-                xmin=1.5 * it + 2.3,
-                xmax=1.5 * it + 3.7,
-                linestyle="solid",
-                color=self.colmain,
-            )
 
         # draw the state we come out of, if not ground state
         if wavenumber_gs > 0.0:
@@ -253,7 +244,7 @@ class Plotter:
                         markeredgewidth=5.0,
                     )
 
-            # draw a little dashed line for the last/end state
+            # draw a little solid line for the last/end state
             if it == len(lambda_steps) - 1:
                 self._axes.hlines(
                     tstp,
@@ -332,6 +323,22 @@ class Plotter:
             yval_bott = transition_steps[it]
 
         # now go through low-lying excited states
+        x_spacing_es = (
+            1.5
+            if np.sum(transition_strengths_es) == 0 or not show_trans_strength
+            else 2.0
+        )
+
+        # Lines for manifold ground states
+        for it in range(np.sum(self.config_parser.is_low_lying)):
+            self._axes.hlines(
+                mfld_yinc * ipvalue * (1 + it),
+                xmin=x_spacing_es * it + 2.3,
+                xmax=x_spacing_es * it + 3.7,
+                linestyle="solid",
+                color=self.colmain,
+            )
+
         for it in range(len(wavenumber_es)):
             if lambda_step_es[it] >= 700:
                 col = self.colir
@@ -342,8 +349,8 @@ class Plotter:
             else:
                 col = self.colfuv
 
-            # values
-            xval = firstarrowxmfl + 1.5 + it * 1.5
+            # values for spacing and distance
+            xval = firstarrowxmfl + x_spacing_es + it * x_spacing_es
             yval = mfld_yinc * ipvalue * (1 + it)
             wstp = float(wavenumber_steps[0]) - yval
 
