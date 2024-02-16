@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -159,6 +159,139 @@ class ConfigParser:
     def sett_title(self) -> str:
         """Get the title for the plot."""
         return self._sett_title
+
+    # METHODS
+
+    def scheme_table(self, prec: int = 3, prec_strength: int = 1) -> Tuple[List, List]:
+        """Create a scheme table for further processing.
+
+        The headers are the following:
+        - Step
+        - λ (nm)
+        - From (cm⁻¹)  - including term symbol formatted
+        - To (cm⁻¹) - including term symbol formatted
+        - Forbidden - filled in as "x" if forbidden (only if there are forbidden steps)
+        - Strength (s⁻¹) - formatted as LaTeX string to given precision
+            (only present if any transitions were given)
+
+        Table: All entries are formatted as strings!
+
+        :param prec: Precision for the wavelength and steps.
+        :param prec_strength: Precision for the transition strength.
+
+        :return: Tuple with headers and the scheme table.
+        """
+
+        def reshuffle_list_low_lying(lst: List) -> List:
+            """Reshuffle a given list when low-lying states are present.
+
+            Low-lying states are stored first, then the step from the ground state, and
+            then the actual steps. This function reshuffles the list to have the step
+            from the ground state first, then the low-lying states, and then the actual
+            steps. If no low-lying states are present, do nothing.
+
+            :param lst: List to reshuffle.
+            """
+            if np.any(self._low_lying):
+                idx_first_step = np.where(~self._low_lying)[0][0]
+                tmp_value = lst.pop(idx_first_step)
+                lst.insert(0, tmp_value)
+                return lst
+
+            return lst
+
+        headers = [
+            "Step",
+            "λ (nm)",
+            "From (cm⁻¹)",
+            "To (cm⁻¹)",
+        ]
+
+        first_no_lowlying = np.where(~self._low_lying)[0][0]
+
+        steps = np.ones(self.number_of_levels, dtype=int)
+        for it in range(first_no_lowlying + 1, len(steps)):
+            steps[it] += steps[it - 1]
+
+        lambdas = [f"{it:.{prec}f}" for it in self._steps_nm]
+        lambdas = reshuffle_list_low_lying(lambdas)
+
+        from_level = ["" for _ in range(self.number_of_levels)]
+        # add low-lying states
+        for it in range(first_no_lowlying):
+            tmp_str = f"{self.step_levels[it]:.{prec}f}"
+            if term := self.step_terms[it]:
+                tmp_str += f" ({term})"
+            from_level[it] = tmp_str
+        # add ground state
+        gs = self.gs_level
+        if gs == 0:
+            tmp_str = "0"
+        else:
+            tmp_str = f"{gs:.{prec}f}"
+        if term := self.gs_term:
+            tmp_str += f" ({term})"
+        from_level[first_no_lowlying] = tmp_str
+        # add steps
+        for it in range(
+            first_no_lowlying + 1, self.number_of_levels
+        ):  # above ground state
+            tmp_str = f"{self.step_levels[it - 1]:.{prec}f}"
+            if term := self.step_terms[it - 1]:
+                tmp_str += f" ({term})"
+            from_level[it] = tmp_str
+        from_level = reshuffle_list_low_lying(from_level)
+
+        to_level = ["" for _ in range(self.number_of_levels)]
+        # add low-lying states and first step
+        for it in range(first_no_lowlying + 1):
+            tmp_str = f"{self.step_levels[first_no_lowlying]:.{prec}f}"
+            if term := self.step_terms[first_no_lowlying]:
+                tmp_str += f" ({term})"
+            to_level[it] = tmp_str
+        # add steps
+        for it in range(first_no_lowlying + 1, self.number_of_levels):
+            tmp_str = f"{self.step_levels[it]:.{prec}f}"
+            if term := self.step_terms[it]:
+                tmp_str += f" ({term})"
+            to_level[it] = tmp_str
+        to_level = reshuffle_list_low_lying(to_level)
+
+        # forbidden transitions
+        if np.any(self.step_forbidden):
+            headers.append("Forbidden")
+            forbidden = ["x" if it else "" for it in self.step_forbidden]
+            forbidden = reshuffle_list_low_lying(forbidden)
+
+        # transition strength
+        if np.any(self.transition_strengths):
+            transition_strengths = []
+            headers.append("Strength (s⁻¹)")
+            for val in self.transition_strengths:
+                if val != 0:
+                    transition_strengths.append(ut.my_exp_formatter(val, prec_strength))
+                else:
+                    transition_strengths.append("")
+            transition_strengths = reshuffle_list_low_lying(transition_strengths)
+
+        # create table
+        table = []
+        for idx in range(self.number_of_levels):
+            row = [
+                str(steps[idx]),
+                lambdas[idx],
+                from_level[idx],
+                to_level[idx],
+            ]
+            if np.any(self.step_forbidden):
+                row.append(forbidden[idx])
+            if np.any(self.transition_strengths):
+                row.append(transition_strengths[idx])
+            table.append(row)
+
+        return headers, table
+
+    # PRIVATE METHODS
 
     def _parse_data_scheme(self):
         """Parse the data of the scheme and save it to class variables."""
