@@ -8,18 +8,37 @@
 #   with-sources: false
 
 -e file:.
+    # via file:///-
 contourpy==1.2.0
+    # via matplotlib
 cycler==0.12.1
+    # via matplotlib
 fonttools==4.47.2
+    # via matplotlib
 kiwisolver==1.4.5
+    # via matplotlib
 matplotlib==3.8.2
+    # via rimsschemedrawer
 numpy==1.26.3
+    # via contourpy
+    # via matplotlib
+    # via rimsschemedrawer
 packaging==23.2
+    # via matplotlib
+    # via qtpy
 pillow==10.2.0
+    # via matplotlib
 pyparsing==3.1.1
+    # via matplotlib
 pyqt6==6.6.1
+    # via rimsschemedrawer
 pyqt6-qt6==6.6.1
+    # via pyqt6
 pyqt6-sip==13.6.0
+    # via pyqt6
 python-dateutil==2.8.2
+    # via matplotlib
 qtpy==2.4.1
+    # via rimsschemedrawer
 six==1.16.0
+    # via python-dateutil

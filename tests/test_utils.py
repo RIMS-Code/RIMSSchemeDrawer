@@ -1,37 +1,16 @@
 # Test utility functions for the project
 
-import json
-
 from hypothesis import given, strategies as st
 import pytest
 
 from rimsschemedrawer import utils as ut
 
 
-def test_json_reader(data_path):
-    """Check that a valid json file is returned."""
-    fin = data_path.joinpath("ti.json")
-    data = ut.json_reader(fin)
-
-    assert isinstance(data, dict)
-    assert "scheme" in data.keys()
-    assert "settings" in data.keys()
-
-
-def test_json_reader_new(data_path, tmp_path):
-    """Check correct output with new json format."""
-    # todo: replace this construction with an actual new file
-    fin = data_path.joinpath("ti.json")
-    data = ut.json_reader(fin)
-    data_new = {"rims_scheme": data}
-    fin_new = tmp_path.joinpath("ti_new.json")
-    with open(fin_new, "w") as f:
-        json.dump(data_new, f)
-
-    data_in = ut.json_reader(fin_new)
-    assert isinstance(data_in, dict)
-    assert "scheme" in data_in.keys()
-    assert "settings" in data_in.keys()
+def test_cm_2_to_nm():
+    """Check that the conversion from cm^-1 to nm is correct."""
+    assert ut.cm_2_to_nm(1e7) == 1
+    assert ut.cm_2_to_nm(5e6) == 2
+    assert ut.cm_2_to_nm(3.3333333333333335e6) == 3
 
 
 @pytest.mark.parametrize(
@@ -67,6 +46,13 @@ def test_my_formatter(value):
     elif value >= 10:
         assert "^{" in ret
         assert ret[-2] == "}"
+
+
+def test_nm_to_cm_2():
+    """Check that the conversion from nm to cm^-1 is correct."""
+    assert ut.nm_to_cm_2(1) == 1e7
+    assert ut.nm_to_cm_2(2) == 5e6
+    assert ut.nm_to_cm_2(3) == 3.3333333333333335e6
 
 
 @pytest.mark.parametrize("vals", [["3F2", "$^{3}$F$_{2}$"], ["4G1", "$^{4}$G$_{1}$"]])

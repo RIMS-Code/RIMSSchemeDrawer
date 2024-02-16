@@ -9,6 +9,9 @@ from matplotlib.backends.backend_qtagg import (
     NavigationToolbar2QT as NavigationToolbar,
 )
 from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+
+import rimsschemedrawer.json_parser
 
 try:
     from qtpy import QtCore, QtGui, QtWidgets
@@ -79,6 +82,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.chk_sett_showcmax.setChecked(True)
         self.chk_sett_showevax = QtWidgets.QCheckBox("Show eV axis labels?")
         self.chk_sett_showevax.setChecked(True)
+        self.chk_plot_darkmode = QtWidgets.QCheckBox("Plot dark mode?")
         self.edt_sett_fslbl = QtWidgets.QLineEdit()
         self.edt_sett_headspace = QtWidgets.QLineEdit()
         self.edt_sett_arrwidth = QtWidgets.QLineEdit()
@@ -403,6 +407,13 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         layout.addWidget(self.edt_sett_plttitle, 1, 8, 1, 1)
         self.edt_sett_plttitle.setToolTip("Title of the plot.")
 
+        # plot dark mode?
+        tmplayout = QtWidgets.QHBoxLayout()
+        tmplayout.addWidget(self.chk_plot_darkmode)
+        tmplayout.addStretch()
+        layout.addLayout(tmplayout, 7, 8, 1, 1)
+        self.chk_plot_darkmode.setToolTip("Plot with dark background?")
+
         # set sizes
         self.edt_sett_plttitle.setFixedSize(self.lineedit_size)
         # validators
@@ -433,7 +444,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # push buttons
         layout.addWidget(self.btn_plot, 2, 8, 1, 1)
         if self.rundebug:
-            layout.addWidget(self.btn_test, bottomrowindex - 5, 8, 1, 1)
+            layout.addWidget(self.btn_test, bottomrowindex, 0, 1, 1)
         layout.addWidget(self.btn_load_conf, bottomrowindex - 4, 8, 1, 1)
         layout.addWidget(self.btn_save_conf, bottomrowindex - 3, 8, 1, 1)
         layout.addWidget(self.btn_reset_formatting, bottomrowindex - 2, 8, 1, 1)
@@ -563,6 +574,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             set_checkbox(self.chk_sett_linebreaks, "line_breaks")
             set_checkbox(self.chk_sett_showcmax, "show_cm-1_axis")
             set_checkbox(self.chk_sett_showevax, "show_eV_axis")
+            set_checkbox(self.chk_plot_darkmode, "plot_darkmode")
 
     def set_label_names(self):
         # get the unit
@@ -640,7 +652,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # open the plotting window
         data = self.write_json()
 
-        PlotDisplay(data, parent=self)
+        PlotDisplay(data, parent=self, darkmode=self.chk_plot_darkmode.isChecked())
 
     def load_config(self, **kwargs):
         """
@@ -668,7 +680,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         self.user_path = filename.parent
         # load the json file
-        savedict = ut.json_reader(filename)
+        savedict = rimsschemedrawer.json_parser.json_reader(filename)
 
         # function for setting line edits
         def set_line_edits(category, entry, lineedit):
@@ -790,6 +802,16 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             self.chk_sett_showevax.setChecked(
                 ut.DEFAULT_SETTINGS["settings"]["show_eV_axis"]
             )
+        # plot darkmode
+        try:
+            if savedict["settings"]["plot_darkmode"]:
+                self.chk_plot_darkmode.setChecked(True)
+            else:
+                self.chk_plot_darkmode.setChecked(False)
+        except KeyError:
+            self.chk_plot_darkmode.setChecked(
+                ut.DEFAULT_SETTINGS["settings"]["plot_darkmode"]
+            )
 
         set_line_edits("settings", "plot_title", self.edt_sett_plttitle)
         set_line_edits("settings", "prec_level", self.edt_sett_preclevel)
@@ -851,6 +873,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         savedict["settings"]["line_breaks"] = self.chk_sett_linebreaks.isChecked()
         savedict["settings"]["show_cm-1_axis"] = self.chk_sett_showcmax.isChecked()
         savedict["settings"]["show_eV_axis"] = self.chk_sett_showevax.isChecked()
+        savedict["settings"]["plot_darkmode"] = self.chk_plot_darkmode.isChecked()
 
         return savedict
 
@@ -920,9 +943,21 @@ class MplCanvas(FigureCanvasQTAgg):
 
 
 class PlotDisplay(QtWidgets.QMainWindow):
-    def __init__(self, json_data: dict, parent: QtWidgets.QWidget = None):
+    def __init__(
+        self, json_data: dict, parent: QtWidgets.QWidget = None, darkmode: bool = False
+    ):
+        """Prepare the plot display window.
+
+        :param json_data: Data according to rimsschemedrawer json format.
+        :param parent: Parent widget.
+        :param darkmode: Use dark background for plot?
+        """
         super().__init__(parent=parent)
 
+        if darkmode:
+            plt.style.use("dark_background")
+        else:
+            plt.style.use("default")
         sc = MplCanvas(width=5, height=4, dpi=100)
         Plotter(json_data, fig_ax=(sc.figure, sc.axes))
 

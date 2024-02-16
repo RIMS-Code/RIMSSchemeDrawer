@@ -1,11 +1,10 @@
 """Plotting functions and class for the rims scheme drawer."""
 
-from typing import Any
-
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
+from rimsschemedrawer.json_parser import ConfigParser
 from rimsschemedrawer import utils as ut
 
 
@@ -20,28 +19,37 @@ class Plotter:
             - fig_ax: Tuple of matplotlib figure and axes to plot on. Defaults to
                 creating new ones.
         """
-        self.data = data
+        self.config_parser = ConfigParser(data)
 
         # set kwargs
         self.number_of_steps = kwargs.get("number_of_steps", 7)
 
         # matplotlib parameters
         # tick size
-        fsz_axes = int(data["settings"].get("fs_axes", 12))
+        fsz_axes = self.config_parser.sett_fontsize[0]
         matplotlib.rc("xtick", labelsize=fsz_axes, direction="in")
         matplotlib.rc("ytick", labelsize=fsz_axes, direction="in")
 
         # figure stuff
+        if self.config_parser.sett_darkmode:
+            plt.style.use("dark_background")
         self._figure, self._axes = kwargs.get("fig_ax", plt.subplots(1, 1))
 
         # Colors for arrows
-        self.colir = "#a00000"
-        self.coluv = "#0012a0"
-        self.colfuv = "#5f00a0"
-        self.colpump = "#0aa000"
-
-        self.figwidth = float(data["settings"]["fig_width"])
-        self.figheight = float(data["settings"]["fig_height"])
+        if self.config_parser.sett_darkmode:
+            self.colmain = "#ffffff"
+            self.colir = "#d27878"
+            self.coluv = "#8c96df"
+            self.colfuv = "#9365b2"
+            self.colpump = "#60a55b"
+            self.colhdr = "#343f74"  # header color
+        else:
+            self.colmain = "#000000"
+            self.colir = "#a00000"
+            self.coluv = "#0012a0"
+            self.colfuv = "#5f00a0"
+            self.colpump = "#0aa000"
+            self.colhdr = "#adbbff"  # header color
 
         # now plot the scheme
         self._plotit()
@@ -50,17 +58,6 @@ class Plotter:
     def axes(self) -> plt.Axes:
         """Return the axes."""
         return self._axes
-
-    @property
-    def default_plotting_values(self) -> dict:
-        """Return the default plotting values."""
-        default_values = ut.DEFAULT_SETTINGS  # edits it in place, which is okay!
-
-        # add default values for backwards compatibility with old json files
-        for it in range(self.number_of_steps):
-            default_values["scheme"][f"step_forbidden{it}"] = False
-
-        return default_values
 
     @property
     def figure(self) -> plt.Figure:
@@ -75,156 +72,64 @@ class Plotter:
         """
         self._figure.savefig(fout)
 
-    def _get_dict_entry(self, main_key: str, entry_key: str) -> Any:
-        """Get a dictionary key and fill with default if not available."""
-        try:
-            return self.data[main_key][entry_key]
-        except KeyError:
-            try:
-                return self.default_plotting_values[main_key][entry_key]
-            except KeyError as e:
-                raise KeyError(
-                    f"Could not find {main_key}/{entry_key} in data or default values."
-                ) from e
-
     def _plotit(self):
         # textpad
         textpad = 0.4
         # percentage to increase for manifold
         mfld_yinc = 0.04  # in # of ipvalue
-        #
         firstarrowxmfl = 1.0
 
-        # get settings from program
-        fsz_title = int(self._get_dict_entry("settings", "fs_title"))
-        fsz_axes_labels = int(self._get_dict_entry("settings", "fs_axes_labels"))
-        fsz_labels = int(self._get_dict_entry("settings", "fs_labels"))
-        sett_headspace = float(self._get_dict_entry("settings", "headspace"))
-        sett_arr = float(self._get_dict_entry("settings", "arrow_width"))
-        sett_arr_head = float(self._get_dict_entry("settings", "arrow_head_width"))
-        prec_lambda = int(self._get_dict_entry("settings", "prec_wavelength"))
-        prec_level = int(self._get_dict_entry("settings", "prec_level"))
+        # get formatting settings
+        _, fsz_axes_labels, fsz_labels, fsz_title = self.config_parser.sett_fontsize
+        sett_headspace = self.config_parser.sett_headspace
+        sett_arr, sett_arr_head = self.config_parser.sett_arrow_fmt
+        prec_lambda, prec_level = self.config_parser.sett_prec
+        title_entry = self.config_parser.sett_title
+        (
+            show_cm_1_ax,
+            show_ev_ax,
+            show_forbidden_trans,
+            show_trans_strength,
+        ) = self.config_parser.sett_shows
+        if self.config_parser.sett_line_breaks:
+            lbreak = "\n"
+        else:
+            lbreak = ", "
 
-        # let's first get the wavelengths that we want and a list of bools if states are forbidden
-        lambdas = []
-        forbidden = []
+        # ground state, IP, total wavenumber
+        wavenumber_gs = self.config_parser.gs_level
+        ipvalue = self.config_parser.ip_level
+        totwavenumber_photons = self.config_parser.step_levels[-1]
+        term_symb_ip = self.config_parser.ip_term
+        term_symb_gs = self.config_parser.gs_term
 
-        it = 0  # assign it here so we can use it later updated
-        for it in range(self.number_of_steps):
-            try:
-                if (
-                    stp_level := self._get_dict_entry("scheme", f"step_level{it}")
-                ) == "":
-                    break
-                lambdas.append(float(stp_level))
-                forbidden.append(self._get_dict_entry("scheme", f"step_forbidden{it}"))
-            except KeyError:
-                break
+        # get data for actual steps, low-lying excluded
+        transition_strengths_steps = self.config_parser.transition_strengths[
+            ~self.config_parser.is_low_lying
+        ]
 
-        number_of_steps = it
+        transition_steps = self.config_parser.step_levels[
+            ~self.config_parser.is_low_lying
+        ]
+        forbidden_steps = self.config_parser.step_forbidden[
+            ~self.config_parser.is_low_lying
+        ]
+        lambda_steps = self.config_parser.step_nm[~self.config_parser.is_low_lying]
+        wavenumber_steps = ut.nm_to_cm_2(lambda_steps)
+        term_symb = self.config_parser.step_terms[~self.config_parser.is_low_lying]
 
-        # transition strengths
-        transition_strengths = []
-        for it in range(self.number_of_steps):
-            try:
-                tstrength = self._get_dict_entry("scheme", f"trans_strength{it}")
-                if tstrength == "":
-                    add_value = ""
-                else:
-                    add_value = float(tstrength)
-                transition_strengths.append(add_value)
-            except KeyError:
-                transition_strengths.append("")
-
-        # now only add lambdas that are NOT low-lying states, same for forbidden steps!
-        lambda_steps = []
-        transition_strengths_steps = []
-        forbidden_steps = []
-        for it in range(number_of_steps):
-            try:
-                if not self._get_dict_entry("scheme", f"step_lowlying{it}"):
-                    lambda_steps.append(lambdas[it])
-                    transition_strengths_steps.append(transition_strengths[it])
-                    try:
-                        forbidden_steps.append(forbidden[it])
-                    except IndexError:
-                        forbidden_steps.append(False)
-            except KeyError:
-                break
-
-        # get the term symbols that were entered
-        term_symb_entered = []
-        for it in range(self.number_of_steps):
-            try:
-                if not self._get_dict_entry("scheme", f"step_lowlying{it}"):
-                    term_symb_entered.append(
-                        self._get_dict_entry("scheme", f"step_term{it}")
-                    )
-            except KeyError:
-                break
-
-        # get ground state wavenumber
-        wavenumber_gs = float(self._get_dict_entry("scheme", "gs_level"))
-
-        # now go through the lambda steps and transform into actual wavelengths if not already
-        unit = self._get_dict_entry("scheme", "unit")
-        if unit != "nm":
-            lambda_steps_temp = []
-            for it in range(len(lambda_steps)):
-                if lambda_steps[it] != "":
-                    if it == 0:
-                        lambda_steps_temp.append(
-                            1.0e7 / (float(lambda_steps[it]) - float(wavenumber_gs))
-                        )
-                    else:
-                        lambda_steps_temp.append(
-                            1.0e7
-                            / (float(lambda_steps[it]) - float(lambda_steps[it - 1]))
-                        )
-            # write lambda_steps back
-            lambda_steps = list(lambda_steps_temp)
-
-        # make lambda_steps into a np.array
-        tmp = []
-        for it in lambda_steps:
-            try:
-                tmp.append(float(it))
-            except ValueError:
-                break
-        lambda_steps = np.array(tmp)
-
-        # get more ground states if available (and forbidden states)
-        wavenumber_es = []
-        term_symb_es = []
-        forbidden_es = []
-        for it in range(number_of_steps):
-            try:
-                if self._get_dict_entry("scheme", f"step_lowlying{it}"):
-                    wavenumber_es.append(
-                        float(self._get_dict_entry("scheme", f"step_level{it}"))
-                    )
-                    term_symb_es.append(
-                        self._get_dict_entry("scheme", f"step_term{it}")
-                    )
-                    forbidden_es.append(
-                        self._get_dict_entry("scheme", f"step_forbidden{it}")
-                    )
-            except KeyError:
-                break
-
-        # create wavenumber array
-        wavenumber_steps = 1.0 / lambda_steps * 1e7
-
-        transition_steps = np.zeros(len(wavenumber_steps))
-        transition_steps[0] = wavenumber_steps[0] + wavenumber_gs
-        for it in range(1, len(transition_steps)):
-            transition_steps[it] = transition_steps[it - 1] + wavenumber_steps[it]
-
-        # calculate total excitation in wavenumbers - for scaling later
-        totwavenumber_photons = np.sum(wavenumber_steps)
-
-        # get the ipvalue
-        ipvalue = float(self._get_dict_entry("scheme", "ip_level"))
+        # get low-lying information
+        wavenumber_es = self.config_parser.step_levels[self.config_parser.is_low_lying]
+        lambda_step_es = self.config_parser.step_nm[self.config_parser.is_low_lying]
+        transition_strengths_es = self.config_parser.transition_strengths[
+            self.config_parser.is_low_lying
+        ]
+        forbidden_es = self.config_parser.step_forbidden[
+            self.config_parser.is_low_lying
+        ]
+        term_symb_es_formatted = self.config_parser.step_terms[
+            self.config_parser.is_low_lying
+        ]
 
         # ymax:
         if ipvalue > totwavenumber_photons + wavenumber_gs:
@@ -234,112 +139,74 @@ class Plotter:
         else:
             ymax = totwavenumber_photons + wavenumber_gs
 
-        # create term symbol string for direct usage in plotting
-        term_symb = []
-        term_symb_es_formatted = []
-        for it in range(len(wavenumber_steps)):
-            term_symb.append(ut.term_to_string(term_symb_entered[it]))
-        for it in range(len(term_symb_es)):
-            term_symb_es_formatted.append(ut.term_to_string(term_symb_es[it]))
-        # get term symbol for ip and gs
-        term_symb_ip = ut.term_to_string(self._get_dict_entry("scheme", "ip_term"))
-        term_symb_gs = ut.term_to_string(self._get_dict_entry("scheme", "gs_term"))
-
-        # break line or put in comma, depending on option
-        if self._get_dict_entry("settings", "line_breaks"):
-            lbreak = "\n"
-        else:
-            lbreak = ", "
-
         # ### CREATE FIGURE ###
-        # second axes -> mirror of first
         a2 = self._axes.twinx()
-
-        # figure width and height)
-        figwidth = self.figwidth
-        figheight = self.figheight
-        self._figure.set_size_inches(figwidth, figheight, forward=True)
+        self._figure.set_size_inches(*self.config_parser.sett_fig_size, forward=True)
 
         # shade the level above the IP
-        xshade = [0.0, 10.0]
-        # the * 10. takes care if the user manually extends the range... to a certain degree at least, i.e., ymax*10
+        xshade = [0.0, 10.0]  # x-axis of the shade (which is never displayed)
         self._axes.fill_between(
-            xshade, ipvalue, ymax * 10.0, facecolor="#adbbff", alpha=0.5
+            xshade, ipvalue, ymax * 10.0, facecolor=self.colhdr, alpha=0.5
         )
+
         # label the IP
-        if self._get_dict_entry("settings", "ip_label_pos") == "Top":
+        if self.config_parser.sett_ip_label_pos == "Top":
             iplabelypos = ipvalue + 0.01 * totwavenumber_photons
             iplabelyalign = "bottom"
         else:
             iplabelypos = ipvalue - 0.01 * totwavenumber_photons
             iplabelyalign = "top"
-        if term_symb_ip is None:
-            iplabelstr = "IP, %.*f" % (int(prec_level), ipvalue) + "$\\,$cm$^{-1}$"
-        else:
-            iplabelstr = (
-                "IP, %.*f" % (int(prec_level), ipvalue)
-                + "$\\,$cm$^{-1}$"
-                + lbreak
-                + term_symb_ip
-            )
+        iplabelstr = f"IP, {ipvalue:.{prec_level}f}$\\,$cm$^{{-1}}$"
+        if term_symb_ip is not None:
+            iplabelstr += f"{lbreak}{term_symb_ip}"
         # ip above or below
         self._axes.text(
             textpad,
             iplabelypos,
             iplabelstr,
-            color="k",
+            color=self.colmain,
             ha="left",
             va=iplabelyalign,
             size=fsz_labels,
         )
 
-        # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
+        # Draw the horizontal lines for every transition below IP and for IP
         for it in transition_steps:
             if it < ipvalue:
-                self._axes.hlines(it, xmin=0, xmax=10, color="k")
-        # Lines for manifold groundstater
-        for it in range(len(wavenumber_es)):
+                self._axes.hlines(it, xmin=0, xmax=10, color=self.colmain)
+        # Lines for manifold ground states
+        for it in range(np.sum(self.config_parser.is_low_lying)):
             self._axes.hlines(
                 mfld_yinc * ipvalue * (1 + it),
                 xmin=1.5 * it + 2.3,
                 xmax=1.5 * it + 3.7,
                 linestyle="solid",
-                color="k",
+                color=self.colmain,
             )
 
-        # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
-        for it in transition_steps:
-            if it < ipvalue:
-                self._axes.hlines(it, xmin=0, xmax=10, color="k")
-
         # draw the state we come out of, if not ground state
-        if float(wavenumber_gs) > 0.0:
-            self._axes.hlines(float(wavenumber_gs), xmin=0, xmax=10, color="k")
+        if wavenumber_gs > 0.0:
+            self._axes.hlines(wavenumber_gs, xmin=0, xmax=10, color=self.colmain)
 
         # draw the arrows and cross them out if forbidden
         deltax = 8.65 / (len(lambda_steps) + 1.0) - 0.5
         xval = 0.0
-        yval_bott = float(wavenumber_gs)
+        yval_bott = wavenumber_gs
         # put in bottom level
-        if term_symb_gs is None:
-            levelstr = "%.*f" % (int(prec_level), wavenumber_gs) + "$\\,$cm$^{-1}$"
-        else:
-            levelstr = (
-                "%.*f" % (int(prec_level), wavenumber_gs)
-                + "$\\,$cm$^{-1}$"
-                + lbreak
-                + term_symb_gs
-            )
+        levelstr = f"{wavenumber_gs:.{prec_level}f}$\\,$cm$^{{-1}}$"
+        if term_symb_gs is not None:
+            levelstr += f"{lbreak}{term_symb_gs}"
         self._axes.text(
             10.0 - textpad,
-            float(wavenumber_gs),
+            wavenumber_gs,
             levelstr,
-            color="k",
+            color=self.colmain,
             ha="right",
             va="bottom",
             size=fsz_labels,
         )
 
+        # draw the arrows for the steps
         for it in range(len(lambda_steps)):
             if lambda_steps[it] >= 700:
                 col = self.colir
@@ -354,11 +221,7 @@ class Plotter:
             wstp = wavenumber_steps[it]
             tstp = transition_steps[it]
             # check if transition is forbidden and no show is activated for the arrow
-            if (
-                not forbidden_steps[it]
-                or self._get_dict_entry("settings", "show_forbidden_transitions")
-                == "x-out"
-            ):
+            if not forbidden_steps[it] or show_forbidden_trans == "x-out":
                 # look for where to plot the array
                 if it == 0 and len(wavenumber_es) > 0:
                     xvalplot = firstarrowxmfl
@@ -378,7 +241,7 @@ class Plotter:
                     head_length=totwavenumber_photons / 30.0,
                 )
 
-                # so we don't want to leave the arrow away but it is forbidden: then x it out!
+                # x-out forbidden arrow
                 if forbidden_steps[it]:
                     yval_cross = yval_bott + wstp / 2.0
                     self._axes.plot(
@@ -390,10 +253,14 @@ class Plotter:
                         markeredgewidth=5.0,
                     )
 
-            # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
+            # draw a little dashed line for the last/end state
             if it == len(lambda_steps) - 1:
                 self._axes.hlines(
-                    tstp, xmin=xval - 0.5, xmax=xval + 0.5, linestyle="solid", color="k"
+                    tstp,
+                    xmin=xval - 0.5,
+                    xmax=xval + 0.5,
+                    linestyle="solid",
+                    color=self.colmain,
                 )
 
             # alignment of labels
@@ -406,16 +273,12 @@ class Plotter:
                 halignlev = "left"
                 xloc_levelstr = textpad
 
-            if (
-                not forbidden_steps[it]
-                or self._get_dict_entry("settings", "show_forbidden_transitions")
-                == "x-out"
-            ):
+            if not forbidden_steps[it] or show_forbidden_trans == "x-out":
                 # wavelength text and transition strength
-                lambdastr = "%.*f" % (int(prec_lambda), lambda_steps[it]) + "$\\,$nm"
+                lambdastr = f"{lambda_steps[it]:.{prec_lambda}f}$\\,$nm"
                 if (
-                    self._get_dict_entry("settings", "show_transition_strength")
-                    and (tmp_strength := transition_strengths_steps[it]) != ""
+                    show_trans_strength
+                    and (tmp_strength := transition_strengths_steps[it]) != 0
                 ):
                     lambdastr += (
                         f"\nA={ut.my_exp_formatter(tmp_strength, 1)}$\\,s^{{-1}}$"
@@ -446,15 +309,9 @@ class Plotter:
                     )
 
             # level text
-            if term_symb[it] is None:
-                levelstr = "%.*f" % (int(prec_level), tstp) + "$\\,$cm$^{-1}$"
-            else:
-                levelstr = (
-                    "%.*f" % (int(prec_level), tstp)
-                    + "$\\,$cm$^{-1}$"
-                    + lbreak
-                    + term_symb[it]
-                )
+            levelstr = f"{tstp:.{prec_level}f}$\\,$cm$^{{-1}}$"
+            if term_symb[it] is not None:
+                levelstr += f"{lbreak}{term_symb[it]}"
             if it == len(lambda_steps) - 1:
                 leveltextypos = tstp
                 leveltextvaalign = "center"
@@ -465,7 +322,7 @@ class Plotter:
                 xloc_levelstr,
                 leveltextypos,
                 levelstr,
-                color="k",
+                color=self.colmain,
                 ha=halignlev,
                 va=leveltextvaalign,
                 size=fsz_labels,
@@ -474,20 +331,7 @@ class Plotter:
             # update yval_bott
             yval_bott = transition_steps[it]
 
-        # create ground state lambda step array
-        lambda_step_es = []
-        transition_strengths_es = []
-        for it in range(len(wavenumber_es)):
-            lambda_step_es.append(
-                1.0e7
-                / (
-                    1.0e7 / lambda_steps[0]
-                    - (float(wavenumber_es[it]) - float(wavenumber_gs))
-                )
-            )
-            transition_strengths_es.append(transition_strengths[it])
-
-        # now go through low lying excited states
+        # now go through low-lying excited states
         for it in range(len(wavenumber_es)):
             if lambda_step_es[it] >= 700:
                 col = self.colir
@@ -503,11 +347,7 @@ class Plotter:
             yval = mfld_yinc * ipvalue * (1 + it)
             wstp = float(wavenumber_steps[0]) - yval
 
-            if (
-                not forbidden_es[it]
-                or self._get_dict_entry("settings", "show_forbidden_transitions")
-                == "x-out"
-            ):
+            if not forbidden_es[it] or show_forbidden_trans == "x-out":
                 # xvalue for arrow
                 self._axes.arrow(
                     xval,
@@ -535,10 +375,10 @@ class Plotter:
                     )
 
                 # wavelength text
-                lambdastr = "%.*f" % (int(prec_lambda), lambda_step_es[it]) + "$\\,$nm"
+                lambdastr = f"{lambda_step_es[it]:.{prec_lambda}f}$\\,$nm"
                 if (
-                    self._get_dict_entry("settings", "show_transition_strength")
-                    and (tmp_strength := transition_strengths_es[it]) != ""
+                    show_trans_strength
+                    and (tmp_strength := transition_strengths_es[it]) != 0
                 ):
                     lambdastr += (
                         f"\nA={ut.my_exp_formatter(tmp_strength, 1)}$\\,s^{{-1}}$"
@@ -556,36 +396,27 @@ class Plotter:
                 )
 
             # level text
-            if term_symb_es_formatted[it] is None:
-                levelstr = (
-                    "%.*f" % (int(prec_level), float(wavenumber_es[it]))
-                    + "$\\,$cm$^{-1}$"
-                )
-            else:
+            levelstr = f"{wavenumber_es[it]:.{prec_level}f}$\\,$cm$^{{-1}}$"
+            if term_symb_es_formatted[it] is not None:
                 # NO LINEBREAK HERE ON THESE LINES!
-                levelstr = (
-                    "%.*f" % (int(prec_level), float(wavenumber_es[it]))
-                    + "$\\,$cm$^{-1}$, "
-                    + term_symb_es_formatted[it]
-                )
+                levelstr += f", {term_symb_es_formatted[it]}"
             self._axes.text(
                 xval + 0.5,
                 yval,
                 levelstr,
-                color="k",
+                color=self.colmain,
                 ha="left",
                 va="bottom",
                 size=fsz_labels,
             )
 
         # Title:
-        title_entry = self._get_dict_entry("settings", "plot_title")
         if title_entry != "":
             self._axes.set_title(title_entry, size=fsz_title)
 
         # ylabel
         self._axes.yaxis.set_major_formatter(ut.my_formatter)  # scientific labels
-        if self._get_dict_entry("settings", "show_cm-1_axis"):
+        if show_cm_1_ax:
             self._axes.set_ylabel("Wavenumber (cm$^{-1}$)", size=fsz_axes_labels)
         else:
             self._axes._axes.get_yaxis().set_ticks([])
@@ -595,7 +426,7 @@ class Plotter:
         self._axes.set_ylim([0.0, ymax])
 
         # eV axis on the right
-        if self._get_dict_entry("settings", "show_eV_axis"):
+        if show_ev_ax:
             a2.set_ylabel("Energy (eV)", size=fsz_axes_labels)
         else:
             a2._axes.get_yaxis().set_ticks([])
