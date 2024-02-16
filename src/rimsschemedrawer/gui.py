@@ -30,7 +30,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
     def __init__(self):
         # run in debug mode?
-        self.rundebug = True
+        self.rundebug = False
 
         # program info
         self.author = "Reto Trappitsch"
@@ -358,10 +358,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "ticks."
         )
         self.edt_sett_headspace.setToolTip(
-            "Set how much space is added on top of the"
-            "IP level: the head space. Adjust this"
-            "value whenever there is not enough space"
-            "on top to fit all the text in. The value"
+            "Set how much space is added on top of the "
+            "IP level: the head space. Adjust this "
+            "value whenever there is not enough space "
+            "on top to fit all the text in. The value "
             "is given in cm<sup>-1</sup>."
         )
         layout.addWidget(self.edt_sett_arrwidth, 7, 7, 1, 1)

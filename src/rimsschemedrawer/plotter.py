@@ -42,7 +42,7 @@ class Plotter:
             self.coluv = "#8c96df"
             self.colfuv = "#9365b2"
             self.colpump = "#60a55b"
-            self.colhdr = "#343f74"  # header color
+            self.colhdr = "#4b5482"  # header color
         else:
             self.colmain = "#000000"
             self.colir = "#a00000"
@@ -170,8 +170,8 @@ class Plotter:
             size=fsz_labels,
         )
 
-        # Draw the horizontal lines for every transition below IP and for IP
-        for it in transition_steps:
+        # Draw the horizontal lines for every transition except last and for IP
+        for it in transition_steps[:-1]:
             if it < ipvalue:
                 self._axes.hlines(it, xmin=0, xmax=10, color=self.colmain)
 
@@ -244,7 +244,7 @@ class Plotter:
                         markeredgewidth=5.0,
                     )
 
-            # draw a little dashed line for the last/end state
+            # draw a little solid line for the last/end state
             if it == len(lambda_steps) - 1:
                 self._axes.hlines(
                     tstp,
