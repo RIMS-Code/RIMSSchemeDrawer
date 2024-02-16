@@ -419,9 +419,10 @@ class ConfigParser:
 
             :return: Value from the json file or default value.
             """
-            return dtype(
-                self.data["settings"].get(key, ut.DEFAULT_SETTINGS["settings"][key])
-            )
+            try:
+                return dtype(self.data["settings"][key])
+            except KeyError:
+                return dtype(ut.DEFAULT_SETTINGS["settings"][key])
 
         # Plot title
         self._sett_title = get_value("plot_title", str)
