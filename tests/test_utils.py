@@ -2,7 +2,6 @@
 
 from hypothesis import given, strategies as st
 import pytest
-import numpy as np
 
 from rimsschemedrawer import utils as ut
 
@@ -54,15 +53,6 @@ def test_nm_to_cm_2():
     assert ut.nm_to_cm_2(1) == 1e7
     assert ut.nm_to_cm_2(2) == 5e6
     assert ut.nm_to_cm_2(3) == 3.3333333333333335e6
-
-
-def test_nparr_to_str():
-    """Check that the conversion from numpy array to string array is correct."""
-    arr = np.array([0, 1, 2, 3])
-    np.testing.assert_equal(ut.nparr_to_str(arr), ["", "1", "2", "3"])
-
-    arr = np.array([0.0, 1.0, 2.0, 3.0])
-    np.testing.assert_equal(ut.nparr_to_str(arr), ["", "1.0", "2.0", "3.0"])
 
 
 @pytest.mark.parametrize("vals", [["3F2", "$^{3}$F$_{2}$"], ["4G1", "$^{4}$G$_{1}$"]])

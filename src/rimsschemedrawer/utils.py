@@ -77,19 +77,6 @@ def nm_to_cm_2(nm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
     return 1e7 / nm
 
 
-def nparr_to_str(arr: np.ndarray) -> np.ndarray:
-    """Convert a numpy array to a string array.
-
-    Replace numbers that are zero with "".
-
-    :param arr: Numpy array to convert.
-    :return: String array.
-    """
-    ret_val = arr.astype(str)
-    ret_val[arr == 0] = ""
-    return ret_val
-
-
 def term_to_string(tstr: str):
     """
     Converts a term symbol string to a LaTeX enabled matplotlib string

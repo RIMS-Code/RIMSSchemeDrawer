@@ -1,6 +1,5 @@
 """Plotting functions and class for the rims scheme drawer."""
 
-
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -20,7 +19,6 @@ class Plotter:
             - fig_ax: Tuple of matplotlib figure and axes to plot on. Defaults to
                 creating new ones.
         """
-        self.data = data  # fixme: remove
         self.config_parser = ConfigParser(data)
 
         # set kwargs
@@ -79,48 +77,59 @@ class Plotter:
         textpad = 0.4
         # percentage to increase for manifold
         mfld_yinc = 0.04  # in # of ipvalue
-        #
         firstarrowxmfl = 1.0
 
-        # get settings from program
+        # get formatting settings
         _, fsz_axes_labels, fsz_labels, fsz_title = self.config_parser.sett_fontsize
         sett_headspace = self.config_parser.sett_headspace
         sett_arr, sett_arr_head = self.config_parser.sett_arrow_fmt
         prec_lambda, prec_level = self.config_parser.sett_prec
+        title_entry = self.config_parser.sett_title
+        (
+            show_cm_1_ax,
+            show_ev_ax,
+            show_forbidden_trans,
+            show_trans_strength,
+        ) = self.config_parser.sett_shows
+        if self.config_parser.sett_line_breaks:
+            lbreak = "\n"
+        else:
+            lbreak = ", "
 
-        # transition strengths - all
-        transition_strengths = ut.nparr_to_str(self.config_parser.transition_strengths)
+        # ground state, IP, total wavenumber
+        wavenumber_gs = self.config_parser.gs_level
+        ipvalue = self.config_parser.ip_level
+        totwavenumber_photons = self.config_parser.step_levels[-1]
+        term_symb_ip = self.config_parser.ip_term
+        term_symb_gs = self.config_parser.gs_term
 
-        # now only add lambdas that are NOT low-lying states, same for forbidden steps!
-        transition_strengths_steps = ut.nparr_to_str(
-            self.config_parser.transition_strengths[~self.config_parser.is_low_lying]
-        )
-        forbidden_steps = self.config_parser.step_forbidden[
+        # get data for actual steps, low-lying excluded
+        transition_strengths_steps = self.config_parser.transition_strengths[
             ~self.config_parser.is_low_lying
         ]
-
-        # get ground state wavenumber
-        wavenumber_gs = self.config_parser.gs_level
-
-        lambda_steps = self.config_parser.step_nm[~self.config_parser.is_low_lying]
-
-        # get more ground states if available (and forbidden states)
-        wavenumber_es = self.config_parser.step_levels[self.config_parser.is_low_lying]
-        forbidden_es = self.config_parser.step_forbidden[
-            self.config_parser.is_low_lying
-        ]
-
-        # create wavenumber array
-        wavenumber_steps = 1.0 / lambda_steps * 1e7
 
         transition_steps = self.config_parser.step_levels[
             ~self.config_parser.is_low_lying
         ]
+        forbidden_steps = self.config_parser.step_forbidden[
+            ~self.config_parser.is_low_lying
+        ]
+        lambda_steps = self.config_parser.step_nm[~self.config_parser.is_low_lying]
+        wavenumber_steps = ut.nm_to_cm_2(lambda_steps)
+        term_symb = self.config_parser.step_terms[~self.config_parser.is_low_lying]
 
-        totwavenumber_photons = self.config_parser.step_levels[-1]
-
-        # get the ipvalue
-        ipvalue = self.config_parser.ip_level
+        # get low-lying information
+        wavenumber_es = self.config_parser.step_levels[self.config_parser.is_low_lying]
+        lambda_step_es = self.config_parser.step_nm[self.config_parser.is_low_lying]
+        transition_strengths_es = self.config_parser.transition_strengths[
+            self.config_parser.is_low_lying
+        ]
+        forbidden_es = self.config_parser.step_forbidden[
+            self.config_parser.is_low_lying
+        ]
+        term_symb_es_formatted = self.config_parser.step_terms[
+            self.config_parser.is_low_lying
+        ]
 
         # ymax:
         if ipvalue > totwavenumber_photons + wavenumber_gs:
@@ -130,40 +139,16 @@ class Plotter:
         else:
             ymax = totwavenumber_photons + wavenumber_gs
 
-        # get the term symbols
-        term_symb = self.config_parser.step_terms[~self.config_parser.is_low_lying]
-        term_symb_es_formatted = self.config_parser.step_terms[
-            self.config_parser.is_low_lying
-        ]
-        term_symb_ip = self.config_parser.ip_term
-        term_symb_gs = self.config_parser.gs_term
-
-        # break line or put in comma, depending on option
-        if self.config_parser.sett_line_breaks:
-            lbreak = "\n"
-        else:
-            lbreak = ", "
-
-        (
-            show_cm_1_ax,
-            show_ev_ax,
-            show_forbidden_trans,
-            show_trans_strength,
-        ) = self.config_parser.sett_shows
-
         # ### CREATE FIGURE ###
-        # second axes -> mirror of first
         a2 = self._axes.twinx()
-
-        # figure width and height)
         self._figure.set_size_inches(*self.config_parser.sett_fig_size, forward=True)
 
         # shade the level above the IP
-        xshade = [0.0, 10.0]  # x axis of the shade (which is never displayed)
-        # the * 10. takes care if the user manually extends the range... to a certain degree at least, i.e., ymax*10
+        xshade = [0.0, 10.0]  # x-axis of the shade (which is never displayed)
         self._axes.fill_between(
             xshade, ipvalue, ymax * 10.0, facecolor=self.colhdr, alpha=0.5
         )
+
         # label the IP
         if self.config_parser.sett_ip_label_pos == "Top":
             iplabelypos = ipvalue + 0.01 * totwavenumber_photons
@@ -185,7 +170,7 @@ class Plotter:
             size=fsz_labels,
         )
 
-        # Draw the horizontal lines for every transition and IP, unless transition is above IP (shade area there)
+        # Draw the horizontal lines for every transition below IP and for IP
         for it in transition_steps:
             if it < ipvalue:
                 self._axes.hlines(it, xmin=0, xmax=10, color=self.colmain)
@@ -221,6 +206,7 @@ class Plotter:
             size=fsz_labels,
         )
 
+        # draw the arrows for the steps
         for it in range(len(lambda_steps)):
             if lambda_steps[it] >= 700:
                 col = self.colir
@@ -255,7 +241,7 @@ class Plotter:
                     head_length=totwavenumber_photons / 30.0,
                 )
 
-                # so we don't want to leave the arrow away but it is forbidden: then x it out!
+                # x-out forbidden arrow
                 if forbidden_steps[it]:
                     yval_cross = yval_bott + wstp / 2.0
                     self._axes.plot(
@@ -267,7 +253,7 @@ class Plotter:
                         markeredgewidth=5.0,
                     )
 
-            # draw a little dashed line for the last one, AI and Rydberg state, to distinguish it from IP
+            # draw a little dashed line for the last/end state
             if it == len(lambda_steps) - 1:
                 self._axes.hlines(
                     tstp,
@@ -292,7 +278,7 @@ class Plotter:
                 lambdastr = f"{lambda_steps[it]:.{prec_lambda}f}$\\,$nm"
                 if (
                     show_trans_strength
-                    and (tmp_strength := transition_strengths_steps[it]) != ""
+                    and (tmp_strength := transition_strengths_steps[it]) != 0
                 ):
                     lambdastr += (
                         f"\nA={ut.my_exp_formatter(tmp_strength, 1)}$\\,s^{{-1}}$"
@@ -345,19 +331,6 @@ class Plotter:
             # update yval_bott
             yval_bott = transition_steps[it]
 
-        # create ground state lambda step array
-        lambda_step_es = []
-        transition_strengths_es = []
-        for it in range(len(wavenumber_es)):
-            lambda_step_es.append(
-                1.0e7
-                / (
-                    1.0e7 / lambda_steps[0]
-                    - (float(wavenumber_es[it]) - float(wavenumber_gs))
-                )
-            )
-            transition_strengths_es.append(transition_strengths[it])
-
         # now go through low-lying excited states
         for it in range(len(wavenumber_es)):
             if lambda_step_es[it] >= 700:
@@ -405,7 +378,7 @@ class Plotter:
                 lambdastr = f"{lambda_step_es[it]:.{prec_lambda}f}$\\,$nm"
                 if (
                     show_trans_strength
-                    and (tmp_strength := transition_strengths_es[it]) != ""
+                    and (tmp_strength := transition_strengths_es[it]) != 0
                 ):
                     lambdastr += (
                         f"\nA={ut.my_exp_formatter(tmp_strength, 1)}$\\,s^{{-1}}$"
@@ -438,7 +411,6 @@ class Plotter:
             )
 
         # Title:
-        title_entry = self.config_parser.sett_title
         if title_entry != "":
             self._axes.set_title(title_entry, size=fsz_title)
 
