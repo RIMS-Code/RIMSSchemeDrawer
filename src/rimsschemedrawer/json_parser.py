@@ -61,6 +61,11 @@ class ConfigParser:
         return self._num_steps
 
     @property
+    def rims_scheme(self) -> Dict:
+        """Return the full scheme parsed into a dictionary."""
+        return
+
+    @property
     def step_levels(self) -> np.ndarray:
         """Get all levels of the scheme."""
         return self._step_levels_cm
