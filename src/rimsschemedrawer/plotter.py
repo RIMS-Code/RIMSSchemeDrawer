@@ -18,6 +18,7 @@ class Plotter:
                 This number can be higher than the number of available steps!
             - fig_ax: Tuple of matplotlib figure and axes to plot on. Defaults to
                 creating new ones.
+            - darkmode: Overwrite the darkmode settings from the config file.
         """
         self.config_parser = ConfigParser(data)
 
@@ -30,13 +31,15 @@ class Plotter:
         matplotlib.rc("xtick", labelsize=fsz_axes, direction="in")
         matplotlib.rc("ytick", labelsize=fsz_axes, direction="in")
 
+        darkmode = kwargs.get("darkmode", self.config_parser.sett_darkmode)
+
         # figure stuff
-        if self.config_parser.sett_darkmode:
+        if darkmode:
             plt.style.use("dark_background")
         self._figure, self._axes = kwargs.get("fig_ax", plt.subplots(1, 1))
 
         # Colors for arrows
-        if self.config_parser.sett_darkmode:
+        if darkmode:
             self.colmain = "#ffffff"
             self.colir = "#d27878"
             self.coluv = "#8c96df"
