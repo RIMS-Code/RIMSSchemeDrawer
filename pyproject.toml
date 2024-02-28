@@ -39,6 +39,8 @@ dev-dependencies = [
     "pytest>=7.4.4",
     "hypothesis>=6.97.1",
     "pytest-cov>=4.1.0",
+    "requests>=2.31.0",
+    "iniabu>=1.1.2",
 ]
 
 [tool.rye.scripts]
@@ -55,3 +57,9 @@ packages = ["src/rimsschemedrawer"]
 testpaths = "tests"
 addopts = "--cov -v"
 filterwarnings = 'ignore:datetime.datetime.utcfromtimestamp\(\) is deprecated:DeprecationWarning'  # 3rd party
+
+[tool.box]
+builder = "rye"
+app_entry = "rimsschemedrawer.app:run_gui"
+app_name = "rimsschemedrawer[gui]"
+optional_deps = "gui"
