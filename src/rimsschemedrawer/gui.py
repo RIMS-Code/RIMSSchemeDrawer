@@ -56,6 +56,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.lineedit_size = QtCore.QSize(100, 20)
 
         # entries and labels necessary
+        self._element = None
         self.rbtngrp_units = QtWidgets.QButtonGroup()
         self.rbtn_nm = QtWidgets.QRadioButton("nm")
         self.rbtn_cm = QtWidgets.QRadioButton()
@@ -67,6 +68,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_gsterm = QtWidgets.QLineEdit()
         self.edt_iplevel = QtWidgets.QLineEdit()
         self.edt_ipterm = QtWidgets.QLineEdit()
+        self.cmb_element = None
         self.chk_lowlying = []
         self.chk_forbidden = []
 
@@ -258,8 +260,23 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         layout.addWidget(ip_lbl, 2 + len(self.lbl_steps), 0, 1, 1)
         layout.addWidget(self.edt_iplevel, 2 + len(self.lbl_steps), 1, 1, 1)
         layout.addWidget(self.edt_ipterm, 2 + len(self.lbl_steps), 2, 1, 1)
-        self.edt_iplevel.setToolTip("Set IP level in cm<sup>-1</sup>.")
+        self.edt_iplevel.setToolTip(
+            "IP level is automatically set by choosing an element below!"
+        )
+        self.edt_iplevel.setEnabled(False)
         self.edt_ipterm.setToolTip("Set term symbol of IP. " + tt_termsymbol)
+
+        # Set the elements
+        element_lbl = QtWidgets.QLabel("Element")
+        layout.addWidget(element_lbl, 4 + len(self.lbl_steps), 0, 1, 1)
+        cmb_element = QtWidgets.QComboBox()
+        cmb_element.addItems(ut.get_elements())
+        layout.addWidget(cmb_element, 4 + len(self.lbl_steps), 1, 1, 1)
+        cmb_element.setToolTip("Select the element to set the IP.")
+        cmb_element.currentIndexChanged.connect(lambda x: self.set_ip(x))
+        cmb_element.setCurrentIndex(0)
+        cmb_element.currentIndexChanged.emit(0)  # emit the signal even if not changed!
+        self.cmb_element = cmb_element
 
         # set sizes and validators of boxes defined outside loop
         self.edt_gslevel.setFixedSize(self.lineedit_size)
@@ -680,7 +697,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         self.user_path = filename.parent
         # load the json file
-        savedict = rimsschemedrawer.json_parser.json_reader(filename)
+        load_dict = rimsschemedrawer.json_parser.json_reader(filename)
+        config_parser = rimsschemedrawer.json_parser.ConfigParser(load_dict)
 
         # function for setting line edits
         def set_line_edits(category, entry, lineedit):
@@ -691,13 +709,13 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             :param lineedit:    <QtWidgets.QLineEdit> The object for the text
             """
             try:
-                lineedit.setText(savedict[category][entry])
+                lineedit.setText(load_dict[category][entry])
             except KeyError:
                 pass
 
         # set the settings for the levels
         try:
-            if savedict["scheme"]["unit"] == "nm":
+            if load_dict["scheme"]["unit"] == "nm":
                 self.rbtn_nm.setChecked(True)
             else:
                 self.rbtn_cm.setChecked(True)
@@ -715,20 +733,31 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 "scheme", f"trans_strength{it}", self.edt_transition_strengths[it]
             )
             try:
-                if savedict["scheme"][f"step_lowlying{it}"]:
+                if load_dict["scheme"][f"step_lowlying{it}"]:
                     self.chk_lowlying[it].setChecked(True)
                 else:
                     self.chk_lowlying[it].setChecked(False)
             except KeyError:
                 self.chk_lowlying[it].setChecked(False)
             try:
-                if savedict["scheme"][f"step_forbidden{it}"]:
+                if load_dict["scheme"][f"step_forbidden{it}"]:
                     self.chk_forbidden[it].setChecked(True)
                 else:
                     self.chk_forbidden[it].setChecked(False)
             except KeyError:
                 self.chk_forbidden[it].setChecked(False)
-        set_line_edits("scheme", "ip_level", self.edt_iplevel)
+
+        # IP level
+        self.cmb_element.setCurrentText(config_parser.element)
+        if config_parser.element_guessed:
+            QtWidgets.QMessageBox.information(
+                self,
+                f"Element set to {config_parser.element}",
+                "You used an old-style configuration file. "
+                "The software automatically guessed the element from the given "
+                "ionization potential. "
+                "Please check if this is correct and adjust if necessary.",
+            )
         set_line_edits("scheme", "ip_term", self.edt_ipterm)
 
         # program settings - alphabetically
@@ -742,7 +771,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         set_line_edits("settings", "fs_title", self.edt_sett_fstitle)
         set_line_edits("settings", "headspace", self.edt_sett_headspace)
         try:
-            if savedict["settings"]["ip_label_pos"] == "Top":
+            if load_dict["settings"]["ip_label_pos"] == "Top":
                 self.rbtn_iplable_top.setChecked(True)
             else:
                 self.rbtn_iplable_bottom.setChecked(True)
@@ -753,7 +782,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 self.rbtn_iplable_bottom.setChecked(True)
         # how to display forbidden transitions
         try:
-            if savedict["settings"]["show_forbidden_transitions"] == "x-out":
+            if load_dict["settings"]["show_forbidden_transitions"] == "x-out":
                 self.rbtn_sett_xoutarrow.setChecked(True)
             else:
                 self.rbtn_sett_nodisparrow.setChecked(True)
@@ -764,7 +793,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 self.rbtn_sett_nodisparrow.setChecked(True)
         # transition strength
         try:
-            if savedict["settings"]["show_transition_strength"]:
+            if load_dict["settings"]["show_transition_strength"]:
                 self.chk_sett_trans_strength.setChecked(True)
             else:
                 self.chk_sett_trans_strength.setChecked(False)
@@ -774,7 +803,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         # line breaks
         try:
-            if savedict["settings"]["line_breaks"]:
+            if load_dict["settings"]["line_breaks"]:
                 self.chk_sett_linebreaks.setChecked(True)
             else:
                 self.chk_sett_linebreaks.setChecked(False)
@@ -784,7 +813,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         # show cm-1 axis
         try:
-            if savedict["settings"]["show_cm-1_axis"]:
+            if load_dict["settings"]["show_cm-1_axis"]:
                 self.chk_sett_showcmax.setChecked(True)
             else:
                 self.chk_sett_showcmax.setChecked(False)
@@ -794,7 +823,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         # show eV axis
         try:
-            if savedict["settings"]["show_eV_axis"]:
+            if load_dict["settings"]["show_eV_axis"]:
                 self.chk_sett_showevax.setChecked(True)
             else:
                 self.chk_sett_showevax.setChecked(False)
@@ -804,7 +833,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         # plot darkmode
         try:
-            if savedict["settings"]["plot_darkmode"]:
+            if load_dict["settings"]["plot_darkmode"]:
                 self.chk_plot_darkmode.setChecked(True)
             else:
                 self.chk_plot_darkmode.setChecked(False)
@@ -841,8 +870,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             savedict["scheme"][f"step_forbidden{it}"] = self.chk_forbidden[
                 it
             ].isChecked()
-        savedict["scheme"]["ip_level"] = self.edt_iplevel.text()
         savedict["scheme"]["ip_term"] = self.edt_ipterm.text()
+        savedict["scheme"]["element"] = self.cmb_element.currentText()
 
         # save the settings
         savedict["settings"]["fig_width"] = self.edt_sett_figwidth.text()
@@ -923,6 +952,15 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "with the mouse and check those tooltips out."
         )
         QtWidgets.QMessageBox.about(self, "About", about_msg)
+
+    def set_ip(self, index: int) -> None:
+        """Set the element name (to be written to json) and the ionization potential.
+
+        :param index: Index of element in list
+        """
+        element = ut.get_elements()[index]
+        self.edt_iplevel.setText(str(ut.get_ip(element)))
+        self._element = element
 
     def test(self):
         """

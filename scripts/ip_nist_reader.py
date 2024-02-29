@@ -1,6 +1,24 @@
+"""Create json file with all ionization potentials.
+
+Elemental data read from the NIST database, which can be found here:
+https://physics.nist.gov/PhysRefData/ASD/levels_form.html
+
+2024-02-29: Currently, the following elements have no IP data associated with them:
+    - Mt
+    - Ds
+    - Rg
+    - Cn
+    - Nh
+    - Fl
+    - Mc
+    - Lv
+    - Ts
+    - Og
+"""
+
+
 import json
 
-from iniabu import ini
 import requests
 
 
@@ -31,10 +49,19 @@ def get_ip(ele: str) -> float:
     data = data.split("\n")
 
     # find limit line in data
+    limit_found = False
     for it, line in enumerate(data):
         if "Limit" in line:
             idx = it
+            limit_found = True
             break
+
+    if not limit_found:
+        try:
+            return manual_ips[ele]
+        except KeyError:
+            print(f"Could not find limit for {ele}")
+            return None
 
     line = data[idx].replace('"', "").replace("=", "").split(",")
     # print(line)
@@ -44,12 +71,130 @@ def get_ip(ele: str) -> float:
     return float(ip)
 
 
-elements = ini.ele_dict.keys()  # list of all elements
+manual_ips = {}
+
+elements = [
+    "H",
+    "He",
+    "Li",
+    "Be",
+    "B",
+    "C",
+    "N",
+    "O",
+    "F",
+    "Ne",
+    "Na",
+    "Mg",
+    "Al",
+    "Si",
+    "P",
+    "S",
+    "Cl",
+    "Ar",
+    "K",
+    "Ca",
+    "Sc",
+    "Ti",
+    "V",
+    "Cr",
+    "Mn",
+    "Fe",
+    "Co",
+    "Ni",
+    "Cu",
+    "Zn",
+    "Ga",
+    "Ge",
+    "As",
+    "Se",
+    "Br",
+    "Kr",
+    "Rb",
+    "Sr",
+    "Y",
+    "Zr",
+    "Nb",
+    "Mo",
+    "Tc",
+    "Ru",
+    "Rh",
+    "Pd",
+    "Ag",
+    "Cd",
+    "In",
+    "Sn",
+    "Sb",
+    "Te",
+    "I",
+    "Xe",
+    "Cs",
+    "Ba",
+    "La",
+    "Ce",
+    "Pr",
+    "Nd",
+    "Pm",
+    "Sm",
+    "Eu",
+    "Gd",
+    "Tb",
+    "Dy",
+    "Ho",
+    "Er",
+    "Tm",
+    "Yb",
+    "Lu",
+    "Hf",
+    "Ta",
+    "W",
+    "Re",
+    "Os",
+    "Ir",
+    "Pt",
+    "Au",
+    "Hg",
+    "Tl",
+    "Pb",
+    "Bi",
+    "Po",
+    "At",
+    "Rn",
+    "Fr",
+    "Ra",
+    "Ac",
+    "Th",
+    "Pa",
+    "U",
+    "Np",
+    "Pu",
+    "Am",
+    "Cm",
+    "Bk",
+    "Cf",
+    "Es",
+    "Fm",
+    "Md",
+    "No",
+    "Lr",
+    "Rf",
+    "Db",
+    "Sg",
+    "Bh",
+    "Hs",
+    "Mt",
+    "Ds",
+    "Rg",
+    "Cn",
+    "Nh",
+    "Fl",
+    "Mc",
+    "Lv",
+    "Ts",
+    "Og",
+]
+
 ele_ips = {}
-
-# print(elements)
-
-# print(get_ip("Tb"))
 
 for ele in elements:
     print(f"{ele} is up")

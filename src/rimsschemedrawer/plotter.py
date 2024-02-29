@@ -1,5 +1,7 @@
 """Plotting functions and class for the rims scheme drawer."""
 
+import warnings
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,6 +23,15 @@ class Plotter:
             - darkmode: Overwrite the darkmode settings from the config file.
         """
         self.config_parser = ConfigParser(data)
+
+        # check if old style
+        if self.config_parser.element_guessed:
+            warnings.warn(
+                f"Old style input detected, where the IP is set manually. "
+                f"The program guessed the element to be "
+                f"{self.config_parser.element}. "
+                f"Please update your input file."
+            )
 
         # set kwargs
         self.number_of_steps = kwargs.get("number_of_steps", 7)
