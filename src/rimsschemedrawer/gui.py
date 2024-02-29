@@ -697,7 +697,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         self.user_path = filename.parent
         # load the json file
-        savedict = rimsschemedrawer.json_parser.json_reader(filename)
+        load_dict = rimsschemedrawer.json_parser.json_reader(filename)
+        config_parser = rimsschemedrawer.json_parser.ConfigParser(load_dict)
 
         # function for setting line edits
         def set_line_edits(category, entry, lineedit):
@@ -708,13 +709,13 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             :param lineedit:    <QtWidgets.QLineEdit> The object for the text
             """
             try:
-                lineedit.setText(savedict[category][entry])
+                lineedit.setText(load_dict[category][entry])
             except KeyError:
                 pass
 
         # set the settings for the levels
         try:
-            if savedict["scheme"]["unit"] == "nm":
+            if load_dict["scheme"]["unit"] == "nm":
                 self.rbtn_nm.setChecked(True)
             else:
                 self.rbtn_cm.setChecked(True)
@@ -732,37 +733,31 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 "scheme", f"trans_strength{it}", self.edt_transition_strengths[it]
             )
             try:
-                if savedict["scheme"][f"step_lowlying{it}"]:
+                if load_dict["scheme"][f"step_lowlying{it}"]:
                     self.chk_lowlying[it].setChecked(True)
                 else:
                     self.chk_lowlying[it].setChecked(False)
             except KeyError:
                 self.chk_lowlying[it].setChecked(False)
             try:
-                if savedict["scheme"][f"step_forbidden{it}"]:
+                if load_dict["scheme"][f"step_forbidden{it}"]:
                     self.chk_forbidden[it].setChecked(True)
                 else:
                     self.chk_forbidden[it].setChecked(False)
             except KeyError:
                 self.chk_forbidden[it].setChecked(False)
-        # set_line_edits("scheme", "ip_level", self.edt_iplevel)
-        # if ip_level is given (old format), guess the element, raise a warning, and set
-        try:
-            ip_level_user = float(savedict["scheme"]["ip_level"])
-            element = ut.guess_element_from_ip(ip_level_user)
-            self.cmb_element.setCurrentText(element)
-            # raise an information box that we the element was set automatically
+
+        # IP level
+        self.cmb_element.setCurrentText(config_parser.element)
+        if config_parser.element_guessed:
             QtWidgets.QMessageBox.information(
                 self,
-                f"Element set to {element}",
+                f"Element set to {config_parser.element}",
                 "You used an old-style configuration file. "
                 "The software automatically guessed the element from the given "
                 "ionization potential. "
                 "Please check if this is correct and adjust if necessary.",
             )
-        except KeyError:  # so we have the new format with element defined
-            element = savedict["scheme"]["element"]
-            self.cmb_element.setCurrentText(element)
         set_line_edits("scheme", "ip_term", self.edt_ipterm)
 
         # program settings - alphabetically
@@ -776,7 +771,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         set_line_edits("settings", "fs_title", self.edt_sett_fstitle)
         set_line_edits("settings", "headspace", self.edt_sett_headspace)
         try:
-            if savedict["settings"]["ip_label_pos"] == "Top":
+            if load_dict["settings"]["ip_label_pos"] == "Top":
                 self.rbtn_iplable_top.setChecked(True)
             else:
                 self.rbtn_iplable_bottom.setChecked(True)
@@ -787,7 +782,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 self.rbtn_iplable_bottom.setChecked(True)
         # how to display forbidden transitions
         try:
-            if savedict["settings"]["show_forbidden_transitions"] == "x-out":
+            if load_dict["settings"]["show_forbidden_transitions"] == "x-out":
                 self.rbtn_sett_xoutarrow.setChecked(True)
             else:
                 self.rbtn_sett_nodisparrow.setChecked(True)
@@ -798,7 +793,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 self.rbtn_sett_nodisparrow.setChecked(True)
         # transition strength
         try:
-            if savedict["settings"]["show_transition_strength"]:
+            if load_dict["settings"]["show_transition_strength"]:
                 self.chk_sett_trans_strength.setChecked(True)
             else:
                 self.chk_sett_trans_strength.setChecked(False)
@@ -808,7 +803,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         # line breaks
         try:
-            if savedict["settings"]["line_breaks"]:
+            if load_dict["settings"]["line_breaks"]:
                 self.chk_sett_linebreaks.setChecked(True)
             else:
                 self.chk_sett_linebreaks.setChecked(False)
@@ -818,7 +813,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         # show cm-1 axis
         try:
-            if savedict["settings"]["show_cm-1_axis"]:
+            if load_dict["settings"]["show_cm-1_axis"]:
                 self.chk_sett_showcmax.setChecked(True)
             else:
                 self.chk_sett_showcmax.setChecked(False)
@@ -828,7 +823,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         # show eV axis
         try:
-            if savedict["settings"]["show_eV_axis"]:
+            if load_dict["settings"]["show_eV_axis"]:
                 self.chk_sett_showevax.setChecked(True)
             else:
                 self.chk_sett_showevax.setChecked(False)
@@ -838,7 +833,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         # plot darkmode
         try:
-            if savedict["settings"]["plot_darkmode"]:
+            if load_dict["settings"]["plot_darkmode"]:
                 self.chk_plot_darkmode.setChecked(True)
             else:
                 self.chk_plot_darkmode.setChecked(False)
@@ -875,8 +870,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             savedict["scheme"][f"step_forbidden{it}"] = self.chk_forbidden[
                 it
             ].isChecked()
-        savedict["scheme"]["ip_level"] = self.edt_iplevel.text()
         savedict["scheme"]["ip_term"] = self.edt_ipterm.text()
+        savedict["scheme"]["element"] = self.cmb_element.currentText()
 
         # save the settings
         savedict["settings"]["fig_width"] = self.edt_sett_figwidth.text()

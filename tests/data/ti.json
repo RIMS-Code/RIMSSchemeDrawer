@@ -1,8 +1,8 @@
 {
     "scheme": {
+        "element": "Ti",
         "gs_level": "0",
         "gs_term": "3F2",
-        "ip_level": "55074",
         "ip_term": "",
         "step_level0": "170.15",
         "step_level1": "386.88",

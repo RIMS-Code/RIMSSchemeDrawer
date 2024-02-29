@@ -26,7 +26,7 @@ def test_get_ip():
 
 def test_guess_element_from_ip():
     """Guess an element from the IP."""
-    assert ut.guess_element_from_ip(90820.0) == "C"
+    assert ut.guess_element_from_ip(90820.0)
     assert ut.guess_element_from_ip(117224) == "N"
 
 

@@ -19,11 +19,22 @@ class ConfigParser:
         """Initialize the class by parsing the data and saving it as variables."""
         self._num_steps = None
         self.data = data
+        self._element_guessed = False
 
         self._parse_data_scheme()
         self._parse_data_settings()
 
     # SCHEME PROPERTIES
+
+    @property
+    def element(self) -> str:
+        """Get the element of the scheme."""
+        return self._element
+
+    @property
+    def element_guessed(self) -> bool:
+        """Return if the element was guessed from the IP."""
+        return self._element_guessed
 
     @property
     def gs_level(self) -> float:
@@ -303,7 +314,13 @@ class ConfigParser:
         self._gs_term = self.data["scheme"]["gs_term"]
 
         # IP
-        self._ip_level = float(self.data["scheme"]["ip_level"])
+        try:  # new format with element instead of IP defined
+            self._element = self.data["scheme"]["element"]
+            self._ip_level = ut.get_ip(self._element)
+        except KeyError:  # new format with element instead of IP defined
+            self._ip_level = float(self.data["scheme"]["ip_level"])
+            self._element = ut.guess_element_from_ip(self._ip_level)
+            self._element_guessed = True
         self._ip_term = self.data["scheme"]["ip_term"]
 
         # Get the step levels and save them as cm-1 (transform if in nm)
