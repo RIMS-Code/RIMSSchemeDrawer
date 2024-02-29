@@ -13,6 +13,23 @@ def test_cm_2_to_nm():
     assert ut.cm_2_to_nm(3.3333333333333335e6) == 3
 
 
+def test_get_ip():
+    """Check that the ionization potentials are correct."""
+    assert ut.get_ip("H") == 109678.77174307
+    assert ut.get_ip("hE") == 198310.66637
+    assert ut.get_ip("LI") == 43487.1142
+    assert ut.get_ip("be") == 75192.64
+    assert ut.get_ip("B") == 66928.04
+    assert ut.get_ip("C") == 90820.348
+    assert ut.get_ip("N") == 117225.7
+
+
+def test_guess_element_from_ip():
+    """Guess an element from the IP."""
+    assert ut.guess_element_from_ip(90820.0) == "C"
+    assert ut.guess_element_from_ip(117224) == "N"
+
+
 @pytest.mark.parametrize(
     "values",
     [

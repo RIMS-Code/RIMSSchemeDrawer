@@ -30,7 +30,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
     def __init__(self):
         # run in debug mode?
-        self.rundebug = False
+        self.rundebug = True
 
         # program info
         self.author = "Reto Trappitsch"
@@ -56,6 +56,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.lineedit_size = QtCore.QSize(100, 20)
 
         # entries and labels necessary
+        self._element = None
         self.rbtngrp_units = QtWidgets.QButtonGroup()
         self.rbtn_nm = QtWidgets.QRadioButton("nm")
         self.rbtn_cm = QtWidgets.QRadioButton()
@@ -258,8 +259,22 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         layout.addWidget(ip_lbl, 2 + len(self.lbl_steps), 0, 1, 1)
         layout.addWidget(self.edt_iplevel, 2 + len(self.lbl_steps), 1, 1, 1)
         layout.addWidget(self.edt_ipterm, 2 + len(self.lbl_steps), 2, 1, 1)
-        self.edt_iplevel.setToolTip("Set IP level in cm<sup>-1</sup>.")
+        self.edt_iplevel.setToolTip(
+            "IP level is automatically set by choosing an element below!"
+        )
+        self.edt_iplevel.setEnabled(False)
         self.edt_ipterm.setToolTip("Set term symbol of IP. " + tt_termsymbol)
+
+        # Set the elements
+        element_lbl = QtWidgets.QLabel("Element")
+        layout.addWidget(element_lbl, 4 + len(self.lbl_steps), 0, 1, 1)
+        cmb_element = QtWidgets.QComboBox()
+        cmb_element.addItems(ut.get_elements())
+        layout.addWidget(cmb_element, 4 + len(self.lbl_steps), 1, 1, 1)
+        cmb_element.setToolTip("Select the element to set the IP.")
+        cmb_element.currentIndexChanged.connect(lambda x: self.set_ip(x))
+        cmb_element.setCurrentIndex(0)
+        cmb_element.currentIndexChanged.emit(0)  # emit the signal even if not changed!
 
         # set sizes and validators of boxes defined outside loop
         self.edt_gslevel.setFixedSize(self.lineedit_size)
@@ -923,6 +938,15 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "with the mouse and check those tooltips out."
         )
         QtWidgets.QMessageBox.about(self, "About", about_msg)
+
+    def set_ip(self, index: int) -> None:
+        """Set the element name (to be written to json) and the ionization potential.
+
+        :param index: Index of element in list
+        """
+        element = ut.get_elements()[index]
+        self.edt_iplevel.setText(str(ut.get_ip(element)))
+        self._element = element
 
     def test(self):
         """

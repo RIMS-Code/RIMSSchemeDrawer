@@ -33,6 +33,92 @@ DEFAULT_SETTINGS = {
     },
 }
 
+IP_DICTIONARY = {
+    "H": 109678.77174307,
+    "He": 198310.66637,
+    "Li": 43487.1142,
+    "Be": 75192.64,
+    "B": 66928.04,
+    "C": 90820.348,
+    "N": 117225.7,
+    "O": 109837.02,
+    "F": 140524.5,
+    "Ne": 173929.75,
+    "Na": 41449.451,
+    "Mg": 61671.05,
+    "Al": 48278.48,
+    "Si": 65747.76,
+    "P": 84580.83,
+    "S": 83559.1,
+    "Cl": 104591.01,
+    "Ar": 127109.842,
+    "K": 35009.814,
+    "Ca": 49305.924,
+    "Sc": 52922.0,
+    "Ti": 55072.5,
+    "V": 54411.67,
+    "Cr": 54575.6,
+    "Mn": 59959.56,
+    "Fe": 63737.704,
+    "Co": 63564.6,
+    "Ni": 61619.77,
+    "Cu": 62317.46,
+    "Zn": 75769.31,
+    "Ga": 48387.634,
+    "Ge": 63713.24,
+    "As": 78950.0,
+    "Se": 78658.15,
+    "Br": 95284.8,
+    "Kr": 112914.433,
+    "Rb": 33690.81,
+    "Sr": 45932.2036,
+    "Y": 50145.6,
+    "Zr": 53507.832,
+    "Nb": 54513.8,
+    "Mo": 57204.3,
+    "Ru": 59366.4,
+    "Rh": 60160.1,
+    "Pd": 67241.14,
+    "Ag": 61106.45,
+    "Cd": 72540.05,
+    "In": 46670.107,
+    "Sn": 59232.69,
+    "Sb": 69431.34,
+    "Te": 72669.006,
+    "I": 84294.9,
+    "Xe": 97833.787,
+    "Cs": 31406.4677325,
+    "Ba": 42034.91,
+    "La": 44981.0,
+    "Ce": 44672.0,
+    "Pr": 44120.0,
+    "Nd": 44562.0,
+    "Sm": 45519.69,
+    "Eu": 45734.74,
+    "Gd": 49601.45,
+    "Tb": 47295.0,
+    "Dy": 47901.76,
+    "Ho": 48567.0,
+    "Er": 49262.0,
+    "Tm": 49880.57,
+    "Yb": 50443.2,
+    "Lu": 43762.6,
+    "Hf": 55047.9,
+    "Ta": 60891.4,
+    "W": 63427.7,
+    "Re": 63181.6,
+    "Os": 68058.9,
+    "Ir": 72323.9,
+    "Pt": 72257.8,
+    "Au": 74409.11,
+    "Hg": 84184.15,
+    "Tl": 49266.66,
+    "Pb": 59819.558,
+    "Bi": 58761.65,
+    "Th": 50867.0,
+    "U": 49958.4,
+}
+
 
 def cm_2_to_nm(cm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
     """Convert a wavenumber in cm^-1 to a wavelength in nm.
@@ -41,6 +127,38 @@ def cm_2_to_nm(cm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
     :return: Wavelength in nm.
     """
     return 1e7 / cm
+
+
+def get_elements() -> list:
+    """Get a list of all elements."""
+    return list(IP_DICTIONARY.keys())
+
+
+def get_ip(ele: str) -> float:
+    """Get the ionization potential for a given element.
+
+    :param ele: Element symbol, not case sensitive.
+
+    :return: Ionization potential in cm-1.
+    """
+
+    return IP_DICTIONARY[ele.capitalize()]
+
+
+def guess_element_from_ip(ip: float) -> str:
+    """Guess an element from the ionization potential.
+
+    This routine is mainly provided for backwards compatibility with older
+    RIMSSchemeDrawer instances, where the user used to define the IP manually.
+
+    :param ip: Ionization potential in cm-1.
+    :return: Element symbol (best guess).
+    """
+    eles, values = list(IP_DICTIONARY.keys()), list(IP_DICTIONARY.values())
+    values = np.array(values)
+    diff = np.abs(values - ip)
+    ind = np.argmin(diff)
+    return eles[ind]
 
 
 def my_exp_formatter(val: float, prec: int) -> str:
