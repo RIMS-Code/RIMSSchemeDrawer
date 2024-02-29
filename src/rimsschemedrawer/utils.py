@@ -144,6 +144,8 @@ IP_DICTIONARY = {
     "Hs": 61000.0,
 }
 
+LASERS = ["Ti:Sa", "Dye", "Ti:Sa and Dye"]  # default is first entry - Ti:Sa
+
 
 def cm_2_to_nm(cm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
     """Convert a wavenumber in cm^-1 to a wavelength in nm.
