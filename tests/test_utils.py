@@ -13,6 +13,15 @@ def test_cm_2_to_nm():
     assert ut.cm_2_to_nm(3.3333333333333335e6) == 3
 
 
+def test_get_elements():
+    """Check that elements are in list."""
+    eles = ut.get_elements()
+    assert "H" in eles
+    assert "He" in eles
+    assert "U" in eles
+    assert "Pu" in eles
+
+
 def test_get_ip():
     """Check that the ionization potentials are correct."""
     assert ut.get_ip("H") == 109678.77174307
