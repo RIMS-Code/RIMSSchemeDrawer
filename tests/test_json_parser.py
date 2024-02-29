@@ -14,7 +14,9 @@ def test_config_parser(data_path, fname):
     fin = data_path.joinpath(fname)
     data = jp.json_reader(fin)
 
-    _ = jp.ConfigParser(data)
+    parser = jp.ConfigParser(data)
+
+    assert parser.lasers == "Ti:Sa"
 
 
 @pytest.mark.parametrize(

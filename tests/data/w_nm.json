@@ -39,7 +39,8 @@
         "trans_strength4": "",
         "trans_strength5": "",
         "trans_strength6": "",
-        "unit": "nm"
+        "unit": "nm",
+        "lasers": "Ti:Sa"
     },
     "settings": {
         "arrow_head_width": "0.6",

@@ -67,6 +67,11 @@ class ConfigParser:
         return self._low_lying
 
     @property
+    def lasers(self) -> str:
+        """Get the types of lasers used in this scheme (defaults to Ti:Sa)."""
+        return self._lasers
+
+    @property
     def number_of_levels(self) -> int:
         """Get the number of steps in the scheme."""
         return self._num_steps
@@ -322,6 +327,12 @@ class ConfigParser:
             self._element = ut.guess_element_from_ip(self._ip_level)
             self._element_guessed = True
         self._ip_term = self.data["scheme"]["ip_term"]
+
+        # Get the laser value and default to Ti:Sa if none selected
+        try:
+            self._lasers = self.data["scheme"]["laser"]
+        except KeyError:
+            self._lasers = ut.LASERS[0]
 
         # Get the step levels and save them as cm-1 (transform if in nm)
         step_levels = []

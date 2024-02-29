@@ -19,7 +19,8 @@
         "step_term2": "3G3",
         "step_term3": "3G4",
         "step_term4": "",
-        "unit": "cm<sup>-1</sup>"
+        "unit": "cm<sup>-1</sup>",
+        "lasers": "Ti:Sa"
     },
     "settings": {
         "arrow_head_width": "0.6",

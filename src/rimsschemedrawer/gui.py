@@ -69,6 +69,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_iplevel = QtWidgets.QLineEdit()
         self.edt_ipterm = QtWidgets.QLineEdit()
         self.cmb_element = None
+        self.cmb_lasers = None
         self.chk_lowlying = []
         self.chk_forbidden = []
 
@@ -278,6 +279,21 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         cmb_element.currentIndexChanged.emit(0)  # emit the signal even if not changed!
         self.cmb_element = cmb_element
 
+        # Laser selection
+        laser_lbls = QtWidgets.QLabel("Lasers")
+        layout.addWidget(laser_lbls, 5 + len(self.lbl_steps), 0, 1, 1)
+        cmb_lasers = QtWidgets.QComboBox()
+        cmb_lasers.addItems(ut.LASERS)
+        cmb_lasers.setToolTip(
+            "Select the lasers used in this scheme. "
+            "While this is not used for the plot, "
+            "this entry is important for submitting your scheme "
+            "to the RIMS database website "
+            "and its entry will be saved to the configuration file."
+        )
+        layout.addWidget(cmb_lasers, 5 + len(self.lbl_steps), 1, 1, 1)
+        self.cmb_lasers = cmb_lasers
+
         # set sizes and validators of boxes defined outside loop
         self.edt_gslevel.setFixedSize(self.lineedit_size)
         self.edt_gslevel.setValidator(QtGui.QDoubleValidator())
@@ -461,7 +477,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         # push buttons
         layout.addWidget(self.btn_plot, 2, 8, 1, 1)
         if self.rundebug:
-            layout.addWidget(self.btn_test, bottomrowindex, 0, 1, 1)
+            layout.addWidget(self.btn_test, bottomrowindex, 3, 1, 1)
         layout.addWidget(self.btn_load_conf, bottomrowindex - 4, 8, 1, 1)
         layout.addWidget(self.btn_save_conf, bottomrowindex - 3, 8, 1, 1)
         layout.addWidget(self.btn_reset_formatting, bottomrowindex - 2, 8, 1, 1)
@@ -760,6 +776,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             )
         set_line_edits("scheme", "ip_term", self.edt_ipterm)
 
+        # set the lasers used
+        self.cmb_lasers.setCurrentText(config_parser.lasers)
+
         # program settings - alphabetically
         set_line_edits("settings", "arrow_head_width", self.edt_sett_arrheadwidth)
         set_line_edits("settings", "arrow_width", self.edt_sett_arrwidth)
@@ -872,6 +891,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             ].isChecked()
         savedict["scheme"]["ip_term"] = self.edt_ipterm.text()
         savedict["scheme"]["element"] = self.cmb_element.currentText()
+        savedict["scheme"]["lasers"] = self.cmb_lasers.currentText()
 
         # save the settings
         savedict["settings"]["fig_width"] = self.edt_sett_figwidth.text()
