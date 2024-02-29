@@ -68,6 +68,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_gsterm = QtWidgets.QLineEdit()
         self.edt_iplevel = QtWidgets.QLineEdit()
         self.edt_ipterm = QtWidgets.QLineEdit()
+        self.cmb_element = None
         self.chk_lowlying = []
         self.chk_forbidden = []
 
@@ -275,6 +276,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         cmb_element.currentIndexChanged.connect(lambda x: self.set_ip(x))
         cmb_element.setCurrentIndex(0)
         cmb_element.currentIndexChanged.emit(0)  # emit the signal even if not changed!
+        self.cmb_element = cmb_element
 
         # set sizes and validators of boxes defined outside loop
         self.edt_gslevel.setFixedSize(self.lineedit_size)
@@ -743,7 +745,24 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                     self.chk_forbidden[it].setChecked(False)
             except KeyError:
                 self.chk_forbidden[it].setChecked(False)
-        set_line_edits("scheme", "ip_level", self.edt_iplevel)
+        # set_line_edits("scheme", "ip_level", self.edt_iplevel)
+        # if ip_level is given (old format), guess the element, raise a warning, and set
+        try:
+            ip_level_user = float(savedict["scheme"]["ip_level"])
+            element = ut.guess_element_from_ip(ip_level_user)
+            self.cmb_element.setCurrentText(element)
+            # raise an information box that we the element was set automatically
+            QtWidgets.QMessageBox.information(
+                self,
+                f"Element set to {element}",
+                "You used an old-style configuration file. "
+                "The software automatically guessed the element from the given "
+                "ionization potential. "
+                "Please check if this is correct and adjust if necessary.",
+            )
+        except KeyError:  # so we have the new format with element defined
+            element = savedict["scheme"]["element"]
+            self.cmb_element.setCurrentText(element)
         set_line_edits("scheme", "ip_term", self.edt_ipterm)
 
         # program settings - alphabetically
