@@ -39,6 +39,7 @@ dev-dependencies = [
     "hypothesis>=6.97.1",
     "pytest-cov>=4.1.0",
     "requests>=2.31.0",
+    "ruff>=0.3.0",
 ]
 
 [tool.rye.scripts]
