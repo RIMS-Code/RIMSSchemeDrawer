@@ -35,7 +35,6 @@ build-backend = "hatchling.build"
 [tool.rye]
 managed = true
 dev-dependencies = [
-    "ruff>=0.1.14",
     "pytest>=7.4.4",
     "hypothesis>=6.97.1",
     "pytest-cov>=4.1.0",
@@ -57,8 +56,9 @@ testpaths = "tests"
 addopts = "--cov -v"
 filterwarnings = 'ignore:datetime.datetime.utcfromtimestamp\(\) is deprecated:DeprecationWarning'  # 3rd party
 
+
+
 [tool.box]
 builder = "rye"
 app_entry = "rimsschemedrawer.app:run_gui"
-app_name = "rimsschemedrawer[gui]"
-optional_deps = "gui"
+python_version = "3.12"

@@ -712,56 +712,37 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             filename = Path(filename)
 
         self.user_path = filename.parent
-        # load the json file
-        load_dict = rimsschemedrawer.json_parser.json_reader(filename)
-        config_parser = rimsschemedrawer.json_parser.ConfigParser(load_dict)
 
-        # function for setting line edits
-        def set_line_edits(category, entry, lineedit):
-            """
-            Sets a given line edit from the dictionary, but also checks if available.
-            :param category:    <string>    Category the entry is in
-            :param entry:       <string>    Entry with the value
-            :param lineedit:    <QtWidgets.QLineEdit> The object for the text
-            """
-            try:
-                lineedit.setText(load_dict[category][entry])
-            except KeyError:
-                pass
+        # load the json file
+        _load_dict = rimsschemedrawer.json_parser.json_reader(filename)
+        config_parser = rimsschemedrawer.json_parser.ConfigParser(_load_dict)
 
         # set the settings for the levels
-        try:
-            if load_dict["scheme"]["unit"] == "nm":
-                self.rbtn_nm.setChecked(True)
-            else:
-                self.rbtn_cm.setChecked(True)
-        except KeyError:
-            pass
+        if config_parser.sett_unit_nm:
+            self.rbtn_nm.setChecked(True)
+        else:
+            self.rbtn_cm.setChecked(True)
 
-        set_line_edits("scheme", "gs_level", self.edt_gslevel)
-        set_line_edits("scheme", "gs_term", self.edt_gsterm)
+        self.edt_gslevel.setText(str(config_parser.gs_level))
+        self.edt_gsterm.setText(config_parser.gs_term_no_formatting)
         for it in range(
             len(self.edt_level)
         ):  # only loop through as many entries as there are
-            set_line_edits("scheme", f"step_level{it}", self.edt_level[it])
-            set_line_edits("scheme", f"step_term{it}", self.edt_term[it])
-            set_line_edits(
-                "scheme", f"trans_strength{it}", self.edt_transition_strengths[it]
-            )
             try:
-                if load_dict["scheme"][f"step_lowlying{it}"]:
-                    self.chk_lowlying[it].setChecked(True)
+                if config_parser.sett_unit_nm:
+                    value_list = config_parser.step_nm
                 else:
-                    self.chk_lowlying[it].setChecked(False)
-            except KeyError:
-                self.chk_lowlying[it].setChecked(False)
-            try:
-                if load_dict["scheme"][f"step_forbidden{it}"]:
-                    self.chk_forbidden[it].setChecked(True)
-                else:
-                    self.chk_forbidden[it].setChecked(False)
-            except KeyError:
-                self.chk_forbidden[it].setChecked(False)
+                    value_list = config_parser.step_levels
+                self.edt_level[it].setText(str(value_list[it]))
+                self.edt_term[it].setText(config_parser.step_terms_no_formatting[it])
+
+                trans_strength = config_parser.transition_strengths[it]
+                if trans_strength > 0:
+                    self.edt_transition_strengths[it].setText(str(trans_strength))
+                self.chk_lowlying[it].setChecked(config_parser.is_low_lying[it])
+                self.chk_forbidden[it].setChecked(config_parser.step_forbidden[it])
+            except IndexError:
+                break
 
         # IP level
         self.cmb_element.setCurrentText(config_parser.element)
@@ -774,96 +755,54 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 "ionization potential. "
                 "Please check if this is correct and adjust if necessary.",
             )
-        set_line_edits("scheme", "ip_term", self.edt_ipterm)
+        self.edt_ipterm.setText(config_parser.ip_term_no_formatting)
 
         # set the lasers used
         self.cmb_lasers.setCurrentText(config_parser.lasers)
 
-        # program settings - alphabetically
-        set_line_edits("settings", "arrow_head_width", self.edt_sett_arrheadwidth)
-        set_line_edits("settings", "arrow_width", self.edt_sett_arrwidth)
-        set_line_edits("settings", "fig_height", self.edt_sett_figheight)
-        set_line_edits("settings", "fig_width", self.edt_sett_figwidth)
-        set_line_edits("settings", "fs_axes", self.edt_sett_fsaxes)
-        set_line_edits("settings", "fs_axes_labels", self.edt_sett_fsaxlbl)
-        set_line_edits("settings", "fs_labels", self.edt_sett_fslbl)
-        set_line_edits("settings", "fs_title", self.edt_sett_fstitle)
-        set_line_edits("settings", "headspace", self.edt_sett_headspace)
-        try:
-            if load_dict["settings"]["ip_label_pos"] == "Top":
-                self.rbtn_iplable_top.setChecked(True)
-            else:
-                self.rbtn_iplable_bottom.setChecked(True)
-        except KeyError:
-            if ut.DEFAULT_SETTINGS["settings"]["ip_label_pos"] == "Top":
-                self.rbtn_iplable_top.setChecked(True)
-            else:
-                self.rbtn_iplable_bottom.setChecked(True)
-        # how to display forbidden transitions
-        try:
-            if load_dict["settings"]["show_forbidden_transitions"] == "x-out":
-                self.rbtn_sett_xoutarrow.setChecked(True)
-            else:
-                self.rbtn_sett_nodisparrow.setChecked(True)
-        except KeyError:
-            if ut.DEFAULT_SETTINGS["settings"]["show_forbidden_transitions"] == "x-out":
-                self.rbtn_sett_xoutarrow.setChecked(True)
-            else:
-                self.rbtn_sett_nodisparrow.setChecked(True)
-        # transition strength
-        try:
-            if load_dict["settings"]["show_transition_strength"]:
-                self.chk_sett_trans_strength.setChecked(True)
-            else:
-                self.chk_sett_trans_strength.setChecked(False)
-        except KeyError:
-            self.chk_sett_trans_strength.setChecked(
-                ut.DEFAULT_SETTINGS["settings"]["show_transition_strength"]
-            )
-        # line breaks
-        try:
-            if load_dict["settings"]["line_breaks"]:
-                self.chk_sett_linebreaks.setChecked(True)
-            else:
-                self.chk_sett_linebreaks.setChecked(False)
-        except KeyError:
-            self.chk_sett_linebreaks.setChecked(
-                ut.DEFAULT_SETTINGS["settings"]["line_breaks"]
-            )
-        # show cm-1 axis
-        try:
-            if load_dict["settings"]["show_cm-1_axis"]:
-                self.chk_sett_showcmax.setChecked(True)
-            else:
-                self.chk_sett_showcmax.setChecked(False)
-        except KeyError:
-            self.chk_sett_showcmax.setChecked(
-                ut.DEFAULT_SETTINGS["settings"]["show_cm-1_axis"]
-            )
-        # show eV axis
-        try:
-            if load_dict["settings"]["show_eV_axis"]:
-                self.chk_sett_showevax.setChecked(True)
-            else:
-                self.chk_sett_showevax.setChecked(False)
-        except KeyError:
-            self.chk_sett_showevax.setChecked(
-                ut.DEFAULT_SETTINGS["settings"]["show_eV_axis"]
-            )
-        # plot darkmode
-        try:
-            if load_dict["settings"]["plot_darkmode"]:
-                self.chk_plot_darkmode.setChecked(True)
-            else:
-                self.chk_plot_darkmode.setChecked(False)
-        except KeyError:
-            self.chk_plot_darkmode.setChecked(
-                ut.DEFAULT_SETTINGS["settings"]["plot_darkmode"]
-            )
+        # settings
+        arrow_width, arrow_head_width = config_parser.sett_arrow_fmt
+        self.edt_sett_arrwidth.setText(str(arrow_width))
+        self.edt_sett_arrheadwidth.setText(str(arrow_head_width))
 
-        set_line_edits("settings", "plot_title", self.edt_sett_plttitle)
-        set_line_edits("settings", "prec_level", self.edt_sett_preclevel)
-        set_line_edits("settings", "prec_wavelength", self.edt_sett_preclambda)
+        fig_width, fig_height = config_parser.sett_fig_size
+        self.edt_sett_figwidth.setText(str(fig_width))
+        self.edt_sett_figheight.setText(str(fig_height))
+
+        fs_axticks, fs_axlabels, fs_labels, fs_title = config_parser.sett_fontsize
+        self.edt_sett_fsaxes.setText(str(fs_axticks))
+        self.edt_sett_fsaxlbl.setText(str(fs_axlabels))
+        self.edt_sett_fslbl.setText(str(fs_labels))
+        self.edt_sett_fstitle.setText(str(fs_title))
+
+        self.edt_sett_headspace.setText(str(config_parser.sett_headspace))
+
+        if config_parser.sett_ip_label_pos == "Top":
+            self.rbtn_iplable_top.setChecked(True)
+        else:
+            self.rbtn_iplable_bottom.setChecked(True)
+
+        (
+            show_cm1_axis,
+            show_ev_axis,
+            show_forbidden_transitions,
+            show_transition_strength,
+        ) = config_parser.sett_shows
+        if show_forbidden_transitions == "x-out":
+            self.rbtn_sett_xoutarrow.setChecked(True)
+        else:
+            self.rbtn_sett_nodisparrow.setChecked(True)
+
+        self.chk_sett_trans_strength.setChecked(show_transition_strength)
+        self.chk_sett_showcmax.setChecked(show_cm1_axis)
+        self.chk_sett_showevax.setChecked(show_ev_axis)
+        self.chk_sett_linebreaks.setChecked(config_parser.sett_line_breaks)
+        self.chk_plot_darkmode.setChecked(config_parser.sett_darkmode)
+
+        self.edt_sett_plttitle.setText(config_parser.sett_title)
+        lambda_prec, level_prec = config_parser.sett_prec
+        self.edt_sett_preclambda.setText(str(lambda_prec))
+        self.edt_sett_preclevel.setText(str(level_prec))
 
     def write_json(self) -> dict:
         """Write the json dictionary to save or pass on.

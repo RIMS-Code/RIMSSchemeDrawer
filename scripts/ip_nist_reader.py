@@ -16,7 +16,6 @@ https://physics.nist.gov/PhysRefData/ASD/levels_form.html
     - Og
 """
 
-
 import json
 
 import requests

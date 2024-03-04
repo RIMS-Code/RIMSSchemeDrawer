@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 
 import rimsschemedrawer.json_parser as jp
+import rimsschemedrawer.utils as ut
 
 
 @pytest.mark.parametrize("fname", ["ti.json", "w_nm.json"])
@@ -45,8 +46,8 @@ def test_config_parser_mixed_units(data_path, fname):
     parser = jp.ConfigParser(data)
     parser_mixed = jp.ConfigParser(data_mixed)
 
-    assert not parser._input_nm
-    assert parser_mixed._input_nm
+    assert not parser.sett_unit_nm
+    assert parser_mixed.sett_unit_nm
 
     # make sure the steps are the same!
     np.testing.assert_almost_equal(
@@ -74,6 +75,23 @@ def test_config_parser_nm(data_path, params):
     parser = jp.ConfigParser(data)
 
     np.testing.assert_almost_equal(parser._steps_nm, nm_exp, decimal=3)
+
+
+def test_config_parser_fmt_terms(data_path):
+    """Ensure formatted and unformatted term symbols are available."""
+    fin = data_path.joinpath("ti.json")
+    data = jp.json_reader(fin)
+    parser = jp.ConfigParser(data)
+
+    gs_term_fmt_exp = ut.term_to_string(parser.gs_term_no_formatting)
+    ip_term_fmt_exp = ut.term_to_string(parser.ip_term_no_formatting)
+    step_terms_fmt_exp = [
+        ut.term_to_string(term) for term in parser.step_terms_no_formatting
+    ]
+
+    assert parser.gs_term == gs_term_fmt_exp
+    assert parser.ip_term == ip_term_fmt_exp
+    assert (parser.step_terms == step_terms_fmt_exp).all()
 
 
 def test_json_reader(data_path):

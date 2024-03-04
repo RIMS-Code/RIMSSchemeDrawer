@@ -47,6 +47,11 @@ class ConfigParser:
         return ut.term_to_string(self._gs_term)
 
     @property
+    def gs_term_no_formatting(self) -> str:
+        """Get the ground state term, not formatted for plotting."""
+        return self._gs_term
+
+    @property
     def ip_level(self) -> float:
         """Get the ionization potential level."""
         return self._ip_level
@@ -55,6 +60,11 @@ class ConfigParser:
     def ip_term(self) -> str:
         """Get the ionization potential term, formatted for plotting."""
         return ut.term_to_string(self._ip_term)
+
+    @property
+    def ip_term_no_formatting(self):
+        """Get the ionization potential term, not formatted for plotting."""
+        return self._ip_term
 
     @property
     def is_low_lying(self) -> np.ndarray:
@@ -77,11 +87,6 @@ class ConfigParser:
         return self._num_steps
 
     @property
-    def rims_scheme(self) -> Dict:
-        """Return the full scheme parsed into a dictionary."""
-        return
-
-    @property
     def step_levels(self) -> np.ndarray:
         """Get all levels of the scheme."""
         return self._step_levels_cm
@@ -100,6 +105,11 @@ class ConfigParser:
     def step_terms(self) -> np.ndarray:
         """Get the terms for all states, formatted for plotting."""
         return np.array([ut.term_to_string(it) for it in self._step_term])
+
+    @property
+    def step_terms_no_formatting(self) -> np.ndarray:
+        """Get the terms for all states, not formatted for plotting."""
+        return self._step_term
 
     @property
     def transition_strengths(self) -> np.ndarray:
@@ -175,6 +185,11 @@ class ConfigParser:
     def sett_title(self) -> str:
         """Get the title for the plot."""
         return self._sett_title
+
+    @property
+    def sett_unit_nm(self) -> bool:
+        """Return if the unit is in nm."""
+        return self._input_nm
 
     # METHODS
 
