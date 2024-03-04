@@ -21,6 +21,10 @@ gui = [
     "PyQt6>=6.6.1",
     "qtpy>=2.4.1",
 ]
+docs = [
+    "mkdocs>=1.5.3",
+    "mkdocs-material>=9.5.12",
+]
 
 [project.urls]
 Homepage = "https://github.com/RIMS-Code/RIMSSchemeDrawer"
