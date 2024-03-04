@@ -44,5 +44,6 @@ nav:
   - Home: index.md
   - Installation: install.md
   - GUI: gui.md
+  - Development: dev.md
   - API:
       - Overview: api/index.md
