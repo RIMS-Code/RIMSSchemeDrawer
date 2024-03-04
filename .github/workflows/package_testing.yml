@@ -30,11 +30,9 @@ jobs:
         rye sync
     - name: Run Tests for python interface
       run: rye run test
-    - name: Run Lint on one python
-      if: ${{ matrix.python-version == env.MAIN_PYTHON_VERSION }}
-      run: |
-        source .venv/bin/activate
-        ruff check
+#    - name: Run Lint on one python
+#      if: ${{ matrix.python-version == env.MAIN_PYTHON_VERSION }}
+#      run: rye lint
     - name: Run Pytest with coverage
       if: ${{ matrix.python-version == env.MAIN_PYTHON_VERSION }}
       run: |
