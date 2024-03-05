@@ -39,10 +39,21 @@ markdown_extensions:
 
 plugins:
   - search
-
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
 nav:
   - Home: index.md
   - Installation: install.md
   - GUI: gui.md
+  - Development: dev.md
   - API:
       - Overview: api/index.md
+      - Plotter: api/plotter.md
+      - JSON Parser: api/json_parser.md
+      - Utilities: api/utils.md
+      - GUI: api/gui.md
