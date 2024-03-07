@@ -74,6 +74,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.chk_forbidden = []
 
         # settings line edits
+        self.edt_sett_plttitle = QtWidgets.QLineEdit()
         self.edt_sett_figwidth = QtWidgets.QLineEdit()
         self.edt_sett_figheight = QtWidgets.QLineEdit()
         self.edt_sett_fstitle = QtWidgets.QLineEdit()
@@ -99,7 +100,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.rbtngrp_sett_forbidden = QtWidgets.QButtonGroup()
         self.rbtn_sett_xoutarrow = QtWidgets.QRadioButton("x-out")
         self.rbtn_sett_nodisparrow = QtWidgets.QRadioButton("Don't show")
-        self.edt_sett_plttitle = QtWidgets.QLineEdit()
 
         # push buttons
         self.btn_plot = QtWidgets.QPushButton("Plot")
@@ -450,8 +450,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "- dark transparent: Dark mode with transparent background"
         )
 
-        # set sizes
-        self.edt_sett_plttitle.setFixedSize(self.lineedit_size)
         # validators
         self.edt_sett_figwidth.setValidator(QtGui.QDoubleValidator())
         self.edt_sett_figheight.setValidator(QtGui.QDoubleValidator())
