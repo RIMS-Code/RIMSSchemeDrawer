@@ -127,14 +127,6 @@ class ConfigParser:
         return self._sett_arrow_fmt
 
     @property
-    def sett_darkmode(self) -> bool:
-        """Get the darkmode setting for the plot.
-
-        :return: Darkmode setting.
-        """
-        return self._sett_darkmode
-
-    @property
     def sett_fig_size(self) -> Tuple[float, float]:
         """Get the figure size for the plot.
 
@@ -172,6 +164,30 @@ class ConfigParser:
         :return: Precisions for: wavelength, level
         """
         return self._sett_prec
+
+    @property
+    def sett_plot_dark(self) -> bool:
+        """Get the darkmode setting for the plot.
+
+        :return: Darkmode setting.
+        """
+        return "dark" in self._sett_plot_style
+
+    @property
+    def sett_plot_style(self) -> str:
+        """Get the plot style setting for the plot.
+
+        :return: Plot style setting.
+        """
+        return self._sett_plot_style
+
+    @property
+    def sett_plot_transparent(self) -> bool:
+        """Get the transparent setting for the plot.
+
+        :return: Transparent setting.
+        """
+        return "transparent" in self._sett_plot_style
 
     @property
     def sett_shows(self) -> Tuple[bool, bool, str, bool]:
@@ -514,7 +530,7 @@ class ConfigParser:
         )
 
         # Darkmode
-        self._sett_darkmode = get_value("plot_darkmode", bool)
+        self._sett_plot_style = get_value("plot_style", str)
 
 
 def json_reader(fin: Path) -> Dict:

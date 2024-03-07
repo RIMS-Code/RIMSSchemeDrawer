@@ -74,6 +74,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.chk_forbidden = []
 
         # settings line edits
+        self.edt_sett_plttitle = QtWidgets.QLineEdit()
         self.edt_sett_figwidth = QtWidgets.QLineEdit()
         self.edt_sett_figheight = QtWidgets.QLineEdit()
         self.edt_sett_fstitle = QtWidgets.QLineEdit()
@@ -85,7 +86,8 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.chk_sett_showcmax.setChecked(True)
         self.chk_sett_showevax = QtWidgets.QCheckBox("Show eV axis labels?")
         self.chk_sett_showevax.setChecked(True)
-        self.chk_plot_darkmode = QtWidgets.QCheckBox("Plot dark mode?")
+        self.drop_plot_style = QtWidgets.QComboBox()
+        self.drop_plot_style.addItems(ut.PLOT_STYLES)
         self.edt_sett_fslbl = QtWidgets.QLineEdit()
         self.edt_sett_headspace = QtWidgets.QLineEdit()
         self.edt_sett_arrwidth = QtWidgets.QLineEdit()
@@ -98,7 +100,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.rbtngrp_sett_forbidden = QtWidgets.QButtonGroup()
         self.rbtn_sett_xoutarrow = QtWidgets.QRadioButton("x-out")
         self.rbtn_sett_nodisparrow = QtWidgets.QRadioButton("Don't show")
-        self.edt_sett_plttitle = QtWidgets.QLineEdit()
 
         # push buttons
         self.btn_plot = QtWidgets.QPushButton("Plot")
@@ -131,7 +132,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         Initialize the UI
         """
         # bottom most row:
-        bottomrowindex = 12  # depends on how many settings entries there are!
+        bottomrowindex = 13  # depends on how many settings entries there are!
         if self.numberofsteps + 2 > bottomrowindex:
             bottomrowindex = self.numberofsteps + 2
 
@@ -182,10 +183,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         lbl_sett = QtWidgets.QLabel("Settings")
         lbl_sett.setFont(self.fontheader)
         layout.addWidget(lbl_sett, 0, 6, 1, 1)
-        # plot title
-        lbl_plttit = QtWidgets.QLabel("Plot Title")
-        lbl_plttit.setFont(self.fontheader)
-        layout.addWidget(lbl_plttit, 0, 8, 1, 1)
 
         # ground state
         lbl_gs = QtWidgets.QLabel("Ground state (cm<sup>-1</sup>)")
@@ -313,60 +310,63 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.rbtngrp_sett_forbidden.addButton(self.rbtn_sett_nodisparrow)
 
         # labels for settings
-        layout.addWidget(QtWidgets.QLabel("Figure Width x Height:"), 1, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Font size title:"), 2, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Font size axes:"), 3, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Font size axes label:"), 4, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Font size labels:"), 5, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Headspace (cm<sup>-1</sup>):"), 6, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Arrow width:"), 7, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Arrow head width:"), 8, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Precision wavelength:"), 9, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Precision level:"), 10, 6, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("IP label position:"), 11, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Plot Title"), 1, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Figure Width x Height:"), 2, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size title:"), 3, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size axes:"), 4, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size axes label:"), 5, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Font size labels:"), 6, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Headspace (cm<sup>-1</sup>):"), 7, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Arrow width:"), 8, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Arrow head width:"), 9, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Precision wavelength:"), 10, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("Precision level:"), 11, 6, 1, 1)
+        layout.addWidget(QtWidgets.QLabel("IP label position:"), 12, 6, 1, 1)
         layout.addWidget(
-            QtWidgets.QLabel("Display forbidden transitions:"), 12, 6, 1, 1
+            QtWidgets.QLabel("Display forbidden transitions:"), 13, 6, 1, 1
         )
         # line edits and buttons, include tooltips
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.edt_sett_figwidth)
+        layout.addWidget(self.edt_sett_plttitle, 1, 7, 1, 1)
+        self.edt_sett_plttitle.setToolTip("Title of the plot.")
         self.edt_sett_figwidth.setToolTip("Width of figure in inches.")
         tmplayout.addStretch()
         tmplayout.addWidget(QtWidgets.QLabel("x"))
         tmplayout.addStretch()
         tmplayout.addWidget(self.edt_sett_figheight)
         self.edt_sett_figheight.setToolTip("Height of figure in inches.")
-        layout.addLayout(tmplayout, 1, 7, 1, 1)
-        layout.addWidget(self.edt_sett_fstitle, 2, 7, 1, 1)
+        layout.addLayout(tmplayout, 2, 7, 1, 1)
+        layout.addWidget(self.edt_sett_fstitle, 3, 7, 1, 1)
         self.edt_sett_fstitle.setToolTip("Font size of the plot title.")
-        layout.addWidget(self.edt_sett_fsaxes, 3, 7, 1, 1)
+        layout.addWidget(self.edt_sett_fsaxes, 4, 7, 1, 1)
         self.edt_sett_fsaxes.setToolTip("Font size of axes ticks.")
-        layout.addWidget(self.edt_sett_fsaxlbl, 4, 7, 1, 1)
+        layout.addWidget(self.edt_sett_fsaxlbl, 5, 7, 1, 1)
         self.edt_sett_fsaxlbl.setToolTip("Font size of axes labels.")
         # transition_strengths
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_trans_strength)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 3, 8, 1, 1)
+        layout.addLayout(tmplayout, 1, 8, 1, 1)
         self.chk_sett_trans_strength.setToolTip("Display the transition strength?")
         # line breaks
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_linebreaks)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 4, 8, 1, 1)
+        layout.addLayout(tmplayout, 2, 8, 1, 1)
         self.chk_sett_linebreaks.setToolTip(
             "Should there be a line break between\n"
             "the state and the term symbol? Play\n"
             "with this to make the the plot look nicer."
         )
-        layout.addWidget(self.edt_sett_fslbl, 5, 7, 1, 1)
+        layout.addWidget(self.edt_sett_fslbl, 6, 7, 1, 1)
         # check box show cm-1 axis
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_showcmax)
         tmplayout.addStretch()
         tmplabel = QtWidgets.QLabel("Show cm-1 axis labels?")
         tmplayout.addWidget(tmplabel)
-        layout.addLayout(tmplayout, 5, 8, 1, 1)
+        layout.addLayout(tmplayout, 3, 8, 1, 1)
         self.chk_sett_showcmax.setToolTip(
             "Show the cm<sup>-1</sup> (left) axis? You can turn this off in case you "
             "want to stich plots together afterwards! This function will also hide the "
@@ -378,12 +378,12 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "ticks."
         )
         self.edt_sett_fslbl.setToolTip("Font size of the labels.")
-        layout.addWidget(self.edt_sett_headspace, 6, 7, 1, 1)
+        layout.addWidget(self.edt_sett_headspace, 7, 7, 1, 1)
         # check box show eV axis
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.chk_sett_showevax)
         tmplayout.addStretch()
-        layout.addLayout(tmplayout, 6, 8, 1, 1)
+        layout.addLayout(tmplayout, 4, 8, 1, 1)
         self.chk_sett_showevax.setToolTip(
             "Show the eV (right) axis? You can turn this\n"
             " off in case you want to stich plots together\n"
@@ -397,23 +397,23 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "on top to fit all the text in. The value "
             "is given in cm<sup>-1</sup>."
         )
-        layout.addWidget(self.edt_sett_arrwidth, 7, 7, 1, 1)
+        layout.addWidget(self.edt_sett_arrwidth, 8, 7, 1, 1)
         self.edt_sett_arrwidth.setToolTip(
             "Set the width of the arrow line in\n"
             "undefine dunits. Play to get the ideal\n"
             "settings."
         )
-        layout.addWidget(self.edt_sett_arrheadwidth, 8, 7, 1, 1)
+        layout.addWidget(self.edt_sett_arrheadwidth, 9, 7, 1, 1)
         self.edt_sett_arrheadwidth.setToolTip(
             "Set the width of the arrwo head in\n"
             "undefined units. Play to get the ideal\n"
             "settings."
         )
-        layout.addWidget(self.edt_sett_preclambda, 9, 7, 1, 1)
+        layout.addWidget(self.edt_sett_preclambda, 10, 7, 1, 1)
         self.edt_sett_preclambda.setToolTip(
             "Set the precision with which the wavelength\n" "is displayed on the plot."
         )
-        layout.addWidget(self.edt_sett_preclevel, 10, 7, 1, 1)
+        layout.addWidget(self.edt_sett_preclevel, 11, 7, 1, 1)
         self.edt_sett_preclevel.setToolTip(
             "Set the precision with which the wavenumber\n" "is displayed on the plot."
         )
@@ -424,7 +424,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         tmplayout.addWidget(self.rbtn_iplable_bottom)
         self.rbtn_iplable_top.setToolTip("Display the IP label above the line.")
         self.rbtn_iplable_bottom.setToolTip("Display the IP label below the line.")
-        layout.addLayout(tmplayout, 11, 7, 1, 1)
+        layout.addLayout(tmplayout, 12, 7, 1, 1)
         tmplayout = QtWidgets.QHBoxLayout()
         tmplayout.addWidget(self.rbtn_sett_xoutarrow)
         self.rbtn_sett_xoutarrow.setChecked(True)  # set top as default
@@ -436,19 +436,20 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.rbtn_sett_nodisparrow.setToolTip(
             "Don't show arrows for forbidden\n" "transitions."
         )
-        layout.addLayout(tmplayout, 12, 7, 1, 1)
-        layout.addWidget(self.edt_sett_plttitle, 1, 8, 1, 1)
-        self.edt_sett_plttitle.setToolTip("Title of the plot.")
+        layout.addLayout(tmplayout, 13, 7, 1, 1)
 
         # plot dark mode?
-        tmplayout = QtWidgets.QHBoxLayout()
-        tmplayout.addWidget(self.chk_plot_darkmode)
-        tmplayout.addStretch()
-        layout.addLayout(tmplayout, 7, 8, 1, 1)
-        self.chk_plot_darkmode.setToolTip("Plot with dark background?")
+        plot_style_lbl = QtWidgets.QLabel("Plot Style")
+        layout.addWidget(plot_style_lbl, 5, 8, 1, 1)
+        layout.addWidget(self.drop_plot_style, 6, 8, 1, 1)
+        self.drop_plot_style.setToolTip(
+            "Select the plot style\n"
+            "- light: Light mode\n"
+            "- dark: Dark mode\n"
+            "- light transparent: Light mode with transparent background\n"
+            "- dark transparent: Dark mode with transparent background"
+        )
 
-        # set sizes
-        self.edt_sett_plttitle.setFixedSize(self.lineedit_size)
         # validators
         self.edt_sett_figwidth.setValidator(QtGui.QDoubleValidator())
         self.edt_sett_figheight.setValidator(QtGui.QDoubleValidator())
@@ -475,7 +476,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_sett_preclevel.setAlignment(QtCore.Qt.AlignRight)
 
         # push buttons
-        layout.addWidget(self.btn_plot, 2, 8, 1, 1)
+        layout.addWidget(self.btn_plot, 0, 8, 1, 1)
         if self.rundebug:
             layout.addWidget(self.btn_test, bottomrowindex, 3, 1, 1)
         layout.addWidget(self.btn_load_conf, bottomrowindex - 4, 8, 1, 1)
@@ -607,7 +608,11 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             set_checkbox(self.chk_sett_linebreaks, "line_breaks")
             set_checkbox(self.chk_sett_showcmax, "show_cm-1_axis")
             set_checkbox(self.chk_sett_showevax, "show_eV_axis")
-            set_checkbox(self.chk_plot_darkmode, "plot_darkmode")
+
+            # set plot style
+            self.drop_plot_style.setCurrentText(
+                ut.DEFAULT_SETTINGS["settings"]["plot_style"]
+            )
 
     def set_label_names(self):
         # get the unit
@@ -674,18 +679,15 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         """
         Call the plotting window
         """
-        if self.rundebug:
-            print("Plotting...")
-        if not self.check_fields():
-            return
-
         # fill default values - if not already there
         self.fill_default_values()
 
         # open the plotting window
         data = self.write_json()
 
-        PlotDisplay(data, parent=self, darkmode=self.chk_plot_darkmode.isChecked())
+        darkmode = "dark" in self.drop_plot_style.currentText()
+        transparent = "transparent" in self.drop_plot_style.currentText()
+        PlotDisplay(data, parent=self, darkmode=darkmode, transparent=transparent)
 
     def load_config(self, **kwargs):
         """
@@ -797,7 +799,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.chk_sett_showcmax.setChecked(show_cm1_axis)
         self.chk_sett_showevax.setChecked(show_ev_axis)
         self.chk_sett_linebreaks.setChecked(config_parser.sett_line_breaks)
-        self.chk_plot_darkmode.setChecked(config_parser.sett_darkmode)
+        self.drop_plot_style.setCurrentText(config_parser.sett_plot_style)
 
         self.edt_sett_plttitle.setText(config_parser.sett_title)
         lambda_prec, level_prec = config_parser.sett_prec
@@ -861,7 +863,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         savedict["settings"]["line_breaks"] = self.chk_sett_linebreaks.isChecked()
         savedict["settings"]["show_cm-1_axis"] = self.chk_sett_showcmax.isChecked()
         savedict["settings"]["show_eV_axis"] = self.chk_sett_showevax.isChecked()
-        savedict["settings"]["plot_darkmode"] = self.chk_plot_darkmode.isChecked()
+        savedict["settings"]["plot_style"] = self.drop_plot_style.currentText()
 
         return savedict
 
@@ -941,13 +943,18 @@ class MplCanvas(FigureCanvasQTAgg):
 
 class PlotDisplay(QtWidgets.QMainWindow):
     def __init__(
-        self, json_data: dict, parent: QtWidgets.QWidget = None, darkmode: bool = False
+        self,
+        json_data: dict,
+        parent: QtWidgets.QWidget = None,
+        darkmode: bool = False,
+        transparent: bool = False,
     ):
         """Prepare the plot display window.
 
         :param json_data: Data according to rimsschemedrawer json format.
         :param parent: Parent widget.
         :param darkmode: Use dark background for plot?
+        :param transparent: Use transparent background for plot?
         """
         super().__init__(parent=parent)
 
@@ -957,6 +964,9 @@ class PlotDisplay(QtWidgets.QMainWindow):
             plt.style.use("default")
         sc = MplCanvas(width=5, height=4, dpi=100)
         Plotter(json_data, fig_ax=(sc.figure, sc.axes))
+        if transparent:
+            sc.figure.patch.set_alpha(0.0)
+            sc.axes.patch.set_alpha(0.0)
 
         toolbar = NavigationToolbar(sc, self)
 

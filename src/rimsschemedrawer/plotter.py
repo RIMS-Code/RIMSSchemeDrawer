@@ -21,6 +21,7 @@ class Plotter:
             - fig_ax: Tuple of matplotlib figure and axes to plot on. Defaults to
                 creating new ones.
             - darkmode: Overwrite the darkmode settings from the config file.
+            - transparent: Overwrite the transparency settings from the config file.
         """
         self.config_parser = ConfigParser(data)
 
@@ -42,7 +43,10 @@ class Plotter:
         matplotlib.rc("xtick", labelsize=fsz_axes, direction="in")
         matplotlib.rc("ytick", labelsize=fsz_axes, direction="in")
 
-        darkmode = kwargs.get("darkmode", self.config_parser.sett_darkmode)
+        darkmode = kwargs.get("darkmode", self.config_parser.sett_plot_dark)
+        self.transparent = kwargs.get(
+            "transparent", self.config_parser.sett_plot_transparent
+        )
 
         # figure stuff
         if darkmode:
@@ -79,6 +83,9 @@ class Plotter:
     @property
     def figure(self) -> plt.Figure:
         """Return the figure."""
+        if self.transparent:
+            self._figure.patch.set_alpha(0.0)
+            self._figure.axes[0].patch.set_alpha(0.0)
         return self._figure
 
     def savefig(self, fout: str):

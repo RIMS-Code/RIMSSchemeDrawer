@@ -49,30 +49,31 @@ The sections are as follows:
 The settings of the plot can be configured on the right-hand side of the program, labeled 2 in the overview image.
 The following settings from top to bottom in the left column are available.
 
-1. Width and height of the figure. This is set in inches, however, the actual units are fairly unimportant.
-2. Font size of the title (if set).
-3. Font size of the axes.
-4. Font size of the axes labels.
-5. Headspace in cm<sup>-1</sup>. This is the space above the IP that will be added.
+1. Plot title: Here you can enter an optional title for the plot.
+2. Width and height of the figure. This is set in inches, however, the actual units are fairly unimportant.
+3. Font size of the title (if set).
+4. Font size of the axes.
+5. Font size of the axes labels.
+6. Headspace in cm<sup>-1</sup>. This is the space above the IP that will be added.
     This is one of the most frequent values changed in the settings.
     For example, you might want to add additional space in order to display all labels nicely within the plot.
-6. Width of the arrow in arbitrary units. Mainly needs to be changed if the figure size is modified.
-7. Arrow head width in arbitrary units. Mainly needs to be changed if the figure size is modified.
-8. Precision of the wavelength: How many digits should be displayed for the wavelengths?
-9. Precision of the levels: How many digits should be displayed for the levels?
-10. Where should the IP be labeled: on top or on the bottom of the IP line?
-11. How do you want to show forbidden transitions? Cross them out ("x-out") or don't show them at all ("Don't show")?
+7. Width of the arrow in arbitrary units. Mainly needs to be changed if the figure size is modified.
+8. Arrow head width in arbitrary units. Mainly needs to be changed if the figure size is modified.
+9. Precision of the wavelength: How many digits should be displayed for the wavelengths?
+10. Precision of the levels: How many digits should be displayed for the levels?
+11. Where should the IP be labeled: on top or on the bottom of the IP line?
+12. How do you want to show forbidden transitions? Cross them out ("x-out") or don't show them at all ("Don't show")?
 
 In the right column, the following options are available:
 
-1. Plot title: Here you can enter an optional title for the plot.
-2. Transition strengths? Checkbox to display the transition strengths in the plot.
-3. Line breaks? Checkbox to show line breaks between the levels and the term symbols.
+1. Transition strengths? Checkbox to display the transition strengths in the plot.
+2. Line breaks? Checkbox to show line breaks between the levels and the term symbols.
     This can be useful if you want a narrow figure or higher level precision.
-4. Show cm<sup>-1</sup> axis labels? If unchecked, the left axis labels will disappear.
-5. Show eV axis labels? If unchecked, the right axis labels will disappear.
-6. Plot dark mode? If checked, the plot will be displayed in dark mode.
-    This can be useful, e.g., if you create slides with a dark background.
+3. Show cm<sup>-1</sup> axis labels? If unchecked, the left axis labels will disappear.
+4. Show eV axis labels? If unchecked, the right axis labels will disappear.
+5. Plot style: Please select from the dropdown menu, how you want to style your plot.
+  The default is "light".
+  If you select a transparent option, the plot background will be transparent (useful for talks with non-black/non-white backgrounds).
 
 !!! note
     The filled GUI example image above shows a reasonable setup for a Ti resonance ionization scheme (plot shown below).
@@ -92,7 +93,8 @@ Once the scheme is filled out, hit the "Plot" button in order to display a figur
 A window will open with the figure.
 Here's an example:
 
-![Example Titanium](img/plot_window.png)
+![Example Titanium](img/plot_window.png#only-light)
+![Example Titanium, dark mode](img/plot_window_dark.png#only-dark)
 
 This figure is for a Ti resonance ionization scheme,
 taken from [Trappitsch et al. (2018)](https://doi.org/10.1039/C8JA00269J).

@@ -25,7 +25,7 @@ DEFAULT_SETTINGS = {
         "show_transition_strength": True,
         "show_cm-1_axis": True,
         "show_eV_axis": True,
-        "plot_darkmode": False,
+        "plot_style": "light",
     },
     "scheme": {
         "gs_term": "",
@@ -145,6 +145,8 @@ IP_DICTIONARY = {
 }
 
 LASERS = ["Ti:Sa", "Dye", "Ti:Sa and Dye"]  # default is first entry - Ti:Sa
+
+PLOT_STYLES = ["light", "dark", "light transparent", "dark transparent"]
 
 
 def cm_2_to_nm(cm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
