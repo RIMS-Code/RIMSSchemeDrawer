@@ -30,7 +30,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
     def __init__(self):
         # run in debug mode?
-        self.rundebug = True
+        self.rundebug = False
 
         # program info
         self.author = "Reto Trappitsch"
