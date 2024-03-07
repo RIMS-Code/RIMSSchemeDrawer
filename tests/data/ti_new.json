@@ -53,7 +53,7 @@
         "headspace": "2700",
         "ip_label_pos": "Top",
         "line_breaks": false,
-        "plot_darkmode": false,
+        "plot_style": "light",
         "plot_title": "",
         "prec_level": "0",
         "prec_wavelength": "3",

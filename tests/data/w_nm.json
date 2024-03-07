@@ -54,7 +54,7 @@
         "headspace": "3000",
         "ip_label_pos": "Bottom",
         "line_breaks": true,
-        "plot_darkmode": false,
+        "plot_style": "dark transparent",
         "plot_title": "",
         "prec_level": "2",
         "prec_wavelength": "3",
