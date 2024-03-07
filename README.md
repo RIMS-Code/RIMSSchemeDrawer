@@ -1,79 +1,30 @@
 # RIMSSchemeDrawer
 
-A drawing program to create publishable RIMS schemes.  
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Rye](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/mitsuhiko/rye/main/artwork/badge.json)](https://rye-up.com)
+[![PyPI](https://img.shields.io/pypi/v/rimsschemedrawer)](https://pypi.org/project/rimsschemedrawer/)
+[![Documentation Status](https://readthedocs.org/projects/rimsschemedrawer/badge/?version=latest)](https://rimsschemedrawer.readthedocs.io/en/latest/?badge=latest)
+[![codecov](https://codecov.io/gh/RIMS-Code/RIMSSchemeDrawer/graph/badge.svg?token=TUUIKGLGGD)](https://codecov.io/gh/RIMS-Code/RIMSSchemeDrawer)
+[![tests](https://github.com/RIMS-Code/RIMSSchemeDrawer/actions/workflows/package_testing.yml/badge.svg)](https://github.com/RIMS-Code/RIMSSchemeDrawer/actions/workflows/package_testing.yml)
 
-Help with the installation / compilation can be found [here](INSTALLATION.md).
+## Welcome!
 
+As the name implies,
+the `RIMSSchemeDrawer` is a tool to draw resonance ionization schemes.
+The goal of this package is to create a publication-ready figure.
 
-## How to use
+The easiest way to use the software is via a graphical user interface (GUI).
+However, the software can also be used as a library.
 
-Generally, the GUI should be fairly self-explanatory.
-Tool tips are furthermore implemented to help you navigate what you need to do.
+For details on installation, usage, etc.,
+please see the [documentation](https://rimsschemedrawer.readthedocs.io/en/latest/).
 
-Below is a screenshot of the main window in the software
-that is configured to mostly reproduce 
-the Titanium resonance ionization scheme published by 
-[Trappitsch et al. (2018)](https://doi.org/10.1039/C8JA00269J). 
+## Issues/Enhancements
 
-![Example Ti](examples/screenshot_titanium.png)
-
-### State / transition information
-
-Information on the transitions are entered on the left hand side of the software.
-You can select if you would like to enter the information in nm (wavelength)
-or in cm<sup>-1</sup> (wavenumbers). 
-The term symbols can also be given, but are optional. 
-Furthermore, if you have low-lying states, 
-check the according box, 
-and you can now add the associated information.
-If a transition is forbidden,
-check the box and it will either be crossed out,
-or not shown (depending on the configuration selected).
-
-### Plotting
-
-On the right hand side of the program are the settings.
-Many parameters of the plot can be configured here. 
-It is worth playing with various parameters. 
-The `Plot` button will quickly allow you to see the figure in a new window. 
-It will also allow you to save the figure (see toolbar).
-Available formats can be found
-[here](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.savefig.html).
-
-In the background, RIMSSchemeDrawer uses matplotlib to draw the figures
-and to display them nicely. 
-Feel free to tinker with the code and explore additional styles.
-
-### Loading and saving configurations
-
-If you want to load / save the configurations
-you can use the according `Load Config` and `Save Config` buttons. 
-The data is saved as a `json` file. 
-You can open a saved file with any text editor and have a look, 
-but please note that bad things can happen 
-if you change the file right there, 
-unless of course you know what you're doing. 
-The file should be fairly self-explanatory. 
-
-If you are interested: 
-The file with the configurations shown in the image above can be found [here](examples/example_titanium.json).
-
-
-## Issues/enhancements
-
-If you find bugs in the software or would like to have an additional feature, 
-please raise an Issue [here](https://github.com/RIMS-Code/RIMSSchemeDrawer/issues).
-Please also browse the issues to first see if the bug/feature request 
-you want to report is already listed. 
-
-If you furthermore have ideas on how to implement/fix the bug already, 
-please feel free to discuss it through in the Issues tab 
-and create a pull request. 
-Contributions are always welcome!
-Please follow [best practices](https://chris.beams.io/posts/git-commit/) in your commit messages.
-
+If you run into any problems with the software
+or have ideas for enhancements,
+please raise an issue [here on GitHub](https://github.com/RIMS-Code/RIMSSchemeDrawer/issues).
 
 ## License
 
-RIMSSchemeDrawer is Copyright (C) 2020-2024 Reto Trappitsch  
-It is licensed under the MIT license.
+This software is licensed under the [MIT license](https://github.com/RIMS-Code/RIMSSchemeDrawer/blob/main/LICENSE).
