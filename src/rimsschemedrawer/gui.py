@@ -30,7 +30,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
     def __init__(self):
         # run in debug mode?
-        self.rundebug = False
+        self.rundebug = True
 
         # program info
         self.author = "Reto Trappitsch"
@@ -392,7 +392,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         )
         self.edt_sett_headspace.setToolTip(
             "Set how much space is added on top of the "
-            "IP level: the head space. Adjust this "
+            "highest transition: the head space. Adjust this "
             "value whenever there is not enough space "
             "on top to fit all the text in. The value "
             "is given in cm<sup>-1</sup>."
@@ -652,11 +652,11 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         Check if the required fields are filled in.
         """
         # throw an error if not at least one box is filled
-        if self.edt_level[0].text() == "":
+        if self.edt_level[0].text() == "" or self.edt_gslevel.text() == "":
             QtWidgets.QMessageBox.warning(
                 self,
                 "No entries",
-                "Need at least one level to make a plot!",
+                "Need at least ground state and one level to make a plot!",
                 QtWidgets.QMessageBox.Ok,
             )
             return False
@@ -679,6 +679,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         """
         Call the plotting window
         """
+        if not self.check_fields():
+            return
+
         # fill default values - if not already there
         self.fill_default_values()
 
@@ -717,7 +720,16 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # load the json file
         _load_dict = rimsschemedrawer.json_parser.json_reader(filename)
-        config_parser = rimsschemedrawer.json_parser.ConfigParser(_load_dict)
+        try:
+            config_parser = rimsschemedrawer.json_parser.ConfigParser(_load_dict)
+        except Exception as err:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Error",
+                f"An error occurred while reading the file.\n{'\n'.join(err.args)}",
+                QtWidgets.QMessageBox.Ok,
+            )
+            return
 
         # set the settings for the levels
         if config_parser.sett_unit_nm:
@@ -744,7 +756,11 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 self.chk_lowlying[it].setChecked(config_parser.is_low_lying[it])
                 self.chk_forbidden[it].setChecked(config_parser.step_forbidden[it])
             except IndexError:
-                break
+                self.edt_level[it].setText("")
+                self.edt_term[it].setText("")
+                self.edt_transition_strengths[it].setText("")
+                self.chk_lowlying[it].setChecked(False)
+                self.chk_forbidden[it].setChecked(False)
 
         # IP level
         self.cmb_element.setCurrentText(config_parser.element)
@@ -931,6 +947,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "Documents/code/RIMSCode/RIMSSchemeDrawer/examples/example_titanium.json"
         )
         self.load_config(fname=fname)
+        self.user_path = Path(
+            "/home/reto/Documents/code/RIMSCode/rims-code.github.io/temp/out"
+        )
 
 
 class MplCanvas(FigureCanvasQTAgg):

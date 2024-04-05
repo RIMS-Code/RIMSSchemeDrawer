@@ -14,7 +14,7 @@ DEFAULT_SETTINGS = {
         "fs_axes": 12,
         "fs_axes_labels": 12,
         "fs_labels": 12,
-        "headspace": 3000,
+        "headspace": 1300,
         "arrow_width": 0.2,
         "arrow_head_width": 0.6,
         "prec_wavelength": 3,
@@ -225,13 +225,21 @@ def nm_to_cm_2(nm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
 
 
 def term_to_string(tstr: str):
-    """
+    """Convert term symbol to LaTeX enabled string.
+
     Converts a term symbol string to a LaTeX enabled matplotlib string
+    If already a LaTeX string, just return it.
     :param tstr:   Input string to convert
     :return:       Output string LaTeX enabled for Matplotlib
     """
     if tstr == "":
         return None
+
+    latex_characters = ["{", "}", "^", "_"]
+    for lch in latex_characters:
+        if lch in tstr:
+            tstr = tstr.replace(" ", "\\,")
+            return f"${tstr}$"
 
     # some exceptionslike AI and IP
     if tstr == "IP":
