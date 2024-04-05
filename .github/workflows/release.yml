@@ -17,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Install the latest version of rye
-        uses: eifinger/setup-rye@v1
+        uses: eifinger/setup-rye@v2
       - name: Sync Rye
         run: |
           rye pin ${{ env.PYTHON_VERSION }}

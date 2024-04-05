@@ -158,10 +158,8 @@ class Plotter:
         # ymax:
         if ipvalue > totwavenumber_photons + wavenumber_gs:
             ymax = ipvalue + sett_headspace
-        elif totwavenumber_photons + wavenumber_gs - ipvalue < sett_headspace:
-            ymax = ipvalue + sett_headspace
         else:
-            ymax = totwavenumber_photons + wavenumber_gs
+            ymax = totwavenumber_photons + wavenumber_gs + sett_headspace
 
         # ### CREATE FIGURE ###
         a2 = self._axes.twinx()
