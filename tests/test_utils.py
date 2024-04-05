@@ -87,6 +87,13 @@ def test_term_to_string(vals):
     assert ut.term_to_string(vals[0]) == vals[1]
 
 
+def test_term_to_string_latex():
+    """Return a string surrounded by $ if LaTeX characters found."""
+    str_in = "^{3}F_{2}"
+    str_exp = f"${str_in}$"
+    assert ut.term_to_string(str_in) == str_exp
+
+
 @pytest.mark.parametrize("val", ["IP", "AI", "Rydberg", "Ryd"])
 def test_term_to_string_no_change(val):
     """Leave these symbols / strings unchanged."""

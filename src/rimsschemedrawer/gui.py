@@ -873,9 +873,9 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             dispforbidden = "noshow"
         savedict["settings"]["show_forbidden_transitions"] = dispforbidden
         savedict["settings"]["plot_title"] = self.edt_sett_plttitle.text()
-        savedict["settings"][
-            "show_transition_strength"
-        ] = self.chk_sett_trans_strength.isChecked()
+        savedict["settings"]["show_transition_strength"] = (
+            self.chk_sett_trans_strength.isChecked()
+        )
         savedict["settings"]["line_breaks"] = self.chk_sett_linebreaks.isChecked()
         savedict["settings"]["show_cm-1_axis"] = self.chk_sett_showcmax.isChecked()
         savedict["settings"]["show_eV_axis"] = self.chk_sett_showevax.isChecked()
