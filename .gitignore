@@ -40,3 +40,7 @@ target/*
 dist/
 *.egg-info/
 *.dist-info/
+
+# box
+build/*
+target/*
