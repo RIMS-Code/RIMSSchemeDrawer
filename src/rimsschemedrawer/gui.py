@@ -82,6 +82,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.edt_sett_fsaxlbl = QtWidgets.QLineEdit()
         self.chk_sett_trans_strength = QtWidgets.QCheckBox("Transition strengths?")
         self.chk_sett_linebreaks = QtWidgets.QCheckBox("Line breaks?")
+        self.chk_sett_linebreaks.setChecked(True)
         self.chk_sett_showcmax = QtWidgets.QCheckBox()  # no label -> label in layout
         self.chk_sett_showcmax.setChecked(True)
         self.chk_sett_showevax = QtWidgets.QCheckBox("Show eV axis labels?")
