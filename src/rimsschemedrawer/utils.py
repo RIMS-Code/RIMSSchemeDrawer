@@ -14,7 +14,7 @@ DEFAULT_SETTINGS = {
         "fs_axes": 12,
         "fs_axes_labels": 12,
         "fs_labels": 12,
-        "headspace": 1300,
+        "headspace": 2500,
         "arrow_width": 0.2,
         "arrow_head_width": 0.6,
         "prec_wavelength": 3,
