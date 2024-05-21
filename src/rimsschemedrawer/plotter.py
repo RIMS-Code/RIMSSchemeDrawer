@@ -227,6 +227,13 @@ class Plotter:
                     xvalplot = firstarrowxmfl
                 else:
                     xvalplot = xval
+                # face color for arrow
+                fc_col = col
+                if (
+                    self.config_parser.last_step_to_ip_mode
+                    and it == len(lambda_steps) - 1
+                ):
+                    fc_col = "None"
                 # now plot the arrow
                 self._axes.arrow(
                     xvalplot,
@@ -234,7 +241,7 @@ class Plotter:
                     0,
                     wstp,
                     width=sett_arr,
-                    fc=col,
+                    fc=fc_col,
                     ec=col,
                     length_includes_head=True,
                     head_width=sett_arr_head,
@@ -254,14 +261,15 @@ class Plotter:
                     )
 
             # draw a little solid line for the last/end state
-            if it == len(lambda_steps) - 1:
-                self._axes.hlines(
-                    tstp,
-                    xmin=xval - 0.5,
-                    xmax=xval + 0.5,
-                    linestyle="solid",
-                    color=self.colmain,
-                )
+            if not self.config_parser.last_step_to_ip_mode:
+                if it == len(lambda_steps) - 1:
+                    self._axes.hlines(
+                        tstp,
+                        xmin=xval - 0.5,
+                        xmax=xval + 0.5,
+                        linestyle="solid",
+                        color=self.colmain,
+                    )
 
             # alignment of labels
             if xval <= 5.0:
@@ -276,6 +284,11 @@ class Plotter:
             if not forbidden_steps[it] or show_forbidden_trans == "x-out":
                 # wavelength text and transition strength
                 lambdastr = f"{lambda_steps[it]:.{prec_lambda}f}$\\,$nm"
+                if (
+                    self.config_parser.last_step_to_ip_mode
+                    and it == len(lambda_steps) - 1
+                ):
+                    lambdastr = f"<{lambdastr}"
                 if (
                     show_trans_strength
                     and (tmp_strength := transition_strengths_steps[it]) != 0
@@ -309,6 +322,7 @@ class Plotter:
                     )
 
             # level text
+            # fixme: only do this if we are not in the last step to IP mode
             levelstr = f"{tstp:.{prec_level}f}$\\,$cm$^{{-1}}$"
             if term_symb[it] is not None:
                 levelstr += f"{lbreak}{term_symb[it]}"
@@ -318,15 +332,20 @@ class Plotter:
             else:
                 leveltextypos = tstp - 0.01 * totwavenumber_photons
                 leveltextvaalign = "top"
-            self._axes.text(
-                xloc_levelstr,
-                leveltextypos,
-                levelstr,
-                color=self.colmain,
-                ha=halignlev,
-                va=leveltextvaalign,
-                size=fsz_labels,
-            )
+
+            if (
+                not self.config_parser.last_step_to_ip_mode
+                or it != len(lambda_steps) - 1
+            ):
+                self._axes.text(
+                    xloc_levelstr,
+                    leveltextypos,
+                    levelstr,
+                    color=self.colmain,
+                    ha=halignlev,
+                    va=leveltextvaalign,
+                    size=fsz_labels,
+                )
 
             # update yval_bott
             yval_bott = transition_steps[it]
@@ -348,7 +367,7 @@ class Plotter:
                 color=self.colmain,
             )
 
-        for it in range(len(wavenumber_es)):
+        for it in range(len(wavenumber_es)):  # these are never steps to IP
             col = ut.color_wavelength(lambda_step_es[it], self.darkmode)
             # values for spacing and distance
             xval = firstarrowxmfl + x_spacing_es + it * x_spacing_es
