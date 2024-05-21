@@ -149,6 +149,61 @@ LASERS = ["Ti:Sa", "Dye", "Ti:Sa and Dye"]  # default is first entry - Ti:Sa
 PLOT_STYLES = ["light", "dark", "light transparent", "dark transparent"]
 
 
+def color_wavelength(lmb: float, darkmode: bool = False) -> str:
+    """Color the wavelength according to the wavelength.
+
+    When darkmode is turned on, pastel colors are used. Definitions of colors are
+    taken from here:
+    https://sciencenotes.org/visible-light-spectrum-wavelengths-and-colors/
+
+    :param lmb: Wavelength in nm.
+
+    :return: Color string.
+    """
+    dict_light = {
+        "ir": "#500000",
+        "red": "#b70000",
+        "orange": "#d75700",
+        "yellow": "#c09e00",
+        "green": "#0aa000",
+        "light_blue": "#0098ff",
+        "deep_blue": "#0012a0",
+        "violet": "#5f00a0",
+    }
+    dict_dark = {
+        "ir": "#b98989",
+        "red": "#d27878",
+        "orange": "#ffa669",
+        "yellow": "#f4e67c",
+        "green": "#60a55b",
+        "light_blue": "#82b1d1",
+        "deep_blue": "#8c96df",
+        "violet": "#9e85af",
+    }
+
+    if darkmode:
+        dict_use = dict_dark
+    else:
+        dict_use = dict_light
+
+    if lmb > 700:  # infrared
+        return dict_use["ir"]
+    elif lmb >= 625:  # red
+        return dict_use["red"]
+    elif lmb >= 590:  # orange
+        return dict_use["orange"]
+    elif lmb >= 565:  # yellow
+        return dict_use["yellow"]
+    elif lmb >= 500:  # green
+        return dict_use["green"]
+    elif lmb >= 484:  # light blue
+        return dict_use["light_blue"]
+    elif lmb >= 450:  # deep blue
+        return dict_use["deep_blue"]
+    else:  # violet
+        return dict_use["violet"]
+
+
 def cm_2_to_nm(cm: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
     """Convert a wavenumber in cm^-1 to a wavelength in nm.
 
