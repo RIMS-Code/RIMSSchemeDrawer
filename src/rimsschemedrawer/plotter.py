@@ -56,21 +56,15 @@ class Plotter:
 
         self._figure, self._axes = kwargs.get("fig_ax", plt.subplots(1, 1))
 
-        # Colors for arrows
+        # Colors for headspace and main
         if darkmode:
             self.colmain = "#ffffff"
-            self.colir = "#d27878"
-            self.coluv = "#8c96df"
-            self.colfuv = "#9365b2"
-            self.colpump = "#60a55b"
             self.colhdr = "#4b5482"  # header color
         else:
             self.colmain = "#000000"
-            self.colir = "#a00000"
-            self.coluv = "#0012a0"
-            self.colfuv = "#5f00a0"
-            self.colpump = "#0aa000"
             self.colhdr = "#adbbff"  # header color
+
+        self.darkmode = darkmode
 
         # now plot the scheme
         self._plotit()
@@ -221,14 +215,7 @@ class Plotter:
 
         # draw the arrows for the steps
         for it in range(len(lambda_steps)):
-            if lambda_steps[it] >= 700:
-                col = self.colir
-            elif 500.0 < lambda_steps[it] < 700.0:
-                col = self.colpump
-            elif 350.0 < lambda_steps[it] <= 500.0:
-                col = self.coluv
-            else:
-                col = self.colfuv
+            col = ut.color_wavelength(lambda_steps[it], self.darkmode)
             # xvalue for arrow
             xval += deltax
             wstp = wavenumber_steps[it]
@@ -362,15 +349,7 @@ class Plotter:
             )
 
         for it in range(len(wavenumber_es)):
-            if lambda_step_es[it] >= 700:
-                col = self.colir
-            elif 500.0 < lambda_step_es[it] < 700.0:
-                col = self.colpump
-            elif 350.0 < lambda_step_es[it] <= 500.0:
-                col = self.coluv
-            else:
-                col = self.colfuv
-
+            col = ut.color_wavelength(lambda_step_es[it], self.darkmode)
             # values for spacing and distance
             xval = firstarrowxmfl + x_spacing_es + it * x_spacing_es
             yval = mfld_yinc * ipvalue * (1 + it)
