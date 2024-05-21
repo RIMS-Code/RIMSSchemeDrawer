@@ -61,8 +61,6 @@ testpaths = "tests"
 addopts = "--cov -v"
 filterwarnings = 'ignore:datetime.datetime.utcfromtimestamp\(\) is deprecated:DeprecationWarning'  # 3rd party
 
-
-
 [tool.box]
 builder = "rye"
 app_entry = "rimsschemedrawer.app:run_gui"
