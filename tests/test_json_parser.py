@@ -18,6 +18,8 @@ def test_config_parser(data_path, fname):
     parser = jp.ConfigParser(data)
 
     assert parser.lasers == "Ti:Sa"
+    assert not parser.last_step_to_ip_mode
+    assert not parser.last_step_to_ip
 
 
 @pytest.mark.parametrize(
@@ -118,3 +120,18 @@ def test_json_reader_new(data_path, tmp_path):
     assert isinstance(data_in, dict)
     assert "scheme" in data_in.keys()
     assert "settings" in data_in.keys()
+
+
+@pytest.mark.parametrize("selector", [True, False])
+def test_json_reader_last_step_to_ip(data_path, selector):
+    """Check if last step to IP is correctly parsed."""
+    if selector:
+        fin = data_path.joinpath("draw_last_true.json")
+    else:
+        fin = data_path.joinpath("draw_last_false.json")
+    data = jp.json_reader(fin)
+
+    parser = jp.ConfigParser(data)
+
+    assert parser.last_step_to_ip
+    assert parser.last_step_to_ip_mode is selector

@@ -21,6 +21,8 @@ class ConfigParser:
         self.data = data
         self._element_guessed = False
 
+        self._last_step_to_ip_mode = False
+
         self._parse_data_scheme()
         self._parse_data_settings()
 
@@ -80,6 +82,16 @@ class ConfigParser:
     def lasers(self) -> str:
         """Get the types of lasers used in this scheme (defaults to Ti:Sa)."""
         return self._lasers
+
+    @property
+    def last_step_to_ip(self) -> bool:
+        """Get the last step to the ionization potential setup in file."""
+        return self._last_step_to_ip
+
+    @property
+    def last_step_to_ip_mode(self) -> bool:
+        """Get if we are actually in last step to IP mode?"""
+        return self._last_step_to_ip_mode
 
     @property
     def number_of_levels(self) -> int:
@@ -223,6 +235,8 @@ class ConfigParser:
 
         Table: All entries are formatted as strings!
 
+        fixme:  Modifications if in last step to IP mode
+
         :param prec: Precision for the wavelength and steps.
         :param prec_strength: Precision for the transition strength.
 
@@ -365,6 +379,12 @@ class ConfigParser:
         except KeyError:
             self._lasers = ut.LASERS[0]
 
+        # get last step to IP
+        last_step_to_ip_default = ut.DEFAULT_SETTINGS["scheme"]["last_step_to_ip"]
+        self._last_step_to_ip = self.data["scheme"].get(
+            "last_step_to_ip", last_step_to_ip_default
+        )
+
         # Get the step levels and save them as cm-1 (transform if in nm)
         step_levels = []
         idx = 0
@@ -429,6 +449,19 @@ class ConfigParser:
             self._steps_nm[it] = ut.cm_2_to_nm(
                 self._step_levels_cm[it] - self._step_levels_cm[it - 1]
             )
+
+        # adjust scheme if last_step_to_ip and set mode if required
+        if self._last_step_to_ip and self._step_levels_cm[-1] < self._ip_level:
+            self._last_step_to_ip_mode = True
+            # append the last step
+            self._step_levels_cm = np.append(self._step_levels_cm, self._ip_level)
+            self._steps_nm = np.append(
+                self._steps_nm, ut.cm_2_to_nm(self._ip_level - self._step_levels_cm[-2])
+            )
+            self._forbidden = np.append(self._forbidden, False)
+            self._low_lying = np.append(self._low_lying, False)
+            self._transition_strength = np.append(self._transition_strength, 0)
+            self._step_term = np.append(self._step_term, "")
 
     def _parse_data_key(self, key: str, dtype: type, default: any) -> np.ndarray:
         """Parse a key from the data and return values with the correct type.

@@ -72,6 +72,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.cmb_lasers = None
         self.chk_lowlying = []
         self.chk_forbidden = []
+        self.chk_laststep = None
 
         # settings line edits
         self.edt_sett_plttitle = QtWidgets.QLineEdit()
@@ -251,6 +252,16 @@ class SchemeDrawer(QtWidgets.QMainWindow):
                 "Check this box to mark the\n" "transition as forbidden."
             )
 
+        # draw last step to IP
+        self.chk_laststep = QtWidgets.QCheckBox("Draw last step to IP?")
+        self.chk_laststep.setToolTip(
+            "Check this box to draw the last step, if it is below the IP, to the IP.\n"
+            "The wavelength will then be labeled as an upper limit `<` and no level\n"
+            "information will be printed. This option has no influence if the last\n"
+            "step specified above is already above the IP!"
+        )
+        layout.addWidget(self.chk_laststep, 4 + len(self.lbl_steps), 0, 1, 2)
+
         # name the labels
         self.set_label_names()
 
@@ -267,10 +278,10 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # Set the elements
         element_lbl = QtWidgets.QLabel("Element")
-        layout.addWidget(element_lbl, 4 + len(self.lbl_steps), 0, 1, 1)
+        layout.addWidget(element_lbl, 5 + len(self.lbl_steps), 0, 1, 1)
         cmb_element = QtWidgets.QComboBox()
         cmb_element.addItems(ut.get_elements())
-        layout.addWidget(cmb_element, 4 + len(self.lbl_steps), 1, 1, 1)
+        layout.addWidget(cmb_element, 5 + len(self.lbl_steps), 1, 1, 1)
         cmb_element.setToolTip("Select the element to set the IP.")
         cmb_element.currentIndexChanged.connect(lambda x: self.set_ip(x))
         cmb_element.setCurrentIndex(0)
@@ -279,7 +290,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         # Laser selection
         laser_lbls = QtWidgets.QLabel("Lasers")
-        layout.addWidget(laser_lbls, 5 + len(self.lbl_steps), 0, 1, 1)
+        layout.addWidget(laser_lbls, 6 + len(self.lbl_steps), 0, 1, 1)
         cmb_lasers = QtWidgets.QComboBox()
         cmb_lasers.addItems(ut.LASERS)
         cmb_lasers.setToolTip(
@@ -289,7 +300,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
             "to the RIMS database website "
             "and its entry will be saved to the configuration file."
         )
-        layout.addWidget(cmb_lasers, 5 + len(self.lbl_steps), 1, 1, 1)
+        layout.addWidget(cmb_lasers, 6 + len(self.lbl_steps), 1, 1, 1)
         self.cmb_lasers = cmb_lasers
 
         # set sizes and validators of boxes defined outside loop
@@ -740,28 +751,46 @@ class SchemeDrawer(QtWidgets.QMainWindow):
 
         self.edt_gslevel.setText(str(config_parser.gs_level))
         self.edt_gsterm.setText(config_parser.gs_term_no_formatting)
+
+        # get the data to fill from
+        if config_parser.sett_unit_nm:
+            value_list = config_parser.step_nm
+        else:
+            value_list = config_parser.step_levels
+        step_terms_no_formatting = config_parser.step_terms_no_formatting
+        transition_strengths = config_parser.transition_strengths
+        is_low_lying = config_parser.is_low_lying
+        step_forbidden = config_parser.step_forbidden
+
+        # cut last index off if we are dealing with last_step_to_ip defined
+        if config_parser.last_step_to_ip_mode:
+            value_list = value_list[:-1]
+            step_terms_no_formatting = step_terms_no_formatting[:-1]
+            transition_strengths = transition_strengths[:-1]
+            is_low_lying = is_low_lying[:-1]
+            step_forbidden = step_forbidden[:-1]
+
         for it in range(
             len(self.edt_level)
         ):  # only loop through as many entries as there are
             try:
-                if config_parser.sett_unit_nm:
-                    value_list = config_parser.step_nm
-                else:
-                    value_list = config_parser.step_levels
                 self.edt_level[it].setText(str(value_list[it]))
-                self.edt_term[it].setText(config_parser.step_terms_no_formatting[it])
+                self.edt_term[it].setText(step_terms_no_formatting[it])
 
-                trans_strength = config_parser.transition_strengths[it]
+                trans_strength = transition_strengths[it]
                 if trans_strength > 0:
                     self.edt_transition_strengths[it].setText(str(trans_strength))
-                self.chk_lowlying[it].setChecked(config_parser.is_low_lying[it])
-                self.chk_forbidden[it].setChecked(config_parser.step_forbidden[it])
+                self.chk_lowlying[it].setChecked(is_low_lying[it])
+                self.chk_forbidden[it].setChecked(step_forbidden[it])
             except IndexError:
                 self.edt_level[it].setText("")
                 self.edt_term[it].setText("")
                 self.edt_transition_strengths[it].setText("")
                 self.chk_lowlying[it].setChecked(False)
                 self.chk_forbidden[it].setChecked(False)
+
+        # Last step to IP
+        self.chk_laststep.setChecked(config_parser.last_step_to_ip)
 
         # IP level
         self.cmb_element.setCurrentText(config_parser.element)
@@ -850,6 +879,7 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         savedict["scheme"]["ip_term"] = self.edt_ipterm.text()
         savedict["scheme"]["element"] = self.cmb_element.currentText()
         savedict["scheme"]["lasers"] = self.cmb_lasers.currentText()
+        savedict["scheme"]["last_step_to_ip"] = self.chk_laststep.isChecked()
 
         # save the settings
         savedict["settings"]["fig_width"] = self.edt_sett_figwidth.text()

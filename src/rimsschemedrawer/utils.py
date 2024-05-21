@@ -30,6 +30,7 @@ DEFAULT_SETTINGS = {
     "scheme": {
         "gs_term": "",
         "ip_term": "",
+        "last_step_to_ip": False,
     },
 }
 
