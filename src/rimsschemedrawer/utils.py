@@ -125,7 +125,7 @@ IP_DICTIONARY = {
     "Ra": 42573.36,
     "Ac": 43394.52,
     "Th": 50867.0,
-    "Pa": 47500.0,
+    "Pa": 49034.0,
     "U": 49958.4,
     "Np": 50535.0,
     "Pu": 48601.0,
@@ -134,8 +134,8 @@ IP_DICTIONARY = {
     "Bk": 49989.0,
     "Cf": 50666.76,
     "Es": 51364.58,
-    "Fm": 52400.0,
-    "Md": 53100.0,
+    "Fm": 52422.5,
+    "Md": 53230.0,
     "No": 53444.0,
     "Lr": 40005.0,
     "Rf": 48580.0,
@@ -143,6 +143,24 @@ IP_DICTIONARY = {
     "Sg": 63000.0,
     "Bh": 62000.0,
     "Hs": 61000.0,
+}
+
+IP_REFERENCES_NON_NIST = {
+    "Pd": {
+        "author": "Naubereit",
+        "year": 2020,
+        "url": "http://doi.org/10.25358/openscience-5183",
+    },
+    "Fm": {
+        "author": "Grotrian",
+        "year": 2024,
+        "url": "http://grotrian.nsu.ru/en/element/54354",
+    },
+    "Md": {
+        "author": "Grotrian",
+        "year": 2024,
+        "url": "http://grotrian.nsu.ru/en/element/54355",
+    },
 }
 
 LASERS = ["Ti:Sa", "Dye", "Ti:Sa and Dye"]  # default is first entry - Ti:Sa
@@ -228,6 +246,26 @@ def get_ip(ele: str) -> float:
     """
 
     return IP_DICTIONARY[ele.capitalize()]
+
+
+def get_ip_reference(ele: str) -> dict:
+    """Get a reference for the ionization potential.
+
+    If element is in `IP_REFERENCES_NON_NIST`, return the reference dictionary.
+    Otherwise, return a dictionary with "NIST" entries.
+
+    :return: Dictionary with "author", "year", and "url" entries.
+    """
+    nist_dict = {
+        "author": "NIST ASD",
+        "year": 2024,
+        "url": "https://www.nist.gov/pml/atomic-spectra-database",
+    }
+
+    if ele in IP_REFERENCES_NON_NIST.keys():
+        return IP_REFERENCES_NON_NIST[ele]
+    else:
+        return nist_dict
 
 
 def guess_element_from_ip(ip: float) -> str:

@@ -33,6 +33,15 @@ def test_get_ip():
     assert ut.get_ip("N") == 117225.7
 
 
+@pytest.mark.parametrize(
+    "ele_ref",
+    [["H", "NIST ASD"], ["Pd", "Naubereit"], ["Fm", "Grotrian"], ["Md", "Grotrian"]],
+)
+def test_get_ip_reference(ele_ref):
+    """Check that the ionization potential references are correct."""
+    assert ut.get_ip_reference(ele_ref[0])["author"] == ele_ref[1]
+
+
 def test_guess_element_from_ip():
     """Guess an element from the IP."""
     assert ut.guess_element_from_ip(90820.0)
