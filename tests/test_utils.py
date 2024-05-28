@@ -35,7 +35,7 @@ def test_get_ip():
 
 @pytest.mark.parametrize(
     "ele_ref",
-    [["H", "NIST ASD"], ["Pd", "Naubereit"], ["Fm", "Grotrian"], ["Md", "Grotrian"]],
+    [["H", "NIST ASD"], ["Pa", "Naubereit"], ["Fm", "Grotrian"], ["Md", "Grotrian"]],
 )
 def test_get_ip_reference(ele_ref):
     """Check that the ionization potential references are correct."""

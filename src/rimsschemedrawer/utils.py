@@ -146,7 +146,7 @@ IP_DICTIONARY = {
 }
 
 IP_REFERENCES_NON_NIST = {
-    "Pd": {
+    "Pa": {
         "author": "Naubereit",
         "year": 2020,
         "url": "http://doi.org/10.25358/openscience-5183",
