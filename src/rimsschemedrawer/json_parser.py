@@ -344,7 +344,12 @@ class ConfigParser:
             headers.append("Strength (s⁻¹)")
             for val in self.transition_strengths:
                 if val != 0:
-                    transition_strengths.append(ut.my_exp_formatter(val, prec_strength))
+                    transition_strengths.append(
+                        StringFmt(
+                            ut.my_exp_formatter(val, prec_strength),
+                            StringFmt.Type.latex,
+                        ).html
+                    )
                 else:
                     transition_strengths.append("")
             transition_strengths = reshuffle_list_low_lying(transition_strengths)
