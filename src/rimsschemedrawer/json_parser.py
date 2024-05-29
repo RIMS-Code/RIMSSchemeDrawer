@@ -277,8 +277,15 @@ class ConfigParser:
             "Step",
             "λ (nm)",
             "From (cm⁻¹)",
-            "To (cm⁻¹)",
         ]
+
+        has_from_term = any(self.step_terms) or self.gs_term
+        has_to_term = any(self.step_terms) or self.ip_term
+        if has_from_term:
+            headers.append("Term")
+        headers.append("To (cm⁻¹)")
+        if has_to_term:
+            headers.append("Term")
 
         first_no_lowlying = np.where(~self._low_lying)[0][0]
 
@@ -290,11 +297,12 @@ class ConfigParser:
         lambdas = reshuffle_list_low_lying(lambdas)
 
         from_level = ["" for _ in range(self.number_of_levels)]
+        from_term = from_level.copy()
         # add low-lying states
         for it in range(first_no_lowlying):
             tmp_str = f"{self.step_levels[it]:.{prec}f}"
             if term := self.step_terms_html[it]:
-                tmp_str += f" ({term})"
+                from_term[it] = term
             from_level[it] = tmp_str
         # add ground state
         gs = self.gs_level
@@ -302,33 +310,36 @@ class ConfigParser:
             tmp_str = "0"
         else:
             tmp_str = f"{gs:.{prec}f}"
-        if term := self.gs_term_html:
-            tmp_str += f" ({term})"
         from_level[first_no_lowlying] = tmp_str
+        if term := self.gs_term_html:
+            from_term[first_no_lowlying] = term
         # add steps
         for it in range(
             first_no_lowlying + 1, self.number_of_levels
         ):  # above ground state
             tmp_str = f"{self.step_levels[it - 1]:.{prec}f}"
             if term := self.step_terms_html[it - 1]:
-                tmp_str += f" ({term})"
+                from_term[it] = term
             from_level[it] = tmp_str
         from_level = reshuffle_list_low_lying(from_level)
+        from_term = reshuffle_list_low_lying(from_term)
 
         to_level = ["" for _ in range(self.number_of_levels)]
+        to_term = to_level.copy()
         # add low-lying states and first step
         for it in range(first_no_lowlying + 1):
             tmp_str = f"{self.step_levels[first_no_lowlying]:.{prec}f}"
             if term := self.step_terms_html[first_no_lowlying]:
-                tmp_str += f" ({term})"
+                to_term[it] = term
             to_level[it] = tmp_str
         # add steps
         for it in range(first_no_lowlying + 1, self.number_of_levels):
             tmp_str = f"{self.step_levels[it]:.{prec}f}"
             if term := self.step_terms_html[it]:
-                tmp_str += f" ({term})"
+                to_term[it] = term
             to_level[it] = tmp_str
         to_level = reshuffle_list_low_lying(to_level)
+        to_term = reshuffle_list_low_lying(to_term)
 
         # forbidden transitions
         if np.any(self.step_forbidden):
@@ -359,8 +370,12 @@ class ConfigParser:
                 str(steps[idx]),
                 lambdas[idx],
                 from_level[idx],
-                to_level[idx],
             ]
+            if has_from_term:
+                row.append(from_term[idx])
+            row.append(to_level[idx])
+            if has_to_term:
+                row.append(to_term[idx])
             if np.any(self.step_forbidden):
                 row.append(forbidden[idx])
             if np.any(self.transition_strengths):
