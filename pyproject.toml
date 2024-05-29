@@ -8,7 +8,7 @@ authors = [
 dependencies = [
     "matplotlib>=3.7.4",
     "numpy>=1.24.4",
-    "rttools @ git+https://github.com/trappitsch/rttools@string_formatter",
+    "rttools @ git+https://github.com/trappitsch/rttools",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
