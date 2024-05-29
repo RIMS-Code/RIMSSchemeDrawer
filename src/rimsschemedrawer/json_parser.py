@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
+from rttools import StringFmt
 
 import rimsschemedrawer.utils as ut
 
@@ -47,6 +48,11 @@ class ConfigParser:
     def gs_term(self) -> str:
         """Get the ground state term, formatted for plotting."""
         return ut.term_to_string(self._gs_term)
+
+    @property
+    def gs_term_html(self):
+        """Get the ground state term, formatted for HTML."""
+        return StringFmt(self._gs_term, StringFmt.Type.latex).html
 
     @property
     def gs_term_no_formatting(self) -> str:
@@ -119,6 +125,13 @@ class ConfigParser:
         return np.array([ut.term_to_string(it) for it in self._step_term])
 
     @property
+    def step_terms_html(self) -> np.ndarray:
+        """Get the terms for all states, formatted for HTML."""
+        return np.array(
+            [StringFmt(it, StringFmt.Type.latex).html for it in self._step_term]
+        )
+
+    @property
     def step_terms_no_formatting(self) -> np.ndarray:
         """Get the terms for all states, not formatted for plotting."""
         return self._step_term
@@ -167,6 +180,7 @@ class ConfigParser:
     @property
     def sett_line_breaks(self) -> bool:
         """Get the line breaks setting for the plot."""
+        #
         return self._sett_line_breaks
 
     @property
@@ -281,7 +295,7 @@ class ConfigParser:
         # add low-lying states
         for it in range(first_no_lowlying):
             tmp_str = f"{self.step_levels[it]:.{prec}f}"
-            if term := self.step_terms[it]:
+            if term := self.step_terms_html[it]:
                 tmp_str += f" ({term})"
             from_level[it] = tmp_str
         # add ground state
@@ -290,7 +304,7 @@ class ConfigParser:
             tmp_str = "0"
         else:
             tmp_str = f"{gs:.{prec}f}"
-        if term := self.gs_term:
+        if term := self.gs_term_html:
             tmp_str += f" ({term})"
         from_level[first_no_lowlying] = tmp_str
         # add steps
@@ -298,7 +312,7 @@ class ConfigParser:
             first_no_lowlying + 1, self.number_of_levels
         ):  # above ground state
             tmp_str = f"{self.step_levels[it - 1]:.{prec}f}"
-            if term := self.step_terms[it - 1]:
+            if term := self.step_terms_html[it - 1]:
                 tmp_str += f" ({term})"
             from_level[it] = tmp_str
         from_level = reshuffle_list_low_lying(from_level)
@@ -307,13 +321,13 @@ class ConfigParser:
         # add low-lying states and first step
         for it in range(first_no_lowlying + 1):
             tmp_str = f"{self.step_levels[first_no_lowlying]:.{prec}f}"
-            if term := self.step_terms[first_no_lowlying]:
+            if term := self.step_terms_html[first_no_lowlying]:
                 tmp_str += f" ({term})"
             to_level[it] = tmp_str
         # add steps
         for it in range(first_no_lowlying + 1, self.number_of_levels):
             tmp_str = f"{self.step_levels[it]:.{prec}f}"
-            if term := self.step_terms[it]:
+            if term := self.step_terms_html[it]:
                 tmp_str += f" ({term})"
             to_level[it] = tmp_str
         to_level = reshuffle_list_low_lying(to_level)
