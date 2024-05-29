@@ -1,7 +1,15 @@
 # Tests for ConfigParser scheme table creation.
 
+from rttools import StringFmt
+
 import rimsschemedrawer.json_parser as jp
-from rimsschemedrawer.utils import term_to_string as tts
+from rimsschemedrawer.utils import term_to_string
+
+
+def tts(term: str) -> str:
+    """Convert to expected term."""
+    ltx = term_to_string(term)
+    return StringFmt(ltx, StringFmt.Type.latex).html
 
 
 def test_ti_new_json(data_path):
@@ -15,15 +23,17 @@ def test_ti_new_json(data_path):
         "Step",
         "λ (nm)",
         "From (cm⁻¹)",
+        "Term",
         "To (cm⁻¹)",
+        "Term",
     ]
 
     table_exp = [
-        ["1", "465.777", f"0 ({tts('3F2')})", f"21469.500 ({tts('3G3')})"],
-        ["1", "469.498", f"170.150 ({tts('3F3')})", f"21469.500 ({tts('3G3')})"],
-        ["1", "474.324", f"386.880 ({tts('3F4')})", f"21469.500 ({tts('3G3')})"],
-        ["2", "416.158", f"21469.500 ({tts('3G3')})", f"45498.850 ({tts('3G4')})"],
-        ["3", "881.399", f"45498.850 ({tts('3G4')})", "56844.450"],
+        ["1", "465.777", "0", f"{tts('3F2')}", "21469.500", f"{tts('3G3')}"],
+        ["1", "469.498", "170.150", f"{tts('3F3')}", "21469.500", f"{tts('3G3')}"],
+        ["1", "474.324", "386.880", f"{tts('3F4')}", "21469.500", f"{tts('3G3')}"],
+        ["2", "416.158", "21469.500", f"{tts('3G3')}", "45498.850", f"{tts('3G4')}"],
+        ["3", "881.399", "45498.850", f"{tts('3G4')}", "56844.450", ""],
     ]
 
     header, table = parser.scheme_table()
@@ -43,7 +53,9 @@ def test_raised_ground(data_path):
         "Step",
         "λ (nm)",
         "From (cm⁻¹)",
+        "Term",
         "To (cm⁻¹)",
+        "Term",
         "Forbidden",
         "Strength (s⁻¹)",
     ]
@@ -52,26 +64,32 @@ def test_raised_ground(data_path):
         [
             "1",
             "400.262",
-            f"1000.000 ({tts('5D0')})",
-            f"25983.609 ({tts('5F1')})",
+            "1000.000",
+            f"{tts('5D0')}",
+            "25983.609",
+            f"{tts('5F1')}",
             "",
-            "$1.0 \\times 10^{6}$",
+            "1.0 × 10<sup>6</sup>",
         ],
         [
             "2",
             "407.469",
-            f"25983.609 ({tts('5F1')})",
-            f"50525.354 ({tts('5D2')})",
+            "25983.609",
+            f"{tts('5F1')}",
+            "50525.354",
+            f"{tts('5D2')}",
             "x",
             "",
         ],
         [
             "3",
             "771.908",
-            f"50525.354 ({tts('5D2')})",
-            f"63480.266 ({tts('AI')})",
+            "50525.354",
+            f"{tts('5D2')}",
+            "63480.266",
+            f"{tts('AI')}",
             "",
-            "$3.0 \\times 10^{5}$",
+            "3.0 × 10<sup>5</sup>",
         ],
     ]
 

@@ -6,6 +6,11 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 
+try:
+    from rttools import StringFmt
+except ImportError:
+    StringFmt = None
+
 import rimsschemedrawer.utils as ut
 
 
@@ -47,6 +52,12 @@ class ConfigParser:
     def gs_term(self) -> str:
         """Get the ground state term, formatted for plotting."""
         return ut.term_to_string(self._gs_term)
+
+    @property
+    def gs_term_html(self):
+        """Get the ground state term, formatted for HTML."""
+        rttools_error()
+        return StringFmt(self.gs_term, StringFmt.Type.latex).html
 
     @property
     def gs_term_no_formatting(self) -> str:
@@ -119,6 +130,14 @@ class ConfigParser:
         return np.array([ut.term_to_string(it) for it in self._step_term])
 
     @property
+    def step_terms_html(self) -> np.ndarray:
+        """Get the terms for all states, formatted for HTML."""
+        rttools_error()
+        return np.array(
+            [StringFmt(it, StringFmt.Type.latex).html for it in self.step_terms]
+        )
+
+    @property
     def step_terms_no_formatting(self) -> np.ndarray:
         """Get the terms for all states, not formatted for plotting."""
         return self._step_term
@@ -167,6 +186,7 @@ class ConfigParser:
     @property
     def sett_line_breaks(self) -> bool:
         """Get the line breaks setting for the plot."""
+        #
         return self._sett_line_breaks
 
     @property
@@ -230,18 +250,17 @@ class ConfigParser:
         - From (cm⁻¹)  - including term symbol formatted
         - To (cm⁻¹) - including term symbol formatted
         - Forbidden - filled in as "x" if forbidden (only if there are forbidden steps)
-        - Strength (s⁻¹) - formatted as LaTeX string to given precision
+        - Strength (s⁻¹) - formatted as html string to given precision
             (only present if any transitions were given)
 
         Table: All entries are formatted as strings!
-
-        fixme:  Modifications if in last step to IP mode
 
         :param prec: Precision for the wavelength and steps.
         :param prec_strength: Precision for the transition strength.
 
         :return: Tuple with headers and the scheme table.
         """
+        rttools_error()
 
         def reshuffle_list_low_lying(lst: List) -> List:
             """Reshuffle a given list when low-lying states are present.
@@ -265,8 +284,15 @@ class ConfigParser:
             "Step",
             "λ (nm)",
             "From (cm⁻¹)",
-            "To (cm⁻¹)",
         ]
+
+        has_from_term = any(self.step_terms) or self.gs_term
+        has_to_term = any(self.step_terms) or self.ip_term
+        if has_from_term:
+            headers.append("Term")
+        headers.append("To (cm⁻¹)")
+        if has_to_term:
+            headers.append("Term")
 
         first_no_lowlying = np.where(~self._low_lying)[0][0]
 
@@ -278,11 +304,12 @@ class ConfigParser:
         lambdas = reshuffle_list_low_lying(lambdas)
 
         from_level = ["" for _ in range(self.number_of_levels)]
+        from_term = from_level.copy()
         # add low-lying states
         for it in range(first_no_lowlying):
             tmp_str = f"{self.step_levels[it]:.{prec}f}"
-            if term := self.step_terms[it]:
-                tmp_str += f" ({term})"
+            if term := self.step_terms_html[it]:
+                from_term[it] = term
             from_level[it] = tmp_str
         # add ground state
         gs = self.gs_level
@@ -290,33 +317,36 @@ class ConfigParser:
             tmp_str = "0"
         else:
             tmp_str = f"{gs:.{prec}f}"
-        if term := self.gs_term:
-            tmp_str += f" ({term})"
         from_level[first_no_lowlying] = tmp_str
+        if term := self.gs_term_html:
+            from_term[first_no_lowlying] = term
         # add steps
         for it in range(
             first_no_lowlying + 1, self.number_of_levels
         ):  # above ground state
             tmp_str = f"{self.step_levels[it - 1]:.{prec}f}"
-            if term := self.step_terms[it - 1]:
-                tmp_str += f" ({term})"
+            if term := self.step_terms_html[it - 1]:
+                from_term[it] = term
             from_level[it] = tmp_str
         from_level = reshuffle_list_low_lying(from_level)
+        from_term = reshuffle_list_low_lying(from_term)
 
         to_level = ["" for _ in range(self.number_of_levels)]
+        to_term = to_level.copy()
         # add low-lying states and first step
         for it in range(first_no_lowlying + 1):
             tmp_str = f"{self.step_levels[first_no_lowlying]:.{prec}f}"
-            if term := self.step_terms[first_no_lowlying]:
-                tmp_str += f" ({term})"
+            if term := self.step_terms_html[first_no_lowlying]:
+                to_term[it] = term
             to_level[it] = tmp_str
         # add steps
         for it in range(first_no_lowlying + 1, self.number_of_levels):
             tmp_str = f"{self.step_levels[it]:.{prec}f}"
-            if term := self.step_terms[it]:
-                tmp_str += f" ({term})"
+            if term := self.step_terms_html[it]:
+                to_term[it] = term
             to_level[it] = tmp_str
         to_level = reshuffle_list_low_lying(to_level)
+        to_term = reshuffle_list_low_lying(to_term)
 
         # forbidden transitions
         if np.any(self.step_forbidden):
@@ -330,7 +360,12 @@ class ConfigParser:
             headers.append("Strength (s⁻¹)")
             for val in self.transition_strengths:
                 if val != 0:
-                    transition_strengths.append(ut.my_exp_formatter(val, prec_strength))
+                    transition_strengths.append(
+                        StringFmt(
+                            ut.my_exp_formatter(val, prec_strength),
+                            StringFmt.Type.latex,
+                        ).html
+                    )
                 else:
                     transition_strengths.append("")
             transition_strengths = reshuffle_list_low_lying(transition_strengths)
@@ -342,8 +377,12 @@ class ConfigParser:
                 str(steps[idx]),
                 lambdas[idx],
                 from_level[idx],
-                to_level[idx],
             ]
+            if has_from_term:
+                row.append(from_term[idx])
+            row.append(to_level[idx])
+            if has_to_term:
+                row.append(to_term[idx])
             if np.any(self.step_forbidden):
                 row.append(forbidden[idx])
             if np.any(self.transition_strengths):
@@ -582,3 +621,11 @@ def json_reader(fin: Path) -> Dict:
         data = data["rims_scheme"]
 
     return data
+
+
+def rttools_error():
+    """Check for rttools and raise an error if not found."""
+    if StringFmt is None:
+        raise ImportError(
+            "rttools is not installed. Please install it to use this function."
+        )
