@@ -1,7 +1,15 @@
 # Tests for ConfigParser scheme table creation.
 
+from rttools import StringFmt
+
 import rimsschemedrawer.json_parser as jp
-from rimsschemedrawer.utils import term_to_string as tts
+from rimsschemedrawer.utils import term_to_string
+
+
+def tts(term: str) -> str:
+    """Convert to expected term."""
+    ltx = term_to_string(term)
+    return StringFmt(ltx, StringFmt.Type.latex).html
 
 
 def test_ti_new_json(data_path):

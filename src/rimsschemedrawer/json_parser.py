@@ -52,7 +52,7 @@ class ConfigParser:
     @property
     def gs_term_html(self):
         """Get the ground state term, formatted for HTML."""
-        return StringFmt(self._gs_term, StringFmt.Type.latex).html
+        return StringFmt(self.gs_term, StringFmt.Type.latex).html
 
     @property
     def gs_term_no_formatting(self) -> str:
@@ -128,7 +128,7 @@ class ConfigParser:
     def step_terms_html(self) -> np.ndarray:
         """Get the terms for all states, formatted for HTML."""
         return np.array(
-            [StringFmt(it, StringFmt.Type.latex).html for it in self._step_term]
+            [StringFmt(it, StringFmt.Type.latex).html for it in self.step_terms]
         )
 
     @property
@@ -244,12 +244,10 @@ class ConfigParser:
         - From (cm⁻¹)  - including term symbol formatted
         - To (cm⁻¹) - including term symbol formatted
         - Forbidden - filled in as "x" if forbidden (only if there are forbidden steps)
-        - Strength (s⁻¹) - formatted as LaTeX string to given precision
+        - Strength (s⁻¹) - formatted as html string to given precision
             (only present if any transitions were given)
 
         Table: All entries are formatted as strings!
-
-        fixme:  Modifications if in last step to IP mode
 
         :param prec: Precision for the wavelength and steps.
         :param prec_strength: Precision for the transition strength.
