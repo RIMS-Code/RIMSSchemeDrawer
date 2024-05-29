@@ -150,7 +150,6 @@ regex==2024.5.15
 requests==2.32.2
     # via mkdocs-material
 rttools @ git+https://github.com/trappitsch/rttools@b01d4af6f767190a22e22a953e9d4ce18c7b5d9f
-    # via rimsschemedrawer
 scipy==1.13.1
     # via rttools
 six==1.16.0

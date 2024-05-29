@@ -5,7 +5,11 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 import numpy as np
-from rttools import StringFmt
+
+try:
+    from rttools import StringFmt
+except ImportError:
+    StringFmt = None
 
 import rimsschemedrawer.utils as ut
 
@@ -52,6 +56,7 @@ class ConfigParser:
     @property
     def gs_term_html(self):
         """Get the ground state term, formatted for HTML."""
+        rttools_error()
         return StringFmt(self.gs_term, StringFmt.Type.latex).html
 
     @property
@@ -127,6 +132,7 @@ class ConfigParser:
     @property
     def step_terms_html(self) -> np.ndarray:
         """Get the terms for all states, formatted for HTML."""
+        rttools_error()
         return np.array(
             [StringFmt(it, StringFmt.Type.latex).html for it in self.step_terms]
         )
@@ -254,6 +260,7 @@ class ConfigParser:
 
         :return: Tuple with headers and the scheme table.
         """
+        rttools_error()
 
         def reshuffle_list_low_lying(lst: List) -> List:
             """Reshuffle a given list when low-lying states are present.
@@ -614,3 +621,11 @@ def json_reader(fin: Path) -> Dict:
         data = data["rims_scheme"]
 
     return data
+
+
+def rttools_error():
+    """Check for rttools and raise an error if not found."""
+    if StringFmt is None:
+        raise ImportError(
+            "rttools is not installed. Please install it to use this function."
+        )

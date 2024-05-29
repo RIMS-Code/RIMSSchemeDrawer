@@ -8,7 +8,6 @@ authors = [
 dependencies = [
     "matplotlib>=3.7.4",
     "numpy>=1.24.4",
-    "rttools @ git+https://github.com/trappitsch/rttools",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
@@ -45,6 +44,7 @@ dev-dependencies = [
     "hypothesis>=6.97.1",
     "pytest-cov>=4.1.0",
     "requests>=2.31.0",
+    "rttools @ git+https://github.com/trappitsch/rttools",
 ]
 
 [tool.rye.scripts]
