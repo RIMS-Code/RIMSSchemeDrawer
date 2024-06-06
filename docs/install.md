@@ -33,5 +33,11 @@ by choosing the appropriate file for your operating system.
 After downloading,
 simply run the file.
 
+!!! tip
+    We recommend that you try out our latest release candidate!
+    The main difference to the future full release is,
+    that it currently does not include an operating system installer.
+    However, you will be able to run the software by simply double-clicking the executable.
+
 !!! note
     The files are not signed and you might get a warning from your operating system.

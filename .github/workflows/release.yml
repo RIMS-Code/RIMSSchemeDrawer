@@ -22,10 +22,10 @@ jobs:
         run: |
           rye pin ${{ env.PYTHON_VERSION }} --relaxed
           rye sync --all-features
-#      - name: Build and release on PyPi
-#        run: |
-#          rye build
-#          rye publish --token ${{ secrets.PYPI_TOKEN }} --yes
+      - name: Build and release on PyPi
+        run: |
+          rye build
+          rye publish --token ${{ secrets.PYPI_TOKEN }} --yes
       - name: Package Linux App
         run: |
           rye run box package
