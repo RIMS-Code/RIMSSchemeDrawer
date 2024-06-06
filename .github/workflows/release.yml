@@ -12,17 +12,81 @@ env:
 jobs:
   build-linux:
     name: Release on PyPi
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Install the latest version of rye
-        uses: eifinger/setup-rye@v2
+        uses: eifinger/setup-rye@v3
       - name: Sync Rye
         run: |
-          rye pin ${{ env.PYTHON_VERSION }}
-          rye sync
-      - name: Build and release the controller
+          rye pin ${{ env.PYTHON_VERSION }} --relaxed
+          rye sync --all-features
+#      - name: Build and release on PyPi
+#        run: |
+#          rye build
+#          rye publish --token ${{ secrets.PYPI_TOKEN }} --yes
+      - name: Package Linux App
         run: |
-          rye build
-          rye publish --token ${{ secrets.PYPI_TOKEN }} --yes
+          rye run box package
+          mv target/release/rimsschemedrawer target/release/rimsschemedrawer-linux
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files:
+            ${{ github.workspace }}/target/release/rimsschemedrawer-linux
+          tag_name: ${{ github.ref_name }}
+          name: RIMSSchemeDrawer ${{ github.ref_name }}
+          body_path: ${{ github.workspace }}/release_text.md
+
+  build-windows:
+    needs: build-linux
+    name: Package GUI for Windows and add to Release
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install dependencies
+        run: |
+          pip install .
+          pip install box-packager
+          pip install build
+      - name: Package Windows App
+        run: |
+          box init -q -b build
+          rye run box package
+          mv target/release/rimsschemedrawer.exe target/release/rimsschemedrawer-windows.exe
+      - name: Add to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files:
+            target/release/rimsschemedrawer-windows.exe
+          tag_name: ${{ github.ref_name }}
+
+  build-macos:
+    needs: build-linux
+    name: Package GUI for MacOS and add to Release
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Rye
+        uses: eifinger/setup-rye@v3
+      - name: Sync Rye
+        run: |
+          rye pin ${{ env.PYTHON_VERSION }} --relaxed
+          rye sync --all-features
+      - name: Package MacOS App
+        run: |
+          rye run box package
+          mv target/release/rimsschemedrawer target/release/rimsschemedrawer-macos
+      - name: Add to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files:
+            target/release/rimsschemedrawer-macos
+          tag_name: ${{ github.ref_name }}
