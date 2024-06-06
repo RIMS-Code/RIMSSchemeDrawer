@@ -58,7 +58,7 @@ jobs:
       - name: Package Windows App
         run: |
           box init -q -b build
-          rye run box package
+          box package
           mv target/release/rimsschemedrawer.exe target/release/rimsschemedrawer-windows.exe
       - name: Add to Release
         uses: softprops/action-gh-release@v1
