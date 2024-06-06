@@ -1,6 +1,6 @@
 [project]
 name = "rimsschemedrawer"
-version = "3.0.0.dev4"
+version = "3.0.0rc1"
 description = "Drawing of RIMS schemes in python and/or with a Python GUI."
 authors = [
     { name = "Reto Trappitsch", email = "reto@galactic-forensics.space" }
