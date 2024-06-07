@@ -13,7 +13,7 @@ attrs==23.2.0
     # via hypothesis
 babel==2.15.0
     # via mkdocs-material
-box-packager==0.2.0
+box-packager==0.3.0
 certifi==2024.6.2
     # via requests
 charset-normalizer==3.3.2
