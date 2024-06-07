@@ -29,8 +29,13 @@ class SchemeDrawer(QtWidgets.QMainWindow):
     """RIMSSchemeDrawer."""
 
     def __init__(self):
+        super().__init__()
+
         # run in debug mode?
         self.rundebug = False
+
+        icon = Path(__file__).parent.joinpath("assets/icon.svg").absolute()
+        self.setWindowIcon(QtGui.QIcon(str(icon)))
 
         # program info
         self.author = "Reto Trappitsch"
@@ -40,7 +45,6 @@ class SchemeDrawer(QtWidgets.QMainWindow):
         self.user_path = Path.home()
 
         # initialize the thing
-        super().__init__()
         self.title = "RIMS Scheme Drawer"
         self.left = 50
         self.top = 80
