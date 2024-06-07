@@ -29,12 +29,12 @@ jobs:
       - name: Package Linux App
         run: |
           rye run box package
-          mv target/release/rimsschemedrawer target/release/rimsschemedrawer-linux
+          rye run box installer
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files:
-            ${{ github.workspace }}/target/release/rimsschemedrawer-linux
+            ${{ github.workspace }}/target/release/*linux.sh
           tag_name: ${{ github.ref_name }}
           name: RIMSSchemeDrawer ${{ github.ref_name }}
           body_path: ${{ github.workspace }}/release_text.md
@@ -59,12 +59,12 @@ jobs:
         run: |
           box init -q -b build
           box package
-          mv target/release/rimsschemedrawer.exe target/release/rimsschemedrawer-windows.exe
+          box installer
       - name: Add to Release
         uses: softprops/action-gh-release@v1
         with:
           files:
-            target/release/rimsschemedrawer-windows.exe
+            target/release/*win.exe
           tag_name: ${{ github.ref_name }}
 
   build-macos:
@@ -83,10 +83,10 @@ jobs:
       - name: Package MacOS App
         run: |
           rye run box package
-          mv target/release/rimsschemedrawer target/release/rimsschemedrawer-macos
+          rye run box installer
       - name: Add to Release
         uses: softprops/action-gh-release@v1
         with:
           files:
-            target/release/rimsschemedrawer-macos
+            target/release/*macos.dmg
           tag_name: ${{ github.ref_name }}

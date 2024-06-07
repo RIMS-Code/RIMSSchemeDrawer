@@ -1,6 +1,6 @@
 [project]
 name = "rimsschemedrawer"
-version = "3.0.0rc1"
+version = "3.0.0"
 description = "Drawing of RIMS schemes in python and/or with a Python GUI."
 authors = [
     { name = "Reto Trappitsch", email = "reto@galactic-forensics.space" }
@@ -45,7 +45,7 @@ dev-dependencies = [
     "pytest-cov>=4.1.0",
     "requests>=2.31.0",
     "rttools @ git+https://github.com/trappitsch/rttools",
-    "box-packager>=0.2.0",
+    "box-packager>=0.3.0",
 ]
 
 [tool.rye.scripts]
